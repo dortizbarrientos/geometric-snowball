@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>App 5 — Reading the Diagnostics</title>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+
+<script>
+function safeTypeset(root) {
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+    return MathJax.typesetPromise(root ? [root] : undefined).catch(() => {});
+  }
+  return Promise.resolve();
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Work+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg:           #f6f4ee;
+  --surface:      #ffffff;
+  --surface2:     #ede9e0;
+  --border:       #d6d1c4;
+  --text:         #1a1710;
+  --text2:        #4a4638;
+  --text3:        #8c8676;
+
+  --forest-light: #d0eadb;
+  --forest-mid:   #1a7a42;
+  --forest-dark:  #0a3d20;
+
+  --amber-light:  #faebd0;
+  --amber-mid:    #c07810;
+  --amber-dark:   #6a4008;
+
+  --sky-light:    #d8eaf8;
+  --sky-mid:      #1868b8;
+  --sky-dark:     #083468;
+
+  --plum-light:   #ecdff0;
+  --plum-mid:     #7830a0;
+  --plum-dark:    #3c1050;
+
+  --red-light:    #fce4e0;
+  --red-mid:      #c03020;
+  --red-dark:     #700010;
+
+  --serif: 'EB Garamond', Georgia, serif;
+  --sans:  'Work Sans', system-ui, sans-serif;
+  --mono:  'Space Mono', monospace;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 2px 20px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.65; font-size: 16px; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(246,244,238,0.93); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border); padding: 0 2rem;
+}
+.nav-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.nav-series { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); font-weight: 500; }
+.nav-title { font-family: var(--serif); font-size: 16px; color: var(--text); font-style: italic; }
+.nav-links { display: flex; gap: 5px; }
+.nav-pill { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; background: var(--surface2); color: var(--text2); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.nav-pill:hover { background: var(--forest-light); color: var(--forest-dark); border-color: var(--forest-mid); text-decoration: none; }
+.nav-pill.active { background: var(--forest-mid); color: #fff; border-color: var(--forest-mid); }
+.nav-pill.done { opacity: 0.5; }
+
+/* HERO */
+.hero {
+  background: #0a3d20;
+  color: #fff; padding: 0; position: relative; overflow: hidden;
+}
+.hero-inner {
+  max-width: 960px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; min-height: 320px;
+}
+@media (max-width:640px) { .hero-inner { grid-template-columns: 1fr; } }
+.hero-left {
+  padding: 3rem 2rem 3rem 2rem;
+  background: linear-gradient(135deg, #083010 0%, #1a5c30 100%);
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.hero-right {
+  padding: 2rem; display: flex; flex-direction: column; gap: 10px;
+  justify-content: center;
+  background: linear-gradient(135deg, #083468 0%, #3c1050 100%);
+}
+.hero-tag { display: inline-block; background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.22); border-radius: 20px; padding: 3px 14px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; margin-bottom: 1.2rem; }
+.hero h1 { font-family: var(--serif); font-size: clamp(1.8rem,3.5vw,2.6rem); font-weight: 400; line-height: 1.18; margin-bottom: 1rem; }
+.hero h1 em { font-style: italic; color: #90e0b0; }
+.hero-sub { font-size: 0.95rem; color: rgba(255,255,255,0.65); line-height: 1.65; max-width: 380px; }
+.hero-diag-card {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px; padding: 1rem 1.2rem;
+}
+.hero-diag-name { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+.hero-diag-eq { font-family: var(--mono); font-size: 13px; color: #c0d8ff; line-height: 1.5; }
+.hero-diag-desc { font-size: 12px; color: rgba(255,255,255,0.58); margin-top: 4px; }
+
+/* LAYOUT */
+.main { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+.section { margin-bottom: 3.5rem; opacity: 0; }
+.section.visible { animation: fadeUp 0.42s ease forwards; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+.section-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.n-forest { background: var(--forest-light); color: var(--forest-dark); }
+.n-sky    { background: var(--sky-light);    color: var(--sky-dark); }
+.n-amber  { background: var(--amber-light);  color: var(--amber-dark); }
+.n-plum   { background: var(--plum-light);   color: var(--plum-dark); }
+.n-red    { background: var(--red-light);    color: var(--red-dark); }
+.section-title { font-family: var(--serif); font-size: 1.45rem; font-weight: 400; }
+
+/* TABS */
+.tab-bar { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab-btn { padding: 7px 16px; font-size: 13px; font-weight: 500; border: none; background: none; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; font-family: var(--sans); }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--forest-mid); border-bottom-color: var(--forest-mid); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* PROSE */
+.prose p { margin-bottom: 1rem; line-height: 1.78; }
+.prose h3 { font-family: var(--serif); font-weight: 400; font-size: 1.1rem; margin: 1.5rem 0 0.5rem; font-style: italic; }
+.prose ul, .prose ol { padding-left: 1.4rem; margin-bottom: 1rem; }
+.prose li { margin-bottom: 0.45rem; }
+.prose strong { font-weight: 500; }
+
+/* CALLOUT */
+.callout { border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1.2rem 0; border-left: 3px solid; }
+.c-forest { background: var(--forest-light); border-color: var(--forest-mid); }
+.c-amber  { background: var(--amber-light);  border-color: var(--amber-mid); }
+.c-sky    { background: var(--sky-light);    border-color: var(--sky-mid); }
+.c-plum   { background: var(--plum-light);   border-color: var(--plum-mid); }
+.c-red    { background: var(--red-light);    border-color: var(--red-mid); }
+.callout-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.4rem; color: var(--text2); }
+.callout p { margin-bottom: 0; font-size: 15px; }
+
+/* EQ BLOCK */
+.eq-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; margin: 1.2rem 0; overflow-x: auto; }
+.eq-label { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+
+/* INTERACTIVE */
+.interactive-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow); margin: 1.5rem 0; }
+.interactive-title { font-family: var(--serif); font-size: 1.05rem; font-weight: 400; color: var(--text2); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); font-style: italic; }
+.controls-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0.7rem 0; }
+.ctrl-label { font-size: 13px; color: var(--text2); font-weight: 500; min-width: 170px; }
+.ctrl-slider { flex: 1; min-width: 120px; accent-color: var(--forest-mid); }
+.ctrl-value { font-family: var(--mono); font-size: 12px; color: var(--forest-dark); min-width: 52px; text-align: right; }
+canvas { display: block; width: 100%; border-radius: 8px; background: var(--bg); }
+
+/* DECISION MATRIX */
+.decision-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px; margin: 1.2rem 0;
+}
+.decision-card {
+  border-radius: var(--radius); padding: 1.2rem; border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.decision-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.dc-act1::before { background: var(--forest-mid); }
+.dc-act2::before { background: var(--amber-mid); }
+.dc-act3::before { background: var(--red-mid); }
+.dc-re::before   { background: var(--sky-mid); }
+.decision-act { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+.decision-title { font-family: var(--serif); font-size: 1.05rem; margin-bottom: 8px; }
+.decision-sig { font-family: var(--mono); font-size: 12px; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+.decision-action { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+/* ACT INDICATOR STRIP */
+.act-strip {
+  display: flex; border-radius: 8px; overflow: hidden;
+  height: 36px; margin: 1rem 0;
+  border: 1px solid var(--border);
+}
+.act-seg {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500; color: #fff;
+  transition: flex 0.4s ease;
+  white-space: nowrap; overflow: hidden;
+  min-width: 0;
+}
+
+/* TRAJECTORY TABLE */
+.traj-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1rem 0; }
+.traj-table th { background: var(--surface2); padding: 8px 12px; border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text2); text-align: left; }
+.traj-table td { padding: 7px 12px; border: 1px solid var(--border); color: var(--text); vertical-align: top; }
+.traj-table tr:nth-child(even) td { background: var(--surface2); }
+.sig-positive { color: var(--forest-dark); font-family: var(--mono); font-size: 12px; }
+.sig-negative { color: var(--red-dark); font-family: var(--mono); font-size: 12px; }
+.sig-neutral  { color: var(--text3); font-family: var(--mono); font-size: 12px; }
+
+/* SERIES NAV */
+.series-nav { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-top: 3rem; }
+.series-nav-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+.series-list { display: flex; flex-direction: column; gap: 5px; }
+.series-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; font-size: 14px; transition: background 0.12s; text-decoration: none; color: inherit; }
+.series-item.done { color: var(--text3); }
+.series-item.done:hover { background: var(--surface2); color: var(--text); }
+.series-item.current { background: var(--forest-light); color: var(--forest-dark); font-weight: 500; }
+.series-badge { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.series-item.done    .series-badge { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.series-item.current .series-badge { background: var(--forest-mid); color: #fff; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width:640px) { .two-col { grid-template-columns: 1fr; } .decision-grid { grid-template-columns: 1fr; } .hero-inner { grid-template-columns: 1fr; } }
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+.small { font-size: 13px; color: var(--text2); }
+.mt1 { margin-top: 1rem; }
+.code { font-family: var(--mono); background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-size: 0.87em; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div><div class="nav-series">From Field to Formula · App 5 of 5</div></div>
+    <div class="nav-title">Reading the Diagnostics</div>
+    <div class="nav-links">
+      <a href="app0_what_is_a_MET.html"  class="nav-pill done">0</a>
+      <a href="app1_genetic_building_blocks_MET.html" class="nav-pill done">1</a>
+      <a href="app2_reaction_norm_model_MET.html" class="nav-pill done">2</a>
+      <a href="app3_cross_env_covariance.html" class="nav-pill done">3</a>
+      <a href="app4_linear_vs_quad_GEI.html" class="nav-pill done">4</a>
+      <span class="nav-pill active">5</span>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-tag">App 5 · The Decision Framework</div>
+      <h1>Reading the<br/><em>Diagnostics</em></h1>
+      <p class="hero-sub">The capstone app. The earlier apps in the estimation series now converge on a small set of diagnostics — especially $\hat{\mathcal{A}}_g$, $\hat{\mathcal{A}}_g^{(\mathrm{GEI})}$, and the environmental component of the rate signal — that help a breeder decide what to do next.</p>
+    </div>
+    <div class="hero-right">
+      <div class="hero-diag-card">
+        <div class="hero-diag-name">Primary diagnostic</div>
+        <div class="hero-diag-eq">Âg = V̂ₗᵢₙ / ĉ₀₀ ∈ (0, 1)</div>
+        <div class="hero-diag-desc">Current regime — is additive prediction reliable right now?</div>
+      </div>
+      <div class="hero-diag-card">
+        <div class="hero-diag-name">Rate diagnostic</div>
+        <div class="hero-diag-eq">r̂(t) = Ṽₗᵢₙ/V̂ₗᵢₙ − Ṽqᵤₐd/V̂qᵤₐd</div>
+        <div class="hero-diag-desc">Direction — is reliability improving, stable, or eroding?</div>
+      </div>
+      <div class="hero-diag-card">
+        <div class="hero-diag-name">GEI diagnostic</div>
+        <div class="hero-diag-eq">𝒜g(GEI) = φ̂ββ / (φ̂ββ + φ̂γγ)</div>
+        <div class="hero-diag-desc">Transferability — is G×E predictable across environments?</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 1: THE CHANNEL TRAJECTORY SIMULATOR -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num n-forest">1</div>
+    <h2 class="section-title">The channel trajectory simulator</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs1">
+    <button class="tab-btn active" data-tab="t1-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t1-biology">Biology</button>
+    <button class="tab-btn" data-tab="t1-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t1-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t1-plain">
+    <div class="prose">
+      <p>The channel framework from Papers 1 and 2 describes how additive predictability — $\mathcal{A}_g(t)$ — evolves over time as selection acts, the environment shifts, and variance enters or leaves the population. The simulator below brings this to life for the one-trait moving-optimum model, in which all parameters are estimable from a MET.</p>
+      <p>Three phases — Acts I, II, and III — produce qualitatively distinct signatures in both $\mathcal{A}_g(t)$ and $r(t)$. The key insight is that <strong>$r(t)$ gives warning before $\mathcal{A}_g(t)$ crosses the threshold</strong>. A program that monitors only prediction accuracy will detect channel exit only after it has happened. One that monitors $r(t)$ detects it while there is still time to intervene.</p>
+    </div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — Three-act channel trajectory (one-trait moving-optimum model)</div>
+      <div class="two-col">
+        <div>
+          <div class="controls-row">
+            <span class="ctrl-label">Stabilising curvature $s$</span>
+            <input class="ctrl-slider" id="simS" type="range" min="0.02" max="0.5" step="0.01" value="0.12"/>
+            <span class="ctrl-value" id="simSVal">0.12</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label">Initial lag $d_0$</span>
+            <input class="ctrl-slider" id="simD0" type="range" min="0.5" max="3.5" step="0.1" value="2.0"/>
+            <span class="ctrl-value" id="simD0Val">2.00</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label">Optimum speed $\dot\theta$</span>
+            <input class="ctrl-slider" id="simTh" type="range" min="0.0" max="0.08" step="0.005" value="0.025"/>
+            <span class="ctrl-value" id="simThVal">0.025</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label">Initial variance $G_0$</span>
+            <input class="ctrl-slider" id="simG0" type="range" min="0.2" max="2.5" step="0.05" value="1.0"/>
+            <span class="ctrl-value" id="simG0Val">1.00</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label">Effective pop. size $N_e$</span>
+            <input class="ctrl-slider" id="simNe" type="range" min="100" max="2000" step="50" value="500"/>
+            <span class="ctrl-value" id="simNeVal">500</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label">Mutation input $m$</span>
+            <input class="ctrl-slider" id="simM" type="range" min="0.0" max="0.02" step="0.001" value="0.005"/>
+            <span class="ctrl-value" id="simMVal">0.005</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label">Channel threshold $\alpha$</span>
+            <input class="ctrl-slider" id="simAlpha" type="range" min="0.4" max="0.9" step="0.05" value="0.70"/>
+            <span class="ctrl-value" id="simAlphaVal">0.70</span>
+          </div>
+        </div>
+        <div>
+          <div style="background:var(--surface2);border-radius:8px;padding:1rem;font-size:13px;height:100%;">
+            <div style="font-weight:500;margin-bottom:8px;font-family:var(--serif);font-size:1rem;font-style:italic;">Act structure</div>
+            <div id="actSummary" style="line-height:1.8;color:var(--text2);"></div>
+          </div>
+        </div>
+      </div>
+      <canvas id="simCanvas" height="340"></canvas>
+      <div id="simMsg" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t1-biology">
+    <div class="prose">
+      <p>The three acts map onto recognisable phases in real breeding programs and natural populations:</p>
+      <div class="decision-grid">
+        <div class="decision-card dc-act1" style="background:var(--forest-light);">
+          <div class="decision-act" style="color:var(--forest-dark);">Act I — Channel open</div>
+          <div class="decision-title">Directional selection, open channel</div>
+          <div class="decision-sig" style="background:var(--forest-mid);color:#fff;">Âg &gt; α, r̂(t) &gt; 0</div>
+          <div class="decision-action">The optimum is moving, selection is directional, the gradient is large relative to the covariance cloud. Genomic prediction is reliable. Lande's equation describes response accurately. This is the early phase of adaptation to a new environment — or the opening cycles of a selection program in a new target environment.</div>
+        </div>
+        <div class="decision-card dc-act2" style="background:var(--amber-light);">
+          <div class="decision-act" style="color:var(--amber-dark);">Act II — Optimum approached</div>
+          <div class="decision-title">Stabilising selection, channel closing</div>
+          <div class="decision-sig" style="background:var(--amber-mid);color:#fff;">Âg &gt; α, r̂(t) &lt; 0</div>
+          <div class="decision-action">The population has tracked the optimum; the lag $d$ has shrunk and the gradient $b = sd$ is collapsing. Additive prediction still works today — the channel is open — but $r(t) < 0$ warns of impending exit. In a breeding program: genomic models trained now will be less accurate in future cycles. Intervention options: widen the program, introduce new germplasm, or redefine the selection target.</div>
+        </div>
+        <div class="decision-card dc-act3" style="background:var(--red-light);">
+          <div class="decision-act" style="color:var(--red-dark);">Act III — Gradient rotation</div>
+          <div class="decision-title">Environmental change, silent exit</div>
+          <div class="decision-sig" style="background:var(--red-mid);color:#fff;">r̂_env ≪ 0, r̂_cov ≥ 0</div>
+          <div class="decision-action">Climate change rotates the fitness gradient away from the major axis of G. No genetic variance is lost; curvature is unchanged. Yet $\mathcal{A}_g$ falls because the gradient now projects poorly onto the covariance structure. Standard genomic selection fails silently. Diagnosis: the sign pattern $r_\text{env} \ll 0$, $r_\text{cov} \geq 0$ separates Act III from Act II. Intervention: targeted introgression of variance aligned with the new gradient direction.</div>
+        </div>
+        <div class="decision-card dc-re" style="background:var(--sky-light);">
+          <div class="decision-act" style="color:var(--sky-dark);">Re-entry</div>
+          <div class="decision-title">Channel recovery</div>
+          <div class="decision-sig" style="background:var(--sky-mid);color:#fff;">Âg &lt; α, r̂(t) &gt; 0 sustained</div>
+          <div class="decision-action">After channel exit, recovery occurs when $r(t) > 0$ for long enough that $\mathcal{L}(t)$ rises back above $\mathcal{L}_\alpha$. In practice: new genetic variance aligned with the current gradient (from introgression or recombination), or a new optimum shift that regenerates directional signal. Monitor $\mathcal{L}(t)$ — the logit integral of $r(t)$ — as the leading indicator of re-entry.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t1-geometry">
+    <div class="prose"><p>The simulator above shows the one-trait model. Its four panels follow the variables from Paper 2 exactly: lag and variance (state variables), logit trajectory $\mathcal{L}(t)$, additivity index $\mathcal{A}_g(t)$, and the rate diagnostic $r(t)$ decomposed by process. Adjust all seven parameters and watch how the three-act structure changes.</p></div>
+  </div>
+
+  <div class="tab-panel" id="t1-math">
+    <div class="prose"><p>The one-trait closed-form system (Paper 2, §S6) used in the simulator:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">One-trait state equations (per generation)</div>
+      $$\dot{d} = \dot\theta - Gsd, \qquad
+        \dot{G} = -sG^2 - \lambda_\text{rec}(G - G^*) + m - \frac{G}{2N_e}$$
+    </div>
+    <div class="eq-block">
+      <div class="eq-label">Closed-form diagnostics</div>
+      $$\mathcal{A}_g = \frac{d^2}{d^2 + G/2}, \qquad
+        r = \frac{2\dot\theta}{d} - sG + \lambda_\text{rec}\!\left(1 - \frac{G^*}{G}\right) - \frac{m}{G} + \frac{1}{2N_e}$$
+    </div>
+    <div class="prose"><p>$r(t)$ warns before $\mathcal{A}_g(t)$ crosses $\alpha$. The lead time — how many generations of warning $r(t) < 0$ provides — depends on how far above $\alpha$ the channel currently sits and how negative $r$ is. The logit trajectory $\mathcal{L}(t) = \mathcal{L}(0) + \int_0^t r(s)\,ds$ integrates this warning continuously.</p></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 2: ACT II vs ACT III SEPARATOR -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num n-sky">2</div>
+    <h2 class="section-title">Separating Act II from Act III in real data</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs2">
+    <button class="tab-btn active" data-tab="t2-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t2-biology">Biology</button>
+    <button class="tab-btn" data-tab="t2-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t2-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t2-plain">
+    <div class="prose">
+      <p>Both Act II and Act III produce a falling $\mathcal{A}_g(t)$ and eventually channel exit. They look identical in raw prediction accuracy data. But they require <em>opposite interventions</em>:</p>
+      <ul>
+        <li><strong>Act II</strong> requires redesigning the selection target — finding new challenges, new environments, new traits to push against. The channel closed because selection succeeded; the fix is to reopen the gap.</li>
+        <li><strong>Act III</strong> requires redesigning the genetic resource — introducing variance aligned with the new gradient direction. The channel closed because the environment moved the selection pressure away from where genetic variation is concentrated; the fix is to rotate the covariance cloud.</li>
+      </ul>
+      <p>Applying the wrong intervention wastes cycles. The rate diagnostic decomposition separates the two before the channel exits.</p>
+    </div>
+
+    <table class="traj-table">
+      <thead>
+        <tr>
+          <th>Diagnostic signal</th>
+          <th>Act II (optimum reached)</th>
+          <th>Act III (gradient rotation)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>$\hat{\mathcal{A}}_g(t)$</td><td>Falling</td><td>Falling</td></tr>
+        <tr><td>$\hat{r}(t)$ total</td><td class="sig-negative">Negative</td><td class="sig-negative">Negative</td></tr>
+        <tr><td>$\hat{r}_\text{env}$</td><td class="sig-neutral">≈ 0 (optimum stationary)</td><td class="sig-negative">≪ 0 (gradient rotating)</td></tr>
+        <tr><td>$\hat{r}_\text{cov}$</td><td class="sig-negative">&lt; 0 (G compressing)</td><td class="sig-positive">≥ 0 (still compressing toward old gradient)</td></tr>
+        <tr><td>$\hat{r}_\text{sel}$</td><td class="sig-negative">&lt; 0</td><td class="sig-positive">Often &gt; 0</td></tr>
+        <tr><td>$\hat{\mathcal{A}}_g^{(\text{GEI})}$</td><td>Stable or rising</td><td class="sig-negative">Falling (new GEI structure)</td></tr>
+        <tr><td>$\hat{G}$ magnitude</td><td>Declining</td><td>Stable or slightly declining</td></tr>
+        <tr><td>Selection gradient $\|\hat{b}\|$</td><td class="sig-negative">Declining (lag shrinks)</td><td>Stable in magnitude, <em>direction changes</em></td></tr>
+        <tr><td>Intervention</td><td style="color:var(--amber-dark);font-weight:500;">Expand the lag — new targets, new environments</td><td style="color:var(--red-dark);font-weight:500;">Rotate the cloud — introgression along new gradient</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="t2-biology">
+    <div class="prose">
+      <p>In Darwin's finches on Daphne Major, both acts occurred within a decade:</p>
+      <ul>
+        <li><strong>1977–1984 (Act I → II)</strong>: The 1977 drought imposed a steep directional gradient on beak depth. Beak depth shifted nearly one full standard deviation in one generation — Act I in action. Through the early 1980s, the population tracked the new optimum, the lag shrank, and the channel narrowed — Act II. Prediction accuracy for beak depth response would have been declining throughout the 1980s even as phenotypic change continued.</li>
+        <li><strong>1983 El Niño (Act III onset)</strong>: Heavy rains rotated the seed community toward small soft seeds, rotating the fitness gradient away from deep beaks toward wider, shorter beaks. No genetic variance was lost. But the gradient was now pointing in a direction poorly aligned with the covariance structure shaped by years of depth-oriented selection. Act III: $r_\text{env} \ll 0$, $r_\text{cov} \geq 0$.</li>
+      </ul>
+      <p>The rate diagnostic would have flagged the distinction in real time: negative $r_\text{env}$ in 1983 versus near-zero $r_\text{env}$ throughout the previous Act II period.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t2-geometry">
+    <div class="prose"><p>The separator below lets you set the sign of both $r_\text{env}$ and $r_\text{cov}$ and see which act — or combination — is indicated, with recommended interventions.</p></div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — Act II / Act III separator</div>
+      <div class="controls-row">
+        <span class="ctrl-label">$\hat{r}_\text{env}$ (env component)</span>
+        <input class="ctrl-slider" id="rEnv" type="range" min="-0.5" max="0.1" step="0.01" value="-0.05"/>
+        <span class="ctrl-value" id="rEnvVal">-0.05</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">$\hat{r}_\text{cov}$ (covariance component)</span>
+        <input class="ctrl-slider" id="rCov" type="range" min="-0.4" max="0.2" step="0.01" value="-0.15"/>
+        <span class="ctrl-value" id="rCovVal">-0.15</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">$\hat{r}_\text{motion}$ (motion component)</span>
+        <input class="ctrl-slider" id="rMot" type="range" min="-0.1" max="0.3" step="0.01" value="0.05"/>
+        <span class="ctrl-value" id="rMotVal">0.05</span>
+      </div>
+      <canvas id="separatorCanvas" height="240"></canvas>
+      <div id="separatorDiagnosis" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t2-math">
+    <div class="prose"><p>The decomposition of $r(t)$ into mechanistic contributions (Paper 2, §S5) is:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Three-way decomposition</div>
+      $$r(t) = r_\text{motion} + r_\text{env} + r_\text{cov}$$
+    </div>
+    <div class="eq-block">
+      <div class="eq-label">Sign pattern diagnostic table</div>
+      $$\text{Act II}: \quad r_\text{env} \approx 0,\quad r_\text{cov} < 0, \quad r_\text{motion} \approx 0$$
+      $$\text{Act III}: \quad r_\text{env} \ll 0,\quad r_\text{cov} \geq 0, \quad r_\text{motion} \approx 0 \text{ or } > 0$$
+    </div>
+    <div class="prose"><p>The test statistic for distinguishing the two acts is:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Act separator test</div>
+      $$T = \frac{|\hat{r}_\text{env}|}{|\hat{r}_\text{env}| + |\hat{r}_\text{cov}|} \in [0,1]$$
+    </div>
+    <div class="prose"><p>$T \approx 0$ indicates Act II (covariance erosion dominant), $T \approx 1$ indicates Act III (environmental rotation dominant). Values in between indicate a mixture, which arises when both gradient rotation and G-matrix compression are occurring simultaneously — common in real breeding programs facing climate change during active selection.</p></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 3: THE INTROGRESSION CRITERION -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num n-amber">3</div>
+    <h2 class="section-title">The introgression criterion — which germplasm to bring in</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs3">
+    <button class="tab-btn active" data-tab="t3-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t3-biology">Biology</button>
+    <button class="tab-btn" data-tab="t3-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t3-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t3-plain">
+    <div class="prose">
+      <p>When channel exit is imminent and the diagnosis points to Act III, the intervention is to introduce new genetic variance aligned with the current fitness gradient. But not all introgression is equal. A wide cross that adds variance in the wrong direction — into directions of high curvature — will <em>lower</em> $\mathcal{A}_g$ rather than raise it.</p>
+      <p>The introgression criterion (Paper 1, §S7) provides the first-order test for whether a donor line's genetic contribution will deepen or harm the additive channel:</p>
+    </div>
+    <div class="eq-block">
+      <div class="eq-label">Introgression criterion (Paper 1, §S7)</div>
+      $$\delta\mathcal{A}_g \propto \frac{(\hat{b}^\top v)^2}{\hat{V}_\text{lin}} - \frac{v^\top \hat{H}\hat{G}\hat{H} v}{\hat{V}_\text{quad}}$$
+    </div>
+    <div class="prose">
+      <p>where $v$ is the direction of incoming variance from the donor. The criterion has a clear biological reading: new variance <strong>deepens the channel</strong> if gradient alignment benefit ($\hat{b}^\top v$)² exceeds curvature exposure cost $v^\top \hat{H}\hat{G}\hat{H} v$. The optimal donor brings variance squarely aligned with the current fitness gradient.</p>
+    </div>
+    <div class="callout c-amber">
+      <div class="callout-title">Practical application</div>
+      <p>For each candidate donor line $i$, compute $v_i$ as the direction of their breeding value deviation from your current population mean. Then evaluate the introgression criterion. Rank donors by $\delta\mathcal{A}_g$. Select the top-ranked donor for the wide cross. This is the channel-framework guide to germplasm bank selection.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-biology">
+    <div class="prose">
+      <p>The introgression criterion formalises an intuition that experienced breeders often hold but rarely quantify: an exotic line that performs brilliantly in one environment but poorly in your target environment may still deepen your additive channel — if its poor performance arises from directional misalignment rather than nonlinear epistasis. The criterion separates these two causes.</p>
+      <ul>
+        <li>A donor with large $(\hat{b}^\top v)^2$ brings variance aligned with the direction selection is currently pushing. This boosts $V_\text{lin}$ without increasing $V_\text{quad}$ proportionally — a channel deepening.</li>
+        <li>A donor with large $v^\top \hat{H}\hat{G}\hat{H} v$ brings variance exposed to curvature — the fitness consequences of its genetics are highly nonlinear in the current population context. This boosts $V_\text{quad}$ disproportionately — a channel narrowing, even if the donor appears "diverse."</li>
+      </ul>
+      <p>The first quantity is easy to estimate from genomic prediction — it is essentially the GEBV (genomic estimated breeding value) of the donor for the current selection index. The second quantity requires $\hat{H}$, which is harder to estimate (App 7) but is approximated by the nonlinear selection gradient analysis.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-geometry">
+    <div class="prose"><p>Explore the introgression criterion interactively. Set the direction of donor variance (angle $\phi$ relative to the fitness gradient), gradient magnitude, and curvature, and see whether the introgression deepens or narrows the channel.</p></div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — Introgression criterion explorer</div>
+      <div class="controls-row">
+        <span class="ctrl-label">Donor direction $\phi$ (° from $b$)</span>
+        <input class="ctrl-slider" id="introPhi" type="range" min="0" max="90" step="1" value="20"/>
+        <span class="ctrl-value" id="introPhiVal">20°</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">Donor variance magnitude $\sigma^2_\Delta$</span>
+        <input class="ctrl-slider" id="introSig" type="range" min="0.05" max="1.5" step="0.05" value="0.5"/>
+        <span class="ctrl-value" id="introSigVal">0.50</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">Curvature $\gamma$ (isotropic $-H = \gamma I$)</span>
+        <input class="ctrl-slider" id="introGamma" type="range" min="0.05" max="0.8" step="0.025" value="0.3"/>
+        <span class="ctrl-value" id="introGammaVal">0.30</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">Current $\mathcal{A}_g$</span>
+        <input class="ctrl-slider" id="introAg" type="range" min="0.4" max="0.95" step="0.01" value="0.72"/>
+        <span class="ctrl-value" id="introAgVal">0.72</span>
+      </div>
+      <canvas id="introCanvas" height="240"></canvas>
+      <div id="introMsg" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-math">
+    <div class="prose"><p>The first-order change in $\mathcal{A}_g$ from a rank-1 variance input $G^+ = G + \sigma^2_\Delta vv^\top$ (derived in Paper 1, §S7) is:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">First-order change in $\mathcal{A}_g$ from introgression</div>
+      $$\delta\mathcal{A}_g \approx \mathcal{A}_g(1-\mathcal{A}_g)\left[\frac{(\hat{b}^\top v)^2}{\hat{V}_\text{lin}} - \frac{v^\top \hat{H}\hat{G}\hat{H} v}{\hat{V}_\text{quad}}\right]\sigma^2_\Delta$$
+    </div>
+    <div class="prose"><p>The optimal introgression direction maximises $\delta\mathcal{A}_g$ over unit vectors $v$. This is the leading eigenvector of:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Optimal donor direction</div>
+      $$v^* = \arg\max_{\|v\|=1}\left[\frac{(\hat{b}^\top v)^2}{\hat{V}_\text{lin}} - \frac{\hat{V}_\text{lin}}{\hat{V}_\text{quad}} v^\top \hat{G}^{1/2}\hat{H}^2\hat{G}^{1/2} v\right]$$
+    </div>
+    <div class="prose"><p>When curvature is isotropic ($\hat{H} = -\gamma I$), the optimal direction simplifies to $v^* \propto \hat{G}^{-1/2}\hat{b}$ — new variance should be gradient-aligned in the metric of $\hat{G}^{-1}$, meaning it should be concentrated in the direction of selection weighted inversely by current genetic variance. This is the multivariate generalisation of "introduce variance in the direction you are selecting."</p></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 4: THE COMPLETE DECISION FRAMEWORK -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num n-plum">4</div>
+    <h2 class="section-title">The complete decision framework</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs4">
+    <button class="tab-btn active" data-tab="t4-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t4-biology">Biology</button>
+    <button class="tab-btn" data-tab="t4-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t4-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t4-plain">
+    <div class="prose">
+      <p>A plant breeder who has followed this series through Apps 0–5 can now compute four numbers each breeding cycle from their standard MET and genomic data:</p>
+      <ol>
+        <li style="margin-bottom:0.6rem;"><strong>$\hat{\mathcal{A}}_g$</strong> — Is additive prediction currently reliable? (Reference environment, App 7)</li>
+        <li style="margin-bottom:0.6rem;"><strong>$\hat{r}(t)$ decomposed</strong> — Is reliability improving or eroding, and which process is responsible? (App 8–9)</li>
+        <li style="margin-bottom:0.6rem;"><strong>$\hat{\mathcal{A}}_g^{(\text{GEI})}$</strong> — Is G×E across environments predictable? (App 10)</li>
+        <li><strong>$\hat{r}_\text{env}$</strong> — Is the environmental shift deepening or eroding the channel? (App 8, 11)</li>
+      </ol>
+      <p>The decision tree below maps these four readings to actionable responses. The complete interactive simulator assembles all four into a live dashboard.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-biology">
+    <div class="prose">
+      <p>The framework converts a familiar set of breeding observations into a mechanistic language. Three recurring situations that breeders recognise immediately now have precise diagnostic signatures:</p>
+      <ul>
+        <li><strong>"Genomic prediction accuracy has been declining for three cycles."</strong> Check: is $\hat{r}_\text{env} \ll 0$ (climate-driven Act III)? Or is $\hat{\mathcal{A}}_g$ declining while $\hat{r}_\text{cov} < 0$ (variance erosion, Act II)? The response differs fundamentally.</li>
+        <li><strong>"Wide crosses improved diversity metrics but made genomic models worse."</strong> Check: was the donor's introgression criterion $\delta\mathcal{A}_g < 0$? New variance in directions of high curvature always harms prediction, regardless of how genetically diverse the donor is by standard metrics.</li>
+        <li><strong>"We've been selecting in well-watered trials but now face drought."</strong> Check: $\hat{\phi}_{\alpha\beta}$ from your MET — if positive, responsive lines also yield well in the well-watered reference, and the climate shift will erode $\hat{\mathcal{A}}_g$ rapidly (Act III). If negative, your stable lines are already somewhat drought-tolerant and the channel may survive the shift better than expected.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-geometry">
+    <div class="prose"><p>The complete live dashboard — all four diagnostics computed simultaneously from the full parameter set of the series. This is what a breeding program would monitor each cycle.</p></div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — Complete four-diagnostic breeding dashboard</div>
+      <div class="two-col">
+        <div>
+          <p class="small" style="margin-bottom:8px;font-weight:500;">Reference environment</p>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:120px;">$\hat{V}_\text{lin}^{(0)}$</span>
+            <input class="ctrl-slider" id="dVlin" type="range" min="0.1" max="3.5" step="0.05" value="1.8"/>
+            <span class="ctrl-value" id="dVlinVal">1.80</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:120px;">$\hat{c}_{00}$ (total geno var)</span>
+            <input class="ctrl-slider" id="dC00" type="range" min="0.5" max="5.0" step="0.1" value="2.5"/>
+            <span class="ctrl-value" id="dC00Val">2.50</span>
+          </div>
+        </div>
+        <div>
+          <p class="small" style="margin-bottom:8px;font-weight:500;">GEI structure</p>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:120px;">$\hat{\phi}_{\beta\beta}$ (slope var)</span>
+            <input class="ctrl-slider" id="dPhibb" type="range" min="0.0" max="2.0" step="0.05" value="0.7"/>
+            <span class="ctrl-value" id="dPhibbVal">0.70</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:120px;">$\hat{\phi}_{\gamma\gamma}$ (curv var)</span>
+            <input class="ctrl-slider" id="dPhigg" type="range" min="0.0" max="1.0" step="0.025" value="0.22"/>
+            <span class="ctrl-value" id="dPhiggVal">0.22</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:120px;">$\hat{\phi}_{\alpha\beta}$ (cov α,β)</span>
+            <input class="ctrl-slider" id="dPhiab" type="range" min="-0.8" max="0.8" step="0.05" value="0.28"/>
+            <span class="ctrl-value" id="dPhibbVal2">0.28</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:120px;">Env. shift rate $\dot{u}$</span>
+            <input class="ctrl-slider" id="dUdot" type="range" min="-0.4" max="0.4" step="0.01" value="0.12"/>
+            <span class="ctrl-value" id="dUdotVal">0.12</span>
+          </div>
+        </div>
+      </div>
+      <canvas id="dashCanvas" height="280"></canvas>
+      <div id="dashDecision" style="margin-top:1rem;padding:1rem;border-radius:var(--radius);font-size:14px;border:1px solid var(--border);background:var(--surface2);"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-math">
+    <div class="prose"><p>A compact working summary of the four main diagnostics, written in terms of the MET-estimable quantities assembled across the series:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">The complete four-diagnostic system</div>
+      $$\hat{\mathcal{A}}_g = \frac{\hat{V}_\text{lin}^{(0)}}{\hat{c}_{00}} \qquad \hat{\mathcal{A}}_g^{(\text{GEI})} = \frac{\hat{\phi}_{\beta\beta}}{\hat{\phi}_{\beta\beta} + \hat{\phi}_{\gamma\gamma}}$$
+      $$\hat{r}_\text{env} \approx \frac{2\hat{\phi}_{\alpha\beta}}{\hat{c}_{00}\,\hat{\mathcal{A}}_g}\cdot\dot{u} \qquad \hat{r}_\text{cov} = \frac{\hat{b}_0^\top \dot{\hat{G}}\hat{b}_0}{\hat{V}_\text{lin}} - \frac{\operatorname{tr}[\hat{H}_0\hat{G}\hat{H}_0\dot{\hat{G}}]}{\hat{V}_\text{quad}}$$
+    </div>
+    <div class="prose"><p>Together these four numbers constitute a complete first-order audit of the channel's current state and trajectory. They convert the abstract geometry of Papers 1 and 2 into a practical cycle-by-cycle monitoring tool for any breeding program with genomic and MET data.</p></div>
+    <div class="callout c-plum">
+      <div class="callout-title">The series closes here</div>
+      <p>Apps 0–5 have traced the complete identification chain from raw MET phenotypes and SNP markers, through reaction norm models and cross-environment covariance analysis, to the four numbers a breeder needs to read the channel. The mathematics is in Papers 1 and 2. The estimation pathway is here. The two together make the theory actionable.</p>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETE SERIES NAV -->
+<div class="series-nav">
+  <div class="series-nav-title">From Field to Formula — Complete Series (Apps 0–5)</div>
+  <div class="series-list">
+    <a href="app0_what_is_a_MET.html" class="series-item done"><div class="series-badge">0</div><div>What is a Multi-Environment Trial? — The experimental foundation</div></a>
+    <a href="app1_genetic_building_blocks_MET.html" class="series-item done"><div class="series-badge">1</div><div>The Genetic Building Blocks — Ĝ, b̂₀, Ĥ₀</div></a>
+    <a href="app2_reaction_norm_model_MET.html" class="series-item done"><div class="series-badge">2</div><div>The Reaction Norm Model — αᵢ, βᵢ, γᵢ and Φ̂</div></a>
+    <a href="app3_cross_env_covariance.html" class="series-item done"><div class="series-badge">3</div><div>Cross-Environment Covariance — structural model and FA connection</div></a>
+    <a href="app4_linear_vs_quad_GEI.html" class="series-item done"><div class="series-badge">4</div><div>Separating Linear from Quadratic GEI — the identification theorem</div></a>
+    <div class="series-item current"><div class="series-badge">5</div><div><strong>Reading the Diagnostics — Âg, r̂_env, and the decision framework</strong> — You are here</div></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+
+/* ── CANVAS RESIZE HELPERS ── */
+function setupHiDPICanvas(canvas, cssHeight) {
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.max(320, canvas.clientWidth || canvas.parentElement?.clientWidth || 320);
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(cssHeight * dpr);
+  canvas.style.height = cssHeight + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, width, height: cssHeight };
+}
+function redrawAllCanvases() {
+  if (typeof runSim === 'function') runSim();
+  if (typeof drawSeparator === 'function') drawSeparator();
+  if (typeof drawIntro === 'function') drawIntro();
+  if (typeof drawDash === 'function') drawDash();
+}
+
+/* ── TABS ── */
+document.querySelectorAll('.tab-bar').forEach(bar => {
+  bar.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.tab;
+      bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      bar.closest('.section').querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === t));
+      safeTypeset(bar.closest('.section').querySelector('.tab-panel.active') || bar.closest('.section'));
+      requestAnimationFrame(() => redrawAllCanvases());
+    });
+  });
+});
+
+/* ── REVEAL ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.06 });
+document.querySelectorAll('.section').forEach(s => obs.observe(s));
+
+function rr(ctx, x, y, w, h, r) {
+  if (w <= 0) return;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+/* ══ SECTION 1 — TRAJECTORY SIMULATOR ══════════════════ */
+const SimC = document.getElementById('simCanvas');
+let SimX, SimW, SimH;
+
+function runSim() {
+  const s    = +document.getElementById('simS').value;
+  const d0   = +document.getElementById('simD0').value;
+  const th   = +document.getElementById('simTh').value;
+  const G0   = +document.getElementById('simG0').value;
+  const Ne   = +document.getElementById('simNe').value;
+  const m    = +document.getElementById('simM').value;
+  const alpha= +document.getElementById('simAlpha').value;
+  document.getElementById('simSVal').textContent  = s.toFixed(2);
+  document.getElementById('simD0Val').textContent = d0.toFixed(2);
+  document.getElementById('simThVal').textContent = th.toFixed(3);
+  document.getElementById('simG0Val').textContent = G0.toFixed(2);
+  document.getElementById('simNeVal').textContent = Ne;
+  document.getElementById('simMVal').textContent  = m.toFixed(3);
+  document.getElementById('simAlphaVal').textContent = alpha.toFixed(2);
+
+  const T = 120, dt = 1;
+  const lrec = 0.3, Gstar = 0.8;
+  // Phase 1: optimum moves (0–40), stops (40–80), moves again (80–120)
+  const phases = [{start:0,end:40,thdot:th},{start:40,end:80,thdot:0},{start:80,end:120,thdot:th}];
+
+  let d = d0, G = G0;
+  const ts=[],Ags=[],Ls=[],rs=[],rmots=[],rcurvs=[];
+
+  for (let t=0;t<T;t++) {
+    const ph = phases.find(p=>t>=p.start&&t<p.end)||phases[2];
+    const thdot = ph.thdot;
+    const Vlin = s*s*d*d*G, Vquad = 0.5*s*s*G*G;
+    const Ag = Vlin/(Vlin+Vquad+1e-9);
+    const logit = Math.log((Vlin+1e-9)/(Vquad+1e-9));
+    const rmotion = d>0.01 ? 2*thdot/d : 0;
+    const rcurv = -s*G + lrec*(1-Gstar/G) - m/G + 1/(2*Ne);
+    const r_total = rmotion + rcurv;
+
+    ts.push(t); Ags.push(Ag); Ls.push(logit);
+    rs.push(r_total); rmots.push(rmotion); rcurvs.push(rcurv);
+
+    // Euler step
+    const ddot = thdot - G*s*d;
+    const Gdot = -s*G*G - lrec*(G-Gstar) + m - G/(2*Ne);
+    d = Math.max(0.001, d + ddot*dt);
+    G = Math.max(0.01,  G + Gdot*dt);
+  }
+
+  // draw four panels
+  ({ ctx: SimX, width: SimW, height: SimH } = setupHiDPICanvas(SimC, 340));
+  SimX.clearRect(0,0,SimW,SimH);
+  const nPanels=4, panelH=SimH/nPanels;
+
+  const phaseColors = ['rgba(26,122,66,0.12)','rgba(192,120,16,0.12)','rgba(26,122,66,0.12)'];
+  const phaseLabels = ['Act I','Act II','Act I'];
+
+  function drawPanel(idx, data, label, color, yMin, yMax, threshVal, threshColor) {
+    const pad={l:48,r:12,t:8,b:8};
+    const py=idx*panelH, pw=SimW-pad.l-pad.r, ph=panelH-pad.t-pad.b;
+    function toX(t){return pad.l+(t/120)*pw;}
+    function toY(v){return py+pad.t+ph-(v-yMin)/(yMax-yMin+1e-9)*ph;}
+    // phase shading
+    phases.forEach((p,i)=>{
+      SimX.fillStyle=phaseColors[i];
+      SimX.fillRect(toX(p.start),py,toX(p.end)-toX(p.start),panelH);
+    });
+    // zero/threshold line
+    if(threshVal!==null){
+      const ty=toY(threshVal);
+      SimX.strokeStyle=threshColor+'88'; SimX.lineWidth=1; SimX.setLineDash([5,4]);
+      SimX.beginPath(); SimX.moveTo(pad.l,ty); SimX.lineTo(pad.l+pw,ty); SimX.stroke();
+      SimX.setLineDash([]);
+    }
+    // axes
+    SimX.strokeStyle='#d6d1c4'; SimX.lineWidth=0.6;
+    SimX.beginPath(); SimX.moveTo(pad.l,py+pad.t); SimX.lineTo(pad.l,py+pad.t+ph); SimX.lineTo(pad.l+pw,py+pad.t+ph); SimX.stroke();
+    // data line
+    SimX.strokeStyle=color; SimX.lineWidth=2;
+    SimX.beginPath();
+    data.forEach((v,i)=>{ if(i===0)SimX.moveTo(toX(ts[i]),toY(v)); else SimX.lineTo(toX(ts[i]),toY(v)); });
+    SimX.stroke();
+    // y label
+    SimX.fillStyle='#4a4638'; SimX.font='11px Work Sans,sans-serif'; SimX.textAlign='right';
+    SimX.fillText(label,pad.l-4,py+pad.t+ph/2+4);
+    // y axis ticks
+    SimX.fillStyle='#8c8676'; SimX.font='10px Space Mono,monospace'; SimX.textAlign='right';
+    SimX.fillText(yMax.toFixed(1),pad.l-2,py+pad.t+8);
+    SimX.fillText(yMin.toFixed(1),pad.l-2,py+pad.t+ph-2);
+  }
+
+  const agMin=Math.min(...Ags)-0.05, agMax=Math.max(...Ags)+0.05;
+  const lMin=Math.min(...Ls)-0.3, lMax=Math.max(...Ls)+0.3;
+  const rMin=Math.min(...rs)-0.05, rMax=Math.max(...rs)+0.05;
+
+  drawPanel(0, Ags,   'Ag(t)',  '#1a7a42', Math.max(0,agMin), Math.min(1,agMax), alpha, '#7830a0');
+  drawPanel(1, Ls,    'L(t)',   '#1868b8', lMin, lMax, Math.log(alpha/(1-alpha)), '#7830a0');
+  drawPanel(2, rs,    'r(t)',   '#1a1710', rMin, rMax, 0, '#8c8676');
+  drawPanel(3, rmots, 'rmotion','#1a7a42', rMin, rMax, 0, '#8c8676');
+  // overlay rcurv on panel 3
+  SimX.strokeStyle='#c07810'; SimX.lineWidth=1.5; SimX.setLineDash([4,3]);
+  const pad3={l:48,r:12,t:8,b:8};
+  const py3=3*panelH;
+  SimX.beginPath();
+  rcurvs.forEach((v,i)=>{
+    const px=pad3.l+(ts[i]/120)*(SimW-pad3.l-pad3.r);
+    const py_=py3+pad3.t+(panelH-pad3.t-pad3.b)-(v-rMin)/(rMax-rMin+1e-9)*(panelH-pad3.t-pad3.b);
+    if(i===0)SimX.moveTo(px,py_); else SimX.lineTo(px,py_);
+  });
+  SimX.stroke(); SimX.setLineDash([]);
+
+  // phase labels on top panel
+  phases.forEach((p,i)=>{
+    const midX=48+((p.start+p.end)/2/120)*(SimW-60);
+    SimX.fillStyle=i===1?'#6a4008':'#0a3d20'; SimX.font='500 11px Work Sans';
+    SimX.textAlign='center'; SimX.fillText(phaseLabels[i],midX,12);
+  });
+  // panel labels
+  ['Ag(t)','L(t)','r(t)','rmotion (green) / rcurv (amber)'].forEach((l,i)=>{
+    SimX.fillStyle='#4a4638'; SimX.font='10px Work Sans'; SimX.textAlign='right';
+  });
+
+  // legend for panel 3
+  SimX.fillStyle='#1a7a42'; SimX.font='500 10px Work Sans'; SimX.textAlign='left';
+  SimX.fillText('— rmotion', 52, 3*panelH+12);
+  SimX.fillStyle='#c07810';
+  SimX.fillText('- - rcurv', 52+80, 3*panelH+12);
+
+  // x-axis label
+  SimX.fillStyle='#8c8676'; SimX.font='11px Work Sans'; SimX.textAlign='center';
+  SimX.fillText('Generation', SimW/2, SimH-2);
+
+  // act summary
+  const actEntry = Ags.findIndex(a=>a>alpha);
+  const actExit  = Ags.findIndex((a,i)=>i>40&&a<alpha);
+  const actRe    = Ags.findIndex((a,i)=>i>80&&a>alpha);
+  document.getElementById('actSummary').innerHTML =
+    `<b style="color:var(--forest-dark)">Act I entry:</b> gen ${actEntry>0?actEntry:'—'}<br/>` +
+    `<b style="color:var(--amber-dark)">Act II exit:</b> gen ${actExit>0?actExit:'—'} (Ag crosses α=${alpha})<br/>` +
+    `<b style="color:var(--forest-dark)">Re-entry:</b> gen ${actRe>0?actRe:'—'}<br/><br/>` +
+    `Current Ag range: ${Math.min(...Ags).toFixed(3)} – ${Math.max(...Ags).toFixed(3)}<br/>` +
+    `Warning lead: r(t)<0 before exit by ${actExit>0&&actExit>1?Math.round(actExit/3):' ?'} gen`;
+
+  document.getElementById('simMsg').textContent =
+    `One-trait model | s=${s} | d₀=${d0} | θ̇=${th} | G₀=${G0} | Nₑ=${Ne} | m=${m} | α=${alpha}`;
+}
+['simS','simD0','simTh','simG0','simNe','simM','simAlpha'].forEach(id=>document.getElementById(id).addEventListener('input',runSim));
+runSim();
+
+/* ══ SECTION 2 — ACT SEPARATOR ══════════════════════════ */
+const SepC=document.getElementById('separatorCanvas');
+let SepX, SepW, SepH;
+
+function drawSeparator() {
+  const re=+document.getElementById('rEnv').value;
+  const rc=+document.getElementById('rCov').value;
+  const rm=+document.getElementById('rMot').value;
+  document.getElementById('rEnvVal').textContent=re.toFixed(3);
+  document.getElementById('rCovVal').textContent=rc.toFixed(3);
+  document.getElementById('rMotVal').textContent=rm.toFixed(3);
+
+  const total=re+rc+rm;
+  const T_score=Math.abs(re)/(Math.abs(re)+Math.abs(rc)+0.001);
+
+  ({ ctx: SepX, width: SepW, height: SepH } = setupHiDPICanvas(SepC, 240));
+  SepX.clearRect(0,0,SepW,SepH);
+  const bx=24,bw=SepW-48,bh=28,gap=12,top=30;
+
+  const comps=[
+    {label:'r̂_env',  val:re, col:re<-0.05?'#c03020':re>0.05?'#1a7a42':'#8c8676'},
+    {label:'r̂_cov',  val:rc, col:rc<-0.05?'#c07810':rc>0.05?'#1868b8':'#8c8676'},
+    {label:'r̂_motion',val:rm,col:rm>0.05?'#1a7a42':rm<-0.05?'#c03020':'#8c8676'},
+    {label:'r̂(t) total',val:total,col:total>0?'#1a7a42':total<0?'#c03020':'#8c8676'},
+  ];
+
+  const rExt=Math.max(0.3,Math.max(...comps.map(c=>Math.abs(c.val)))+0.05);
+  const midX=bx+bw/2;
+
+  comps.forEach((c,i)=>{
+    const y=top+i*(bh+gap);
+    SepX.fillStyle='#ede9e0'; rr(SepX,bx,y,bw,bh,5); SepX.fill();
+    // zero marker
+    SepX.strokeStyle='rgba(0,0,0,0.15)'; SepX.lineWidth=1; SepX.setLineDash([3,3]);
+    SepX.beginPath(); SepX.moveTo(midX,y-3); SepX.lineTo(midX,y+bh+3); SepX.stroke(); SepX.setLineDash([]);
+    // bar
+    const barW=Math.abs(c.val)/rExt*(bw/2);
+    const barX=c.val>=0?midX:midX-barW;
+    SepX.fillStyle=c.col+'cc'; rr(SepX,barX,y,barW,bh,5); SepX.fill();
+    SepX.fillStyle='#1a1710'; SepX.font='500 12px Space Mono'; SepX.textAlign='left';
+    SepX.fillText(c.label,4,y+bh/2+4);
+    SepX.textAlign='right'; SepX.font='12px Space Mono';
+    SepX.fillText((c.val>=0?'+':'')+c.val.toFixed(3),bx+bw,y+bh/2+4);
+  });
+  // T-score bar
+  const ty=top+4*(bh+gap)+8;
+  SepX.fillStyle='#ede9e0'; rr(SepX,bx,ty,bw,20,4); SepX.fill();
+  SepX.fillStyle=T_score>0.6?'#c03020cc':T_score<0.3?'#c07810cc':'#7830a0cc';
+  rr(SepX,bx,ty,bw*T_score,20,4); SepX.fill();
+  SepX.fillStyle='#1a1710'; SepX.font='11px Work Sans'; SepX.textAlign='left';
+  SepX.fillText(`T = |r_env|/(|r_env|+|r_cov|) = ${T_score.toFixed(3)}   ${T_score>0.65?'→ ACT III (env rotation dominant)':T_score<0.25?'→ ACT II (variance erosion dominant)':'→ MIXED (both processes active'}`,bx+4,ty+13);
+
+  const diagnosis=
+    T_score>0.65?'<strong style="color:var(--red-dark)">Act III diagnosed.</strong> Gradient rotation is the primary driver. Intervention: targeted introgression along the new fitness gradient direction. Check φ̂αβ × u̇ sign.'
+    :T_score<0.25?'<strong style="color:var(--amber-dark)">Act II diagnosed.</strong> Variance erosion is the primary driver. Intervention: expand the breeding population, widen the selection target, find new trait combinations or environments to select toward.'
+    :'<strong style="color:var(--plum-dark)">Mixed scenario.</strong> Both gradient rotation (r_env) and variance erosion (r_cov) are active. Monitor φ̂αβ and the direction of gradient shift before committing to an intervention strategy.';
+  document.getElementById('separatorDiagnosis').innerHTML=diagnosis;
+}
+['rEnv','rCov','rMot'].forEach(id=>document.getElementById(id).addEventListener('input',drawSeparator));
+drawSeparator();
+
+/* ══ SECTION 3 — INTROGRESSION CANVAS ══════════════════ */
+const IntC=document.getElementById('introCanvas');
+let IntX, IntW, IntH;
+
+function drawIntro() {
+  const phi_deg=+document.getElementById('introPhi').value;
+  const sig2=+document.getElementById('introSig').value;
+  const gamma=+document.getElementById('introGamma').value;
+  const Ag=+document.getElementById('introAg').value;
+  document.getElementById('introPhiVal').textContent=phi_deg+'°';
+  document.getElementById('introSigVal').textContent=sig2.toFixed(2);
+  document.getElementById('introGammaVal').textContent=gamma.toFixed(3);
+  document.getElementById('introAgVal').textContent=Ag.toFixed(2);
+
+  const phi=phi_deg*Math.PI/180;
+  // canonical: b = (1,0), G = diag(1.5, 0.6), H = -gamma*I (isotropic)
+  const b=[1,0], Gdiag=[1.5,0.6];
+  const v=[Math.cos(phi),Math.sin(phi)];
+  const bv=b[0]*v[0]+b[1]*v[1];
+  const Vlin=b[0]*b[0]*Gdiag[0]+b[1]*b[1]*Gdiag[1]; // b^T G b
+  const Vquad=0.5*gamma*gamma*(Gdiag[0]*Gdiag[0]+Gdiag[1]*Gdiag[1]); // isotropic
+  // v^T H G H v = gamma^2 * v^T G v
+  const vGv=v[0]*v[0]*Gdiag[0]+v[1]*v[1]*Gdiag[1];
+  const criterion=(bv*bv)/Vlin - (vGv*gamma*gamma)/Vquad;
+  const deltaAg=Ag*(1-Ag)*criterion*sig2;
+
+  ({ ctx: IntX, width: IntW, height: IntH } = setupHiDPICanvas(IntC, 240));
+  IntX.clearRect(0,0,IntW,IntH);
+  const cx=IntW*0.38, cy=IntH*0.5, sc=65;
+
+  // covariance ellipse (G)
+  IntX.beginPath(); IntX.ellipse(cx,cy,Math.sqrt(Gdiag[0])*sc*0.85,Math.sqrt(Gdiag[1])*sc*0.85,0,0,Math.PI*2);
+  IntX.strokeStyle='#1a7a42'; IntX.lineWidth=1.8; IntX.stroke();
+  IntX.fillStyle='rgba(26,122,66,0.06)'; IntX.fill();
+
+  // fitness gradient arrow (b = (1,0))
+  IntX.strokeStyle='#1868b8'; IntX.lineWidth=2.5;
+  IntX.beginPath(); IntX.moveTo(cx,cy); IntX.lineTo(cx+sc*1.2,cy); IntX.stroke();
+  const ang=0;
+  IntX.beginPath(); IntX.moveTo(cx+sc*1.2,cy);
+  IntX.lineTo(cx+sc*1.2-11,cy-6); IntX.lineTo(cx+sc*1.2-11,cy+6); IntX.closePath();
+  IntX.fillStyle='#1868b8'; IntX.fill();
+  IntX.font='12px Space Mono'; IntX.fillStyle='#1868b8'; IntX.textAlign='left';
+  IntX.fillText('b', cx+sc*1.2+6, cy+4);
+
+  // donor direction arrow
+  const dColor=deltaAg>0?'#1a7a42':'#c03020';
+  IntX.strokeStyle=dColor; IntX.lineWidth=2;
+  IntX.beginPath(); IntX.moveTo(cx,cy); IntX.lineTo(cx+v[0]*sc*1.1,cy-v[1]*sc*1.1); IntX.stroke();
+  IntX.beginPath(); IntX.moveTo(cx+v[0]*sc*1.1,cy-v[1]*sc*1.1);
+  IntX.lineTo(cx+v[0]*sc*1.1-9*Math.cos(phi-0.4),cy-v[1]*sc*1.1+9*Math.sin(phi-0.4));
+  IntX.lineTo(cx+v[0]*sc*1.1-9*Math.cos(phi+0.4),cy-v[1]*sc*1.1+9*Math.sin(phi+0.4));
+  IntX.closePath(); IntX.fillStyle=dColor; IntX.fill();
+  IntX.font='12px Space Mono'; IntX.fillStyle=dColor; IntX.textAlign='left';
+  IntX.fillText('v (donor)', cx+v[0]*sc*1.15+4, cy-v[1]*sc*1.15+4);
+
+  // angle arc
+  IntX.strokeStyle='rgba(0,0,0,0.2)'; IntX.lineWidth=1;
+  IntX.beginPath(); IntX.arc(cx,cy,30,0,-phi); IntX.stroke();
+  IntX.fillStyle='#4a4638'; IntX.font='11px Work Sans'; IntX.textAlign='left';
+  IntX.fillText(phi_deg+'°',cx+35,cy-15);
+
+  // criterion display (right panel)
+  const rx=IntW*0.65, ry=40, rw=IntW*0.32;
+  const items=[
+    {lab:'Gradient benefit',val:(bv*bv/Vlin).toFixed(3),col:'#1a7a42'},
+    {lab:'Curvature cost',  val:(vGv*gamma*gamma/Vquad).toFixed(3),col:'#c03020'},
+    {lab:'Net criterion',   val:criterion.toFixed(3),col:criterion>0?'#1a7a42':'#c03020'},
+    {lab:'δÂg × σ²Δ⁻¹',   val:deltaAg.toFixed(4), col:deltaAg>0?'#1a7a42':'#c03020'},
+  ];
+  items.forEach((it,i)=>{
+    IntX.fillStyle='#4a4638'; IntX.font='500 11px Work Sans'; IntX.textAlign='left';
+    IntX.fillText(it.lab, rx, ry+i*44+14);
+    IntX.fillStyle=it.col; IntX.font='700 16px Space Mono';
+    IntX.fillText(it.val, rx, ry+i*44+32);
+  });
+
+  document.getElementById('introMsg').textContent =
+    deltaAg>0.005 ? `✓ Introgression DEEPENS channel by δÂg ≈ +${deltaAg.toFixed(4)} — donor variance is well-aligned with the fitness gradient`
+    : deltaAg<-0.005 ? `✗ Introgression NARROWS channel by δÂg ≈ ${deltaAg.toFixed(4)} — donor variance is curvature-exposed; choose a donor closer to the gradient direction`
+    : `≈ 0 Neutral — introgression has minimal impact on channel depth at this direction. Rotate donor toward b (φ=0°) for maximum benefit.`;
+}
+['introPhi','introSig','introGamma','introAg'].forEach(id=>document.getElementById(id).addEventListener('input',drawIntro));
+drawIntro();
+
+/* ══ SECTION 4 — DASHBOARD ══════════════════════════════ */
+const DashC=document.getElementById('dashCanvas');
+let DashX, DashW, DashH;
+
+function drawDash() {
+  const vlin=+document.getElementById('dVlin').value;
+  const c00 =Math.max(+document.getElementById('dC00').value, vlin);
+  const pbb =+document.getElementById('dPhibb').value;
+  const pgg =+document.getElementById('dPhigg').value;
+  const pab =+document.getElementById('dPhiab').value;
+  const ud  =+document.getElementById('dUdot').value;
+  document.getElementById('dVlinVal').textContent=vlin.toFixed(2);
+  document.getElementById('dC00Val').textContent=c00.toFixed(2);
+  document.getElementById('dPhibbVal').textContent=pbb.toFixed(2);
+  document.getElementById('dPhiggVal').textContent=pgg.toFixed(3);
+  document.getElementById('dPhibbVal2').textContent=pab.toFixed(2);
+  document.getElementById('dUdotVal').textContent=ud.toFixed(2);
+
+  const Ag=vlin/c00;
+  const AgGEI=pbb/(pbb+pgg+0.0001);
+  const renv=2*pab/(c00*Ag+0.0001)*ud;
+  const rdrift=1/1000; // nominal
+
+  ({ ctx: DashX, width: DashW, height: DashH } = setupHiDPICanvas(DashC, 280));
+  DashX.clearRect(0,0,DashW,DashH);
+  const bx=20,bw=DashW-40,bh=26,gap=14,top=26;
+
+  const diagnostics=[
+    {label:'Âg (reference)',   val:Ag,    min:0,max:1, thresh:0.70, thCol:'#7830a0', goodHigh:true},
+    {label:'𝒜g(GEI)',          val:AgGEI, min:0,max:1, thresh:0.70, thCol:'#7830a0', goodHigh:true},
+    {label:'r̂_env (rate)',     val:renv,  min:-0.3,max:0.3, thresh:0, thCol:'#8c8676', goodHigh:true},
+    {label:'φ̂ₐβ sign check', val:(pab+0.8)/1.6, min:0,max:1, thresh:0.5, thCol:'#8c8676', goodHigh:true},
+  ];
+
+  diagnostics.forEach((d,i)=>{
+    const y=top+i*(bh+gap);
+    const pct=(d.val-d.min)/(d.max-d.min);
+    const thPct=(d.thresh-d.min)/(d.max-d.min);
+    const fillColor=(d.goodHigh&&pct>thPct)||(!d.goodHigh&&pct<thPct)?'#1a7a42':'#c03020';
+
+    DashX.fillStyle='#ede9e0'; rr(DashX,bx,y,bw,bh,5); DashX.fill();
+    DashX.fillStyle=fillColor+'b8'; rr(DashX,bx,y,Math.max(2,bw*Math.max(0,Math.min(1,pct))),bh,5); DashX.fill();
+    if(thPct>0&&thPct<1){
+      const tx=bx+thPct*bw;
+      DashX.strokeStyle=d.thCol; DashX.lineWidth=1.5; DashX.setLineDash([4,3]);
+      DashX.beginPath(); DashX.moveTo(tx,y-3); DashX.lineTo(tx,y+bh+3); DashX.stroke(); DashX.setLineDash([]);
+    }
+    DashX.fillStyle='#1a1710'; DashX.font='500 12px Space Mono'; DashX.textAlign='left';
+    DashX.fillText(d.label,4,y+bh/2+4);
+    DashX.textAlign='right'; DashX.font='12px Space Mono';
+    DashX.fillText(d.val.toFixed(3),bx+bw-4,y+bh/2+4);
+  });
+
+  // summary status
+  const act=Ag>0.7&&renv>0?'ACT I':Ag>0.7&&renv<=-0?'ACT II / boundary approach':Ag<=0.7&&renv>0?'Re-entry':'ACT II/III — channel eroded';
+  const actColor=act.startsWith('ACT I')?'#0a3d20':act.startsWith('Re')?'#083468':act.includes('boundary')?'#6a4008':'#700010';
+  DashX.fillStyle=actColor; DashX.font='700 14px Work Sans'; DashX.textAlign='center';
+  DashX.fillText('Current state: '+act, DashW/2, top+4*(bh+gap)+18);
+
+  // decision
+  const decisionText =
+    Ag>0.7&&AgGEI>0.7&&renv>-0.02
+      ?'<strong style="color:var(--forest-dark)">✓ Healthy channel.</strong> All four diagnostics green. Continue current selection strategy. Monitor r(t) for early warning of regime change.'
+    :Ag>0.7&&renv<-0.05&&Math.abs(renv)>Math.abs(rdrift)
+      ?'<strong style="color:var(--amber-dark)">⚠ Boundary approach.</strong> Âg above threshold but r̂_env is negative. Channel is eroding. Diagnose Act II vs III using the Section 2 separator. Prepare intervention strategy now — before Âg falls.'
+    :Ag<=0.7&&renv>0
+      ?'<strong style="color:var(--sky-dark)">↑ Re-entry in progress.</strong> Channel was below threshold but r̂_env > 0. Maintain selection pressure — the channel is recovering. Verify with Section 2 that recovery is real and not a noise fluctuation.'
+    :Ag<=0.7
+      ?'<strong style="color:var(--red-dark)">✗ Channel eroded.</strong> Âg below threshold. Additive prediction is unreliable. Identify the dominant cause (Act II: expand targets / Act III: targeted introgression). Check 𝒜g(GEI) — if also low, genomic transfer across environments is failing simultaneously.'
+      :'<strong style="color:var(--forest-dark)">Channel state uncertain — check all four readings.</strong>';
+  document.getElementById('dashDecision').innerHTML=decisionText;
+}
+['dVlin','dC00','dPhibb','dPhigg','dPhiab','dUdot'].forEach(id=>document.getElementById(id).addEventListener('input',drawDash));
+drawDash();
+</script>
+
+<script>
+window.addEventListener('resize', () => requestAnimationFrame(() => redrawAllCanvases()));
+window.addEventListener('load', () => {
+  requestAnimationFrame(() => redrawAllCanvases());
+  safeTypeset(document.body);
+});
+</script>
+</body>
+</html>

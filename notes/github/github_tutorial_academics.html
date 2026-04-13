@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub for Academics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest:       #1A6B4A;
+    --forest-mid:   #2E9B6A;
+    --forest-lt:    rgba(46,155,106,0.12);
+    --forest-xlt:   rgba(46,155,106,0.06);
+    --green-border: rgba(46,155,106,0.28);
+    --blue:         #1A6899;
+    --blue-mid:     #5EB0D8;
+    --blue-lt:      rgba(26,104,153,0.10);
+    --blue-xlt:     rgba(26,104,153,0.05);
+    --blue-border:  rgba(26,104,153,0.24);
+    --orange:       #C05C00;
+    --orange-lt:    rgba(192,92,0,0.08);
+    --orange-border:rgba(192,92,0,0.28);
+    --dark:   #1C2E26;
+    --mid:    #3D5A4A;
+    --muted:  #7A9A87;
+    --faint:  #B8D0C4;
+    --page-bg:#F7FCF9;
+    --white:  #FFFFFF;
+    --shadow-sm: 0 1px 6px rgba(26,107,74,0.07), 0 1px 2px rgba(26,107,74,0.04);
+    --shadow-md: 0 4px 18px rgba(26,107,74,0.10), 0 1px 4px rgba(26,107,74,0.05);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--page-bg);
+    color: var(--dark);
+    line-height: 1.68;
+    font-size: 16px;
+  }
+
+  /* PROGRESS */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--forest-mid), var(--blue-mid));
+    z-index: 200; transition: width 0.1s;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(247,252,249,0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--green-border);
+    display: flex; align-items: center;
+    padding: 0 2rem; height: 54px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .nav-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem; color: var(--forest);
+    white-space: nowrap; margin-right: 2rem; flex-shrink: 0;
+  }
+  .nav-links { display: flex; gap: 0.1rem; list-style: none; flex-shrink: 0; }
+  .nav-links a {
+    display: block; padding: 0.35rem 0.80rem;
+    color: var(--mid); text-decoration: none;
+    font-size: 0.82rem; font-weight: 500;
+    border-radius: 100px; white-space: nowrap;
+    transition: background 0.18s, color 0.18s;
+  }
+  .nav-links a:hover  { background: var(--forest-lt); color: var(--forest); }
+  .nav-links a.active { background: var(--forest-lt); color: var(--forest); font-weight: 600; }
+
+  /* HERO — fully light */
+  .hero {
+    background: linear-gradient(140deg,
+      rgba(214,240,228,0.50) 0%,
+      rgba(214,238,248,0.35) 55%,
+      rgba(247,252,249,0.08) 100%);
+    border-bottom: 1px solid var(--green-border);
+    padding: 4rem 2rem 3.5rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 55% 70% at 88% 38%, rgba(94,176,216,0.16) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 55% at 4% 82%,  rgba(46,155,106,0.10) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 820px; margin: 0 auto; position: relative; }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+    color: var(--forest); line-height: 1.12; margin-bottom: 1rem;
+  }
+  .hero h1 em { font-style: italic; color: var(--blue); }
+  .hero .subtitle {
+    font-size: 1.1rem; color: var(--mid);
+    max-width: 540px; margin-bottom: 1.8rem; font-weight: 300;
+  }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+  .pill {
+    display: inline-flex; align-items: center;
+    padding: 0.32rem 0.95rem; border-radius: 100px;
+    font-size: 0.81rem; font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+  .pill-orange { background: var(--orange-lt); color: var(--orange); border: 1.5px solid var(--orange-border); }
+  .pill-green  { background: var(--forest-lt); color: var(--forest); border: 1px solid var(--green-border); }
+
+  /* MAIN */
+  main { max-width: 880px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+  /* QUICK REF */
+  .quick-ref {
+    background: rgba(255,255,255,0.70);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--green-border);
+    border-left: 4px solid var(--forest-mid);
+    border-radius: 0 10px 10px 0;
+    padding: 1.5rem 1.8rem;
+    margin: 2.5rem 0 3rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .quick-ref h3 {
+    font-family: 'DM Serif Display', serif;
+    color: var(--forest); font-size: 1.0rem; margin-bottom: 1rem;
+  }
+  .cmd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.42rem; }
+  .cmd-line {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.44rem 0.8rem;
+    background: var(--forest-xlt); border-radius: 6px;
+    border-left: 3px solid var(--forest-mid);
+  }
+  .cmd-line code { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--forest); flex-shrink: 0; }
+  .cmd-line span { font-size: 0.78rem; color: var(--muted); }
+
+  /* SECTIONS */
+  section {
+    margin-bottom: 3.5rem; scroll-margin-top: 70px;
+    opacity: 0; transform: translateY(14px);
+    transition: opacity 0.42s ease, transform 0.42s ease;
+  }
+  section.visible { opacity: 1; transform: none; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 1.4rem; padding-bottom: 0.65rem;
+    border-bottom: 1.5px solid rgba(168,213,190,0.50);
+  }
+  .section-num { font-family: 'DM Serif Display', serif; font-size: 1.9rem; color: var(--faint); line-height: 1; }
+  .section-title { font-family: 'DM Serif Display', serif; font-size: 1.55rem; color: var(--forest); line-height: 1.2; }
+  p { margin-bottom: 1rem; color: var(--mid); }
+  p:last-child { margin-bottom: 0; }
+
+  /* CODE */
+  .code-block {
+    background: rgba(214,238,248,0.32);
+    border: 1px solid var(--blue-border);
+    border-left: 4px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    padding: 1.05rem 1.25rem;
+    margin: 1.1rem 0; position: relative; overflow-x: auto;
+  }
+  .code-block pre { font-family: 'DM Mono', monospace; font-size: 0.84rem; line-height: 1.78; color: var(--dark); white-space: pre; }
+  .comment { color: var(--muted); }
+  .cmd     { color: var(--forest); font-weight: 500; }
+  .flag    { color: var(--blue); }
+  .str     { color: var(--orange); }
+  .copy-btn {
+    position: absolute; top: 0.55rem; right: 0.55rem;
+    padding: 0.22rem 0.60rem;
+    background: rgba(255,255,255,0.78);
+    border: 1px solid var(--blue-border); border-radius: 5px;
+    font-family: 'DM Mono', monospace; font-size: 0.70rem; color: var(--blue);
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .copy-btn:hover  { background: var(--blue-lt); }
+  .copy-btn.copied { background: var(--forest-lt); color: var(--forest); border-color: var(--green-border); }
+
+  /* CARDS */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.2rem 0; }
+  .card {
+    background: rgba(255,255,255,0.78);
+    border-radius: 10px; padding: 1.15rem 1.1rem 1.1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--green-border);
+    border-top: 3px solid var(--forest);
+    transition: box-shadow 0.22s, transform 0.22s;
+  }
+  .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .card:nth-child(2) { border-top-color: var(--forest-mid); }
+  .card:nth-child(3) { border-top-color: var(--blue); }
+  .card:nth-child(4) { border-top-color: var(--blue-mid); }
+  .card h4 { font-family: 'DM Serif Display', serif; font-size: 1.02rem; color: var(--forest); margin-bottom: 0.4rem; }
+  .card:nth-child(2) h4 { color: var(--forest-mid); }
+  .card:nth-child(3) h4 { color: var(--blue); }
+  .card:nth-child(4) h4 { color: var(--blue-mid); }
+  .card p { font-size: 0.87rem; color: var(--mid); margin: 0; }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; margin: 1.2rem 0; }
+  .step  { display: flex; gap: 1.1rem; position: relative; }
+  .step:not(:last-child)::before {
+    content: ''; position: absolute; left: 16px; top: 40px;
+    width: 2px; height: calc(100% - 12px);
+    background: rgba(168,213,190,0.45);
+  }
+  .step-num {
+    flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--forest-lt); border: 1.5px solid var(--green-border);
+    color: var(--forest);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace; font-size: 0.88rem; font-weight: 500;
+    position: relative; z-index: 1; margin-top: 0.9rem;
+  }
+  .step:nth-child(even) .step-num { background: var(--blue-lt); border-color: var(--blue-border); color: var(--blue); }
+  .step-body { padding: 0.88rem 0 1.4rem; flex: 1; }
+  .step-body strong { display: block; font-size: 0.99rem; font-weight: 600; color: var(--dark); margin-bottom: 0.2rem; }
+  .step-body p { font-size: 0.89rem; margin-bottom: 0.5rem; }
+  .step-body code {
+    font-family: 'DM Mono', monospace; font-size: 0.82rem;
+    background: var(--blue-lt); color: var(--blue);
+    padding: 0.1em 0.4em; border-radius: 4px;
+  }
+
+  /* COMMITS */
+  .commit-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.2rem 0; }
+  @media (max-width:520px) { .commit-compare { grid-template-columns: 1fr; } }
+  .commit-col { border-radius: 8px; overflow: hidden; }
+  .commit-col-header {
+    padding: 0.45rem 1rem; font-family: 'DM Mono', monospace;
+    font-size: 0.76rem; font-weight: 500; letter-spacing: 0.04em;
+  }
+  .commit-col.good .commit-col-header { background: var(--forest-lt); color: var(--forest); border: 1px solid var(--green-border); border-bottom: none; }
+  .commit-col.bad  .commit-col-header { background: var(--orange-lt); color: var(--orange); border: 1px solid var(--orange-border); border-bottom: none; }
+  .commit-items { background: rgba(255,255,255,0.68); border: 1px solid; border-top: none; border-radius: 0 0 8px 8px; }
+  .commit-col.good .commit-items { border-color: var(--green-border); }
+  .commit-col.bad  .commit-items { border-color: var(--orange-border); }
+  .commit-item { padding: 0.46rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.82rem; border-bottom: 1px solid rgba(200,230,215,0.35); }
+  .commit-item:last-child { border-bottom: none; }
+  .commit-col.good .commit-item { color: var(--forest); }
+  .commit-col.bad  .commit-item { color: var(--orange); }
+
+  /* WARNING */
+  .warning {
+    background: rgba(192,92,0,0.07); border: 1px solid var(--orange-border);
+    border-radius: 8px; padding: 0.85rem 1.1rem; margin: 1.2rem 0;
+    display: flex; gap: 0.75rem; align-items: flex-start;
+  }
+  .warning-icon { font-size: 1.05rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .warning p { color: var(--orange); font-weight: 500; font-size: 0.91rem; margin: 0; }
+
+  /* DIAGRAM */
+  .diagram {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.6rem; flex-wrap: wrap; margin: 1.5rem 0; padding: 1.5rem;
+    background: rgba(255,255,255,0.60); border: 1px solid var(--green-border);
+    border-radius: 12px; box-shadow: var(--shadow-sm);
+  }
+  .diag-box { padding: 0.75rem 1.2rem; border-radius: 8px; text-align: center; min-width: 130px; }
+  .diag-box.overleaf { background: rgba(214,240,228,0.45); border: 1.5px solid var(--green-border); }
+  .diag-box.laptop   { background: rgba(255,255,255,0.85); border: 2px solid var(--forest); }
+  .diag-box.github   { background: rgba(214,238,248,0.45); border: 1.5px solid var(--blue-border); }
+  .diag-box strong { display: block; font-size: 0.93rem; font-weight: 600; }
+  .diag-box span   { font-size: 0.76rem; color: var(--muted); }
+  .diag-arrow { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+  .diag-arrow .al { font-size: 0.70rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .diag-arrow .ar { font-size: 1.15rem; color: var(--forest-mid); }
+
+  /* TIMELINE */
+  .timeline { display: flex; align-items: flex-start; margin: 1.5rem 0; overflow-x: auto; padding-bottom: 0.5rem; }
+  .tl-item { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 96px; position: relative; }
+  .tl-item:not(:last-child)::after {
+    content: ''; position: absolute; top: 13px; left: 50%;
+    width: 100%; height: 2px; background: rgba(168,213,190,0.45); z-index: 0;
+  }
+  .tl-dot {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace; font-size: 0.73rem; font-weight: 500;
+    position: relative; z-index: 1; margin-bottom: 0.45rem; border: 2px solid;
+  }
+  .tl-dot.g1 { background: var(--forest-lt);  border-color: var(--forest);     color: var(--forest); }
+  .tl-dot.g2 { background: var(--forest-xlt); border-color: var(--forest-mid); color: var(--forest-mid); }
+  .tl-dot.b1 { background: var(--blue-lt);    border-color: var(--blue);       color: var(--blue); }
+  .tl-dot.b2 { background: var(--blue-xlt);   border-color: var(--blue-mid);   color: var(--blue-mid); }
+  .tl-dot.o  { background: var(--orange-lt);  border-color: var(--orange);     color: var(--orange); }
+  .tl-label  { font-size: 0.76rem; text-align: center; color: var(--mid); line-height: 1.3; }
+
+  /* TROUBLE */
+  .trouble-list { display: flex; flex-direction: column; gap: 1rem; margin: 1.2rem 0; }
+  .trouble-card { background: rgba(255,255,255,0.72); border: 1px solid var(--green-border); border-radius: 10px; box-shadow: var(--shadow-sm); overflow: hidden; }
+  .trouble-header { padding: 0.60rem 1.1rem; background: rgba(214,240,228,0.25); border-bottom: 1px solid var(--green-border); display: flex; align-items: center; gap: 0.7rem; }
+  .trouble-badge { font-family: 'DM Mono', monospace; font-size: 0.67rem; font-weight: 500; padding: 0.12rem 0.5rem; border-radius: 4px; letter-spacing: 0.05em; border: 1px solid; }
+  .trouble-badge         { background: var(--orange-lt); color: var(--orange); border-color: var(--orange-border); }
+  .trouble-badge.blue    { background: var(--blue-lt);   color: var(--blue);   border-color: var(--blue-border); }
+  .trouble-badge.green   { background: var(--forest-lt); color: var(--forest); border-color: var(--green-border); }
+  .trouble-badge.forest  { background: var(--forest-lt); color: var(--forest); border-color: var(--green-border); }
+  .trouble-header strong { font-size: 0.93rem; color: var(--dark); }
+  .trouble-body { padding: 0 1.1rem 0.9rem; }
+
+  /* TRACK LISTS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.2rem 0; }
+  @media (max-width:520px) { .two-col { grid-template-columns: 1fr; } }
+  .track-list h4 { font-size: 0.80rem; font-family: 'DM Mono', monospace; letter-spacing: 0.07em; padding: 0.4rem 0.85rem; border-radius: 6px 6px 0 0; }
+  .track-list.yes h4 { background: var(--forest-lt); color: var(--forest); border: 1px solid var(--green-border); border-bottom: none; }
+  .track-list.no  h4 { background: var(--orange-lt); color: var(--orange); border: 1px solid var(--orange-border); border-bottom: none; }
+  .track-list ul  { list-style: none; background: rgba(255,255,255,0.68); border: 1px solid; border-top: none; border-radius: 0 0 6px 6px; overflow: hidden; }
+  .track-list.yes ul { border-color: var(--green-border); }
+  .track-list.no  ul { border-color: var(--orange-border); }
+  .track-list li { padding: 0.36rem 0.85rem; font-family: 'DM Mono', monospace; font-size: 0.82rem; border-bottom: 1px solid rgba(200,230,215,0.28); }
+  .track-list li:last-child { border-bottom: none; }
+  .track-list.yes li { color: var(--forest); }
+  .track-list.no  li { color: var(--orange); }
+
+  /* FOOTER */
+  footer {
+    background: rgba(214,240,228,0.30);
+    border-top: 1px solid var(--green-border);
+    color: var(--mid); padding: 2.5rem; text-align: center; font-size: 0.85rem;
+  }
+  footer a { color: var(--forest); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  footer p { color: var(--mid); margin-bottom: 0.4rem; }
+
+  /* BACK TOP */
+  .back-top {
+    position: fixed; bottom: 2rem; right: 2rem;
+    width: 42px; height: 42px;
+    background: rgba(255,255,255,0.80); backdrop-filter: blur(8px);
+    color: var(--forest); border: 1.5px solid var(--green-border);
+    border-radius: 50%; font-size: 1.1rem; cursor: pointer;
+    box-shadow: var(--shadow-md);
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.25s, transform 0.25s, background 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .back-top:hover { background: var(--forest-lt); }
+  .back-top.show  { opacity: 1; transform: none; }
+
+  h3.sub { font-family: 'DM Serif Display', serif; color: var(--forest); font-size: 1.18rem; margin: 1.5rem 0 0.5rem; }
+  code.inline { font-family: 'DM Mono', monospace; font-size: 0.82rem; background: var(--blue-lt); color: var(--blue); padding: 0.1em 0.4em; border-radius: 4px; }
+  code.inline-o { font-family: 'DM Mono', monospace; font-size: 0.82rem; background: var(--orange-lt); color: var(--orange); padding: 0.1em 0.4em; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<nav>
+  <div class="nav-brand">GitHub for Academics</div>
+  <ul class="nav-links">
+    <li><a href="#why">Why Git?</a></li>
+    <li><a href="#concepts">Concepts</a></li>
+    <li><a href="#setup">Setup</a></li>
+    <li><a href="#workflow">Workflow</a></li>
+    <li><a href="#overleaf">Overleaf</a></li>
+    <li><a href="#branches">Branches</a></li>
+    <li><a href="#public">Going Public</a></li>
+    <li><a href="#ignore">What to Track</a></li>
+    <li><a href="#trouble">Troubleshoot</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1>GitHub<br><em>for Academics</em></h1>
+    <p class="subtitle">From version chaos to reproducible science — illustrated with the additive-channels project</p>
+    <div class="hero-meta">
+      <span class="pill pill-orange">github.com/dortizbarrientos/additive-channels</span>
+      <span class="pill pill-green">Ortiz-Barrientos &amp; Cooper · PNAS</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="quick-ref">
+    <h3>The four commands you need every day</h3>
+    <div class="cmd-grid">
+      <div class="cmd-line"><code>git pull overleaf master</code><span>get latest from Overleaf</span></div>
+      <div class="cmd-line"><code>git add .</code><span>stage all changes</span></div>
+      <div class="cmd-line"><code>git commit -m "message"</code><span>save a snapshot</span></div>
+      <div class="cmd-line"><code>git push origin main</code><span>send to GitHub</span></div>
+    </div>
+  </div>
+
+  <section id="why">
+    <div class="section-header"><span class="section-num">01</span><h2 class="section-title">Why GitHub?</h2></div>
+    <p>Every researcher recognises this:</p>
+    <div class="code-block">
+      <pre><span class="comment">thesis_final.docx
+thesis_final_v2.docx
+thesis_final_ACTUAL_final.docx
+thesis_final_mark_comments.docx
+thesis_final_mark_comments_revised.docx
+</span><span class="str">thesis_SUBMIT_THIS_ONE.docx  ← which one is it?</span></pre>
+    </div>
+    <p>Version control replaces this. Git is the tool. GitHub is the platform.</p>
+    <div class="card-grid">
+      <div class="card"><h4>Complete history</h4><p>Every change ever made, with who made it, when, and why.</p></div>
+      <div class="card"><h4>Undo anything</h4><p>Go back to any previous state of any file at any point in time.</p></div>
+      <div class="card"><h4>Safe collaboration</h4><p>Multiple people editing without overwriting each other's work.</p></div>
+      <div class="card"><h4>Proof of priority</h4><p>Timestamped commits establish when ideas were first developed.</p></div>
+    </div>
+  </section>
+
+  <section id="concepts">
+    <div class="section-header"><span class="section-num">02</span><h2 class="section-title">Four core concepts</h2></div>
+    <div class="card-grid">
+      <div class="card"><h4>Repository</h4><p>Your project folder, tracked by git. Contains all files and their complete history.</p></div>
+      <div class="card"><h4>Commit</h4><p>A saved snapshot. Every commit has a timestamp, author, and message. Return to any commit.</p></div>
+      <div class="card"><h4>Remote</h4><p>A copy of the repo on another server. <code class="inline">origin</code> = GitHub. <code class="inline">overleaf</code> = Overleaf.</p></div>
+      <div class="card"><h4>Branch</h4><p>A parallel version for experiments or major revisions. Merge back to main when done.</p></div>
+    </div>
+    <div class="code-block">
+      <pre><span class="comment">Untracked  → git doesn't know about it yet
+Modified   → git knows it, and it has changed
+Staged     → ready to commit  (after git add)
+Committed  → safely saved in history</span></pre>
+    </div>
+  </section>
+
+  <section id="setup">
+    <div class="section-header"><span class="section-num">03</span><h2 class="section-title">Setup pipeline</h2></div>
+    <p>Do this once per project.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Create repo on GitHub</strong>
+          <p>Go to <code class="inline">github.com/new</code>. Name it (e.g. <code class="inline">additive-channels</code>), set <strong>Private</strong>, add README, choose the TeX .gitignore template.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Clone to your computer</strong>
+          <div class="code-block" style="margin-top:0.5rem">
+            <pre><span class="cmd">git clone</span> https://github.com/USERNAME/REPO.git
+<span class="cmd">cd</span> REPO</pre>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Create folder structure</strong>
+          <div class="code-block" style="margin-top:0.5rem">
+            <pre><span class="cmd">mkdir</span> <span class="flag">-p</span> manuscript/figures manuscript/mathematica notes</pre>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Copy files in and commit</strong>
+          <div class="code-block" style="margin-top:0.5rem">
+            <pre><span class="cmd">git add</span> .
+<span class="cmd">git status</span>   <span class="comment"># always check before committing</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Initial commit: manuscript, SI, figures"</span>
+<span class="cmd">git push</span> origin main</pre>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Link to Overleaf</strong>
+          <div class="code-block" style="margin-top:0.5rem">
+            <pre><span class="cmd">git remote add</span> overleaf https://git@git.overleaf.com/PROJECT_ID
+<span class="cmd">git pull</span> overleaf master <span class="flag">--allow-unrelated-histories -X theirs</span>
+<span class="cmd">git push</span> origin main</pre>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <p style="font-size:0.85rem;margin-top:0.5rem">Your project ID is in the Overleaf URL: <code class="inline-o">overleaf.com/project/69c719...</code></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="workflow">
+    <div class="section-header"><span class="section-num">04</span><h2 class="section-title">Daily workflow</h2></div>
+    <p>Run these at the end of every writing session. Three commands is all it takes.</p>
+    <div class="code-block">
+      <pre><span class="cmd">git pull</span> overleaf master       <span class="comment"># get latest from Overleaf</span>
+<span class="cmd">git add</span> .
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Describe what changed"</span>
+<span class="cmd">git push</span> origin main           <span class="comment"># archive to GitHub</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <h3 class="sub">Writing good commit messages</h3>
+    <p>A good message completes the sentence: <em>"If applied, this commit will…"</em></p>
+    <div class="commit-compare">
+      <div class="commit-col good">
+        <div class="commit-col-header">✓ Good</div>
+        <div class="commit-items">
+          <div class="commit-item">"Revise Discussion paragraph 2"</div>
+          <div class="commit-item">"Fix bib key CooperMessina2023"</div>
+          <div class="commit-item">"Update Fig 4 caption and SI S6"</div>
+          <div class="commit-item">"Revise abstract after reviewers"</div>
+        </div>
+      </div>
+      <div class="commit-col bad">
+        <div class="commit-col-header">✗ Bad</div>
+        <div class="commit-items">
+          <div class="commit-item">"update"</div>
+          <div class="commit-item">"fix"</div>
+          <div class="commit-item">"changes"</div>
+          <div class="commit-item">"asdfgh"</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="overleaf">
+    <div class="section-header"><span class="section-num">05</span><h2 class="section-title">Overleaf + GitHub</h2></div>
+    <p>Your project has two remotes. Your laptop sits between them.</p>
+    <div class="diagram">
+      <div class="diag-box overleaf"><strong style="color:var(--forest)">Overleaf</strong><span>where you write</span></div>
+      <div class="diag-arrow"><span class="al">pull</span><span class="ar">⟵</span><span class="ar">⟶</span><span class="al">push</span></div>
+      <div class="diag-box laptop"><strong style="color:var(--forest)">Your laptop</strong><span>additive-channels/</span></div>
+      <div class="diag-arrow"><span class="al">pull</span><span class="ar">⟵</span><span class="ar">⟶</span><span class="al">push</span></div>
+      <div class="diag-box github"><strong style="color:var(--blue)">GitHub</strong><span>archive + backup</span></div>
+    </div>
+    <div class="code-block">
+      <pre><span class="cmd">git remote</span> <span class="flag">-v</span>
+<span class="comment"># origin   https://github.com/USERNAME/REPO.git
+# overleaf https://git@git.overleaf.com/PROJECT_ID</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <div class="warning">
+      <span class="warning-icon">⚠</span>
+      <p>One source of truth: always edit in Overleaf, then push to GitHub. Never edit in both places between syncs.</p>
+    </div>
+  </section>
+
+  <section id="branches">
+    <div class="section-header"><span class="section-num">06</span><h2 class="section-title">Branches &amp; Tags</h2></div>
+    <h3 class="sub" style="margin-top:0">Branches for revisions</h3>
+    <div class="code-block">
+      <pre><span class="cmd">git checkout</span> <span class="flag">-b</span> revision-round-1
+<span class="comment"># ... edit, commit ...</span>
+<span class="cmd">git checkout</span> main
+<span class="cmd">git merge</span> revision-round-1
+<span class="cmd">git push</span> origin main</pre>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <p>Good names: <code class="inline">revision-round-1</code> &nbsp;·&nbsp; <code class="inline">submitted-version</code> &nbsp;·&nbsp; <code class="inline">accepted-version</code></p>
+    <h3 class="sub">Tags for milestones</h3>
+    <div class="code-block">
+      <pre><span class="cmd">git tag</span> <span class="flag">-a</span> v1.0 <span class="flag">-m</span> <span class="str">"bioRxiv submission"</span>  &amp;&amp;  <span class="cmd">git push</span> origin v1.0
+<span class="cmd">git tag</span> <span class="flag">-a</span> v1.1 <span class="flag">-m</span> <span class="str">"PNAS submission"</span>     &amp;&amp;  <span class="cmd">git push</span> origin v1.1
+<span class="cmd">git tag</span> <span class="flag">-a</span> v2.0 <span class="flag">-m</span> <span class="str">"Accepted"</span>            &amp;&amp;  <span class="cmd">git push</span> origin v2.0</pre>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+  </section>
+
+  <section id="public">
+    <div class="section-header"><span class="section-num">07</span><h2 class="section-title">Going public &amp; getting a DOI</h2></div>
+    <p>Make the repo public at the same moment you post the preprint.</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-dot g1">1</div><div class="tl-label">Post preprint<br>to bioRxiv</div></div>
+      <div class="tl-item"><div class="tl-dot g2">2</div><div class="tl-label">Make repo<br>Public</div></div>
+      <div class="tl-item"><div class="tl-dot b1">3</div><div class="tl-label">Create release<br>tag</div></div>
+      <div class="tl-item"><div class="tl-dot b2">4</div><div class="tl-label">Zenodo mints<br>a DOI</div></div>
+      <div class="tl-item"><div class="tl-dot o">5</div><div class="tl-label">Insert DOI into<br>manuscript</div></div>
+    </div>
+    <div class="code-block">
+      <pre><span class="cmd">git tag</span> <span class="flag">-a</span> v1.0 <span class="flag">-m</span> <span class="str">"bioRxiv submission — March 2026"</span>
+<span class="cmd">git push</span> origin v1.0
+<span class="comment"># GitHub → Releases → Create release from tag v1.0
+# Zenodo auto-detects and mints a DOI</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <div class="warning">
+      <span class="warning-icon">🔗</span>
+      <p>Replace <code class="inline">[repository DOI to be inserted]</code> with <code class="inline">https://doi.org/10.5281/zenodo.XXXXXXX</code></p>
+    </div>
+  </section>
+
+  <section id="ignore">
+    <div class="section-header"><span class="section-num">08</span><h2 class="section-title">What to track and what to ignore</h2></div>
+    <div class="two-col">
+      <div class="track-list yes"><h4>✓ Always track</h4><ul><li>.tex source files</li><li>.bib bibliography files</li><li>.py figure scripts</li><li>.R analysis scripts</li><li>.md documentation</li><li>Figure PDFs in figures/</li></ul></div>
+      <div class="track-list no"><h4>✗ Never track</h4><ul><li>Compiled .pdf documents</li><li>LaTeX artefacts (.aux .log .bbl)</li><li>Large data files</li><li>Personal paths or tokens</li><li>.DS_Store (macOS)</li><li>__pycache__ / *.pyc</li></ul></div>
+    </div>
+    <div class="code-block">
+      <pre><span class="comment"># .gitignore for a LaTeX + Python project</span>
+<span class="str">*.aux *.log *.bbl *.blg *.out *.synctex.gz
+*.pdf
+!manuscript/figures/*.pdf
+__pycache__/ *.pyc
+.DS_Store
+notes/git_overleaf_pipeline.md</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+  </section>
+
+  <section id="trouble">
+    <div class="section-header"><span class="section-num">09</span><h2 class="section-title">Troubleshooting</h2></div>
+    <div class="trouble-list">
+      <div class="trouble-card">
+        <div class="trouble-header"><span class="trouble-badge">COMMON</span><strong>Updates were rejected (fetch first)</strong></div>
+        <div class="trouble-body">
+          <div class="code-block" style="margin:0.8rem 0 0">
+            <pre><span class="cmd">git pull</span> origin main <span class="flag">--rebase</span>
+<span class="cmd">git push</span> origin main</pre>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="trouble-card">
+        <div class="trouble-header"><span class="trouble-badge blue">CONFLICT</span><strong>Merge conflict in manuscript</strong></div>
+        <div class="trouble-body">
+          <p style="font-size:0.87rem;margin:0.7rem 0 0.5rem">Open the file, find the <code class="inline">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> markers, keep the correct version, delete the markers.</p>
+          <div class="code-block" style="margin:0">
+            <pre><span class="cmd">git add</span> . &amp;&amp; <span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Resolve conflict"</span></pre>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="trouble-card">
+        <div class="trouble-header"><span class="trouble-badge green">UNDO</span><strong>Committed something wrong</strong></div>
+        <div class="trouble-body">
+          <div class="code-block" style="margin:0.8rem 0 0">
+            <pre><span class="cmd">git reset</span> <span class="flag">--soft</span> HEAD~1  <span class="comment"># undo last commit, keep changes</span>
+<span class="cmd">git revert</span> HEAD           <span class="comment"># or: new commit that reverses it</span></pre>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="trouble-card">
+        <div class="trouble-header"><span class="trouble-badge forest">HISTORY</span><strong>Need old version of one file</strong></div>
+        <div class="trouble-body">
+          <div class="code-block" style="margin:0.8rem 0 0">
+            <pre><span class="cmd">git log</span> <span class="flag">--oneline</span> manuscript/main.tex
+<span class="cmd">git checkout</span> ABC1234 <span class="flag">--</span> manuscript/main.tex</pre>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Built with the <strong>additive-channels</strong> project as a running example.</p>
+  <p>
+    <a href="https://github.com/dortizbarrientos/additive-channels">github.com/dortizbarrientos/additive-channels</a>
+    &nbsp;·&nbsp;
+    <a href="https://git-scm.com">git-scm.com</a>
+    &nbsp;·&nbsp;
+    <a href="https://zenodo.org">zenodo.org</a>
+  </p>
+  <p style="margin-top:0.8rem;font-size:0.78rem;color:var(--muted)">Ortiz-Barrientos &amp; Cooper · The University of Queensland</p>
+</footer>
+
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  const prog = document.getElementById('progress');
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    prog.style.width = (window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100) + '%';
+    backTop.classList.toggle('show', window.scrollY > 400);
+  });
+  const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.07 });
+  document.querySelectorAll('section').forEach(s => obs.observe(s));
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const secs = [...document.querySelectorAll('section[id]')];
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    secs.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+  });
+  function copyCode(btn) {
+    navigator.clipboard.writeText(btn.closest('.code-block').querySelector('pre').innerText).then(() => {
+      btn.textContent = 'copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+</script>
+</body>
+</html>

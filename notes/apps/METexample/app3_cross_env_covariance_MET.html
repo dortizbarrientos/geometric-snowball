@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>App 9 — Cross-Environment Covariance</title>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+
+window.addEventListener('resize', () => requestAnimationFrame(() => redrawAllCanvases()));
+</script>
+
+<script>
+window.MathJax = window.MathJax || {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+function safeTypeset(root) {
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+    return MathJax.typesetPromise(root ? [root] : undefined).catch(() => {});
+  }
+  return Promise.resolve();
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg:           #f0ede6;
+  --surface:      #faf9f6;
+  --surface2:     #e8e4db;
+  --border:       #d4d0c6;
+  --text:         #1c1a12;
+  --text2:        #504e44;
+  --text3:        #8a8778;
+
+  --ochre-light:  #f5e8c4;
+  --ochre-mid:    #b07c10;
+  --ochre-dark:   #6b4a06;
+
+  --teal-light:   #c8ece6;
+  --teal-mid:     #0e8a74;
+  --teal-dark:    #064d40;
+
+  --slate-light:  #dde2ee;
+  --slate-mid:    #3c5280;
+  --slate-dark:   #182040;
+
+  --mauve-light:  #ede4f0;
+  --mauve-mid:    #7a44a0;
+  --mauve-dark:   #3d1858;
+
+  --coral-light:  #fde6e0;
+  --coral-mid:    #c44030;
+  --coral-dark:   #782018;
+
+  --serif: 'Crimson Pro', Georgia, serif;
+  --sans:  'DM Sans', system-ui, sans-serif;
+  --mono:  'Fira Code', monospace;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.65; font-size: 16px; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(240,237,230,0.92); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border); padding: 0 2rem;
+}
+.nav-inner { max-width: 940px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.nav-series { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); font-weight: 500; }
+.nav-title { font-family: var(--serif); font-size: 15px; color: var(--text); font-weight: 300; }
+.nav-links { display: flex; gap: 5px; }
+.nav-pill { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; background: var(--surface2); color: var(--text2); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.nav-pill:hover { background: var(--teal-light); color: var(--teal-dark); border-color: var(--teal-mid); text-decoration: none; }
+.nav-pill.active { background: var(--teal-mid); color: #fff; border-color: var(--teal-mid); }
+.nav-pill.done { opacity: 0.55; }
+
+/* HERO */
+.hero {
+  background: linear-gradient(150deg, #064d40 0%, #182040 50%, #3d1858 100%);
+  color: #fff; padding: 3.5rem 2rem 2.8rem; text-align: center; position: relative; overflow: hidden;
+}
+.hero::after {
+  content: 'C'; position: absolute; right: -2rem; top: -2rem;
+  font-family: var(--serif); font-size: 22rem; font-weight: 600;
+  color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none; user-select: none;
+}
+.hero-tag { display: inline-block; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.24); border-radius: 20px; padding: 3px 14px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; margin-bottom: 1.2rem; position: relative; }
+.hero h1 { font-family: var(--serif); font-size: clamp(1.9rem,4vw,2.8rem); font-weight: 300; line-height: 1.18; margin-bottom: 1rem; position: relative; }
+.hero h1 em { font-style: italic; color: #7adece; }
+.hero-sub { font-size: 1rem; color: rgba(255,255,255,0.68); max-width: 580px; margin: 0 auto 2rem; position: relative; }
+.hero-eq {
+  display: inline-block; background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+  padding: 0.9rem 2rem; font-family: var(--mono); font-size: 0.95rem;
+  color: #b8f0e0; position: relative;
+}
+
+/* LAYOUT */
+.main { max-width: 940px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+.section { margin-bottom: 3.5rem; opacity: 0; }
+.section.visible { animation: fadeUp 0.42s ease forwards; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+.section-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.n-ochre  { background: var(--ochre-light);  color: var(--ochre-dark); }
+.n-teal   { background: var(--teal-light);   color: var(--teal-dark); }
+.n-slate  { background: var(--slate-light);  color: var(--slate-dark); }
+.n-mauve  { background: var(--mauve-light);  color: var(--mauve-dark); }
+.section-title { font-family: var(--serif); font-size: 1.45rem; font-weight: 300; }
+
+/* TABS */
+.tab-bar { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab-btn { padding: 7px 16px; font-size: 13px; font-weight: 500; border: none; background: none; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; font-family: var(--sans); }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--teal-mid); border-bottom-color: var(--teal-mid); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* PROSE */
+.prose p { margin-bottom: 1rem; line-height: 1.78; }
+.prose h3 { font-family: var(--serif); font-weight: 400; font-size: 1.08rem; margin: 1.5rem 0 0.5rem; font-style: italic; }
+.prose ul { padding-left: 1.4rem; margin-bottom: 1rem; }
+.prose ul li { margin-bottom: 0.45rem; }
+.prose strong { font-weight: 500; }
+
+/* CALLOUT */
+.callout { border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1.2rem 0; border-left: 3px solid; }
+.c-ochre  { background: var(--ochre-light);  border-color: var(--ochre-mid); }
+.c-teal   { background: var(--teal-light);   border-color: var(--teal-mid); }
+.c-slate  { background: var(--slate-light);  border-color: var(--slate-mid); }
+.c-mauve  { background: var(--mauve-light);  border-color: var(--mauve-mid); }
+.c-coral  { background: var(--coral-light);  border-color: var(--coral-mid); }
+.callout-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.4rem; color: var(--text2); }
+.callout p { margin-bottom: 0; font-size: 15px; }
+
+/* EQ BLOCK */
+.eq-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; margin: 1.2rem 0; overflow-x: auto; }
+.eq-label { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+
+/* INTERACTIVE */
+.interactive-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow); margin: 1.5rem 0; }
+.interactive-title { font-family: var(--serif); font-size: 1.05rem; font-weight: 300; color: var(--text2); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); font-style: italic; }
+.controls-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0.7rem 0; }
+.ctrl-label { font-size: 13px; color: var(--text2); font-weight: 500; min-width: 150px; }
+.ctrl-slider { flex: 1; min-width: 120px; accent-color: var(--teal-mid); }
+.ctrl-value { font-family: var(--mono); font-size: 13px; color: var(--teal-dark); min-width: 52px; text-align: right; }
+canvas { display: block; width: 100%; border-radius: 8px; background: var(--bg); }
+
+/* MATRIX HEATMAP */
+.heatmap-wrap { overflow-x: auto; margin: 1rem 0; }
+.heatmap-table { border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+.heatmap-table th { padding: 5px 10px; font-size: 11px; font-weight: 500; color: var(--text3); font-family: var(--sans); background: var(--surface2); border: 1px solid var(--border); text-align: center; }
+.heatmap-table td { width: 52px; height: 44px; text-align: center; border: 1px solid var(--border); font-size: 12px; transition: background 0.25s, color 0.25s; cursor: default; }
+
+/* COEFFICIENT DISPLAY */
+.coeff-row { display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+.coeff-card { flex: 1; min-width: 140px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+.coeff-sym { font-family: var(--mono); font-size: 1.3rem; color: var(--teal-mid); font-weight: 500; margin-bottom: 4px; }
+.coeff-val { font-family: var(--mono); font-size: 1.0rem; color: var(--text); font-weight: 500; margin-bottom: 4px; }
+.coeff-meaning { font-size: 12px; color: var(--text2); line-height: 1.45; }
+
+/* REGRESSION TABLE */
+.reg-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 1rem 0; }
+.reg-table th { background: var(--surface2); padding: 7px 12px; border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text2); text-align: left; }
+.reg-table td { padding: 6px 12px; border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; }
+.reg-table tr:hover td { background: var(--surface2); }
+.reg-table .highlight { background: var(--teal-light) !important; color: var(--teal-dark) !important; font-weight: 500; }
+
+/* FA DIAGRAM */
+.fa-diagram { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.2rem 0; }
+.fa-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; }
+.fa-card-title { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.75rem; }
+.fa-factor { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.fa-factor-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.fa-factor-desc { font-size: 13px; color: var(--text); line-height: 1.4; }
+
+/* TWO-COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } .fa-diagram { grid-template-columns: 1fr; } }
+
+/* SERIES NAV */
+.series-nav { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-top: 3rem; }
+.series-nav-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+.series-list { display: flex; flex-direction: column; gap: 5px; }
+.series-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; font-size: 14px; transition: background 0.12s; text-decoration: none; color: inherit; }
+.series-item.done { color: var(--text3); }
+.series-item.done:hover { background: var(--surface2); color: var(--text); }
+.series-item.current { background: var(--teal-light); color: var(--teal-dark); font-weight: 500; }
+.series-item.upcoming { color: var(--text3); }
+.series-item.upcoming:hover { background: var(--surface2); color: var(--text); }
+.series-badge { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.series-item.done .series-badge { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.series-item.current .series-badge { background: var(--teal-mid); color: #fff; }
+.series-item.upcoming .series-badge { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+.small { font-size: 13px; color: var(--text2); }
+.mt1 { margin-top: 1rem; }
+.code { font-family: var(--mono); background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-size: 0.87em; }
+</style>
+<script>window.addEventListener('load',()=>{ safeTypeset(document.body); });</script>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div><div class="nav-series">From Field to Formula · App 3 of 4</div></div>
+    <div class="nav-title">Cross-Environment Covariance</div>
+    <div class="nav-links">
+      <a href="app0_what_is_a_MET.html"  class="nav-pill done">0</a>
+      <a href="app1_genetic_building_blocks_MET.html" class="nav-pill done">1</a>
+      <a href="app2_reaction_norm_model_MET.html" class="nav-pill done">2</a>
+      <span class="nav-pill active">3</span>
+      <a href="app4_linear_vs_quad_GEI.html" class="nav-pill">4</a>
+      
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">App 9 · Identification</div>
+  <h1>Cross-Environment<br/><em>Genetic Covariance</em></h1>
+  <p class="hero-sub">The $E \times E$ genetic covariance matrix has a precise structural form under the channel model. Three numbers — $c_{00}$, $c_{10}$, $c_{11}$ — carry all the channel information hidden in it.</p>
+  <div class="hero-eq">
+    C<sup>(G)</sup><sub>jk</sub> = c<sub>00</sub> + c<sub>10</sub>(Δu<sub>j</sub> + Δu<sub>k</sub>) + c<sub>11</sub> Δu<sub>j</sub>Δu<sub>k</sub>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 1: WHAT IS THE CROSS-ENV GENETIC COVARIANCE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num n-ochre">1</div>
+    <h2 class="section-title">What is $C^{(G)}_{jk}$ and how is it computed?</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs1">
+    <button class="tab-btn active" data-tab="t1-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t1-biology">Biology</button>
+    <button class="tab-btn" data-tab="t1-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t1-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t1-plain">
+    <div class="prose">
+      <p>When a plant breeder runs a multi-environment trial, every pair of environments shares genetic signal. A line that out-yields the average in Queensland also tends to out-yield the average in New South Wales — to some degree. The <strong>cross-environment genetic covariance</strong> $C^{(G)}_{jk}$ measures exactly how much the genotypic performance in environment $j$ and the genotypic performance in environment $k$ move together across the lines in the trial.</p>
+      <p>Think of it as a genetic correlation, but expressed as a covariance rather than a scaled correlation: it mixes the <em>magnitude</em> of the genetic signal with its <em>consistency</em> across environments. High $C^{(G)}_{jk}$ for a pair of environments means genotype rankings are nearly identical between them — the same lines win in both. Low $C^{(G)}_{jk}$ means the rankings differ substantially — a crossover G×E.</p>
+      <div class="callout c-ochre">
+        <div class="callout-title">Key point</div>
+        <p>The full $E \times E$ matrix $\mathbf{C}^{(G)}$ contains all the G×E information from the trial in one object. The structural model says this matrix is not arbitrary: under the channel model, it is a <em>quadratic polynomial in the environmental covariates</em>. That structure is what allows the identification of $V_{\text{lin,GEI}}$ and $V_{\text{quad,GEI}}$ from only three numbers.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t1-biology">
+    <div class="prose">
+      <p>The cross-environment genetic covariance has a direct biological reading. It is the covariance, across genotypes, of genotypic values in two environments:</p>
+      <ul>
+        <li>If all genotypes respond identically to the environment (pure environmental main effect, no G×E), then $C^{(G)}_{jk}$ equals $\sigma^2_g$ for all pairs — a constant matrix. This is the "no G×E" baseline.</li>
+        <li>Linear G×E (Finlay–Wilkinson slopes) causes $C^{(G)}_{jk}$ to vary with the product $\Delta u_j \Delta u_k$. Environments far apart in the gradient have lower genetic covariance because responsive lines gain a large advantage in favourable environments while stable lines do not — splitting the rankings.</li>
+        <li>Nonlinear G×E (curvature) adds a further systematic pattern: environments at the extremes of the gradient have higher covariance with each other than with middle environments, because specialist genotypes (large $|\gamma_i|$) perform similarly at both extremes.</li>
+      </ul>
+      <p>Each of these contributions is captured by one of the three coefficients $c_{00}$, $c_{10}$, $c_{11}$ in the structural model.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t1-geometry">
+    <div class="prose">
+      <p>The interactive below shows a 6×6 cross-environment genetic covariance matrix for six environments ordered by environmental covariate $u$. Drag the structural model coefficients and watch the heatmap update. Hover over cells to read off individual values.</p>
+    </div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — Structural model heatmap</div>
+      <div class="controls-row">
+        <span class="ctrl-label">$c_{00}$ (total genotypic var)</span>
+        <input class="ctrl-slider" id="c00" type="range" min="0.5" max="5.0" step="0.05" value="2.5"/>
+        <span class="ctrl-value" id="c00Val">2.50</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">$c_{10}$ (cross-term)</span>
+        <input class="ctrl-slider" id="c10" type="range" min="-1.0" max="1.0" step="0.025" value="0.3"/>
+        <span class="ctrl-value" id="c10Val">0.30</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">$c_{11}$ (GEI variance)</span>
+        <input class="ctrl-slider" id="c11" type="range" min="0.0" max="2.0" step="0.025" value="0.6"/>
+        <span class="ctrl-value" id="c11Val">0.60</span>
+      </div>
+      <div class="two-col" style="margin-top:1rem;">
+        <div>
+          <p class="small" style="margin-bottom:6px;">$C^{(G)}_{jk}$ matrix (6 environments, $u = -2.5$ to $+2.5$)</p>
+          <div class="heatmap-wrap"><table class="heatmap-table" id="covHeatmap"></table></div>
+        </div>
+        <div>
+          <p class="small" style="margin-bottom:6px;">$C^{(G)}_{jk}$ plotted against $\Delta u_j \Delta u_k$</p>
+          <canvas id="scatterCanvas" height="210"></canvas>
+        </div>
+      </div>
+      <div id="heatmapMsg" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t1-math">
+    <div class="prose"><p>$C^{(G)}_{jk}$ is estimated from the MET by fitting the genomic mixed model with unstructured $E \times E$ genetic covariance:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Unstructured genomic mixed model</div>
+      $$\mathbf{y} = X\boldsymbol{\tau} + Z_g\,\mathbf{g} + \boldsymbol{\varepsilon}, \quad
+        \text{Var}(\mathbf{g}) = \boldsymbol{\Sigma}^{(G)} \otimes \hat{G}$$
+    </div>
+    <div class="prose"><p>The REML estimator of the $E \times E$ matrix $\boldsymbol{\Sigma}^{(G)}$ gives $\hat{C}^{(G)}_{jk} = \hat{\sigma}^{(G)}_{jk}$. In a factor analytic model with $K$ factors, the estimator is:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Factor analytic estimator</div>
+      $$\hat{\boldsymbol{\Sigma}}^{(G)} = \hat{\Lambda}\hat{\Lambda}^\top + \hat{\Psi}$$
+    </div>
+    <div class="prose"><p>where $\hat{\Lambda}$ is the $E \times K$ loading matrix and $\hat{\Psi}$ is a diagonal specific-variance matrix. The FA model is the dominant practical approach because it scales well to large $E$ and provides a low-rank approximation that is numerically stable. In ASReml-R the specification is <span class="code">fa(env, k)</span>; in <span class="code">sommer</span> it is <span class="code">vsr(usr(fa(env,k)), line, Gvar=Ghat)</span>.</p></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 2: THE STRUCTURAL MODEL -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num n-teal">2</div>
+    <h2 class="section-title">The structural model — deriving the three coefficients</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs2">
+    <button class="tab-btn active" data-tab="t2-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t2-biology">Biology</button>
+    <button class="tab-btn" data-tab="t2-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t2-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t2-plain">
+    <div class="prose">
+      <p>The structural model is the central result of this app. It says that the cross-environment genetic covariance between environments $j$ and $k$ is a quadratic polynomial in the environmental covariates, with exactly three free parameters:</p>
+    </div>
+    <div class="coeff-row">
+      <div class="coeff-card">
+        <div class="coeff-sym">c<sub>00</sub></div>
+        <div class="coeff-meaning">Total genotypic variance at the reference environment $u_0$. Equal to $V_\text{lin}^{(0)} + V_\text{quad}^{(0)}$ — the sum of all heritable fitness variance at the reference point. This is what $\hat{\sigma}^2_g$ estimates in a single-environment analysis.</div>
+      </div>
+      <div class="coeff-card">
+        <div class="coeff-sym">c<sub>10</sub></div>
+        <div class="coeff-meaning">Rate of change of the genetic covariance as one environment departs from the reference. Contains both the linear mixed term $b_0^\top G b_u$ and the Hessian mixed term $\frac{1}{2}\text{tr}[H_0 G H_u G]$. Positive $c_{10}$ means the genetic signal strengthens as environments become more extreme.</div>
+      </div>
+      <div class="coeff-card">
+        <div class="coeff-sym">c<sub>11</sub></div>
+        <div class="coeff-meaning">Total GEI variance — the variance of genotypic effects that depends on the environment. Equal to $V_{\text{lin,GEI}} + V_{\text{quad,GEI}} = b_u^\top G b_u + \frac{1}{2}\text{tr}[(H_u G)^2]$. This is the quantity that App 10 separates into its linear and nonlinear components.</div>
+      </div>
+    </div>
+    <div class="callout c-teal">
+      <div class="callout-title">Why only three numbers?</div>
+      <p>Because the fitness surface is quadratic in $z$ and linear in $u$ (the assumptions of the channel model), and the covariance is a product of two such expansions averaged over a Gaussian distribution. The Gaussian kills all odd moments and the Isserlis theorem controls all even ones, leaving exactly the three-term structure $c_{00} + c_{10}(\cdot) + c_{11}(\cdot)$. An $E \times E$ matrix with $E(E+1)/2$ free entries collapses to just 3 numbers under this structure.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t2-biology">
+    <div class="prose">
+      <p>Each coefficient has a biological signature that a breeder can recognise in data:</p>
+      <ul>
+        <li><strong>Large $c_{00}$, small $c_{11}$</strong>: genotypes differ enormously in mean performance (high $\sigma^2_\alpha$) but respond similarly to the environment. G×E is negligible. The same genomic model works across all environments — prediction transfers perfectly.</li>
+        <li><strong>$c_{11} \approx c_{00}$</strong>: as much genetic variance arises from G×E as from mean differences. Genotype rankings shift dramatically across environments. Single-environment GBLUP predictions transfer poorly.</li>
+        <li><strong>$c_{10} > 0$</strong>: high-performing genotypes tend to be more responsive (positive $b_0^\top G b_u$). Genotypes that do well at the reference environment also gain more as conditions improve. This is the common pattern in high-input breeding programs where selection pressure under favourable conditions has linked mean performance to responsiveness.</li>
+        <li><strong>$c_{10} < 0$</strong>: high performers are less responsive — a stability–performance tradeoff. The best genotypes at the reference are the most stable, not the most responsive. This sometimes occurs when breeding under stress has favoured constitutively high-performing lines.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t2-geometry">
+    <div class="prose">
+      <p>The three-coefficient structure means that the cross-environment covariance $C^{(G)}_{jk}$ lies on a ruled surface in 3D space parametrised by $(\Delta u_j, \Delta u_k, C^{(G)}_{jk})$. The regression below demonstrates the identification: given a set of observed $\hat{C}^{(G)}_{jk}$ values and the known $\Delta u_j$, recover $c_{00}$, $c_{10}$, $c_{11}$ by OLS.</p>
+    </div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — OLS identification from observed covariances</div>
+      <p class="small">The true coefficients are set below. The simulator adds sampling noise and runs the OLS regression to recover them. Watch how increasing $E$ (environments) and $n$ (lines) sharpens the estimates.</p>
+      <div class="controls-row">
+        <span class="ctrl-label">True $c_{00}$</span>
+        <input class="ctrl-slider" id="tc00" type="range" min="1.0" max="4.0" step="0.1" value="2.0"/>
+        <span class="ctrl-value" id="tc00Val">2.00</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">True $c_{10}$</span>
+        <input class="ctrl-slider" id="tc10" type="range" min="-0.8" max="0.8" step="0.05" value="0.25"/>
+        <span class="ctrl-value" id="tc10Val">0.25</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">True $c_{11}$</span>
+        <input class="ctrl-slider" id="tc11" type="range" min="0.1" max="1.5" step="0.05" value="0.5"/>
+        <span class="ctrl-value" id="tc11Val">0.50</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">Environments $E$</span>
+        <input class="ctrl-slider" id="regE" type="range" min="3" max="14" step="1" value="6"/>
+        <span class="ctrl-value" id="regEVal">6</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">Lines $n$</span>
+        <input class="ctrl-slider" id="regN" type="range" min="50" max="600" step="25" value="200"/>
+        <span class="ctrl-value" id="regNVal">200</span>
+      </div>
+      <button onclick="runRegSim()" style="margin:0.5rem 0 1rem;padding:7px 18px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:13px;font-family:var(--sans);font-weight:500;">↺ New sample</button>
+      <div id="regTable" style="margin-bottom:1rem;"></div>
+      <canvas id="regCanvas" height="220"></canvas>
+      <p class="small mt1" id="regMsg"></p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t2-math">
+    <div class="prose"><p>The structural model is derived in the companion paper (§3). Starting from the quadratic genotypic value model and applying Gaussian closure and the Isserlis theorem, the result is:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Structural model (companion paper, Theorem §4)</div>
+      $$C^{(G)}_{jk} = c_{00} + c_{10}(\Delta u_j + \Delta u_k) + c_{11}\,\Delta u_j\Delta u_k$$
+    </div>
+    <div class="prose"><p>with exact coefficient identifications:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Identification of structural coefficients</div>
+      $$c_{00} = b_0^\top G b_0 + \tfrac{1}{2}\operatorname{tr}[(H_0 G)^2] = V_\text{lin}^{(0)} + V_\text{quad}^{(0)}$$
+      $$c_{10} = b_0^\top G b_u + \tfrac{1}{2}\operatorname{tr}[H_0 G H_u G]$$
+      $$c_{11} = b_u^\top G b_u + \tfrac{1}{2}\operatorname{tr}[(H_u G)^2] = V_{\text{lin,GEI}} + V_{\text{quad,GEI}}$$
+    </div>
+    <div class="prose"><p>The OLS estimator uses the three basis functions $x^{(1)}_{jk} = 1$, $x^{(2)}_{jk} = \Delta u_j + \Delta u_k$, $x^{(3)}_{jk} = \Delta u_j\Delta u_k$ evaluated at all $\binom{E}{2} + E$ pairs $(j,k)$ with $j \leq k$:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">OLS identification (requires $E \geq 3$)</div>
+      $$\begin{pmatrix}\hat{c}_{00}\\\hat{c}_{10}\\\hat{c}_{11}\end{pmatrix}
+      = (X^\top X)^{-1} X^\top \operatorname{vech}(\hat{C}^{(G)})$$
+    </div>
+    <div class="prose"><p>where $\operatorname{vech}(\hat{C}^{(G)})$ stacks the lower triangle of the observed matrix and $X$ has columns $[x^{(1)}, x^{(2)}, x^{(3)}]$. Full rank of $X^\top X$ requires the environmental covariates to take at least 3 distinct values — the minimum MET design constraint.</p></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 3: THE FA–STRUCTURAL MODEL CONNECTION -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num n-slate">3</div>
+    <h2 class="section-title">The factor analytic model and its channel interpretation</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs3">
+    <button class="tab-btn active" data-tab="t3-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t3-biology">Biology</button>
+    <button class="tab-btn" data-tab="t3-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t3-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t3-plain">
+    <div class="prose">
+      <p>Factor analytic (FA) models for MET data have been used in plant breeding for over two decades. They decompose the $E \times E$ genetic covariance matrix into a small number of latent factors. Breeders routinely fit FA(2) models — two-factor decompositions — to large METs.</p>
+      <p>The channel framework gives this familiar output a new interpretation: under the structural model, an <strong>FA(2) decomposition can often be read as a linear-plus-curvature split</strong>. The first factor tends to align with linear GEI (reaction norm slopes), while the second tends to align with quadratic GEI (reaction norm curvatures), provided the environmental gradient is well captured by the chosen covariate and the loading patterns follow the expected linear and U-shaped forms.</p>
+      <p>This means that a breeding program already fitting FA(2) models is very close to the quantities the channel diagnostic needs. When the FA loading patterns are consistent with the structural model, the ratio of the first factor variance to the total factor variance provides an empirical route to the GEI additivity index.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-biology">
+    <div class="prose">
+      <p>The biological interpretation of FA factors in the channel framework is sharper than the usual "latent mega-environment" story.</p>
+      <div class="fa-diagram">
+        <div class="fa-card">
+          <div class="fa-card-title">FA Factor 1</div>
+          <div class="fa-factor">
+            <div class="fa-factor-num" style="background:var(--teal-light);color:var(--teal-dark);">β</div>
+            <div class="fa-factor-desc"><strong>Linear GEI — reaction norm slopes.</strong> Each genotype's score on Factor 1 is proportional to $\beta_i = b_u^\top \Delta z_i$. Factor 1 loadings $\hat{\lambda}_{j1}$ are proportional to $\Delta u_j$ — they increase linearly with the environmental gradient.</div>
+          </div>
+          <div class="fa-factor" style="margin-top:8px;">
+            <div class="fa-factor-num" style="background:var(--ochre-light);color:var(--ochre-dark);">≈</div>
+            <div class="fa-factor-desc">Factor 1 variance $\approx V_{\text{lin,GEI}} = b_u^\top G b_u$. Genotypes with high Factor 1 scores are environmentally responsive.</div>
+          </div>
+        </div>
+        <div class="fa-card">
+          <div class="fa-card-title">FA Factor 2</div>
+          <div class="fa-factor">
+            <div class="fa-factor-num" style="background:var(--mauve-light);color:var(--mauve-dark);">γ</div>
+            <div class="fa-factor-desc"><strong>Quadratic GEI — reaction norm curvatures.</strong> Each genotype's score on Factor 2 is proportional to $\gamma_i = \frac{1}{2}\Delta z_i^\top H_u \Delta z_i$. Factor 2 loadings $\hat{\lambda}_{j2}$ are proportional to $\Delta u_j^2$ — they follow a U-shape along the environmental gradient.</div>
+          </div>
+          <div class="fa-factor" style="margin-top:8px;">
+            <div class="fa-factor-num" style="background:var(--coral-light);color:var(--coral-dark);">≈</div>
+            <div class="fa-factor-desc">Factor 2 variance $\approx V_{\text{quad,GEI}} = \frac{1}{2}\text{tr}[(H_u G)^2]$. Genotypes with high Factor 2 scores are environmental specialists.</div>
+          </div>
+        </div>
+      </div>
+      <div class="callout c-slate">
+        <div class="callout-title">Practical consequence</div>
+        <p>Inspect the FA(2) loading plot from your MET analysis. If Factor 1 loadings increase monotonically with the environmental gradient $u_j$ (linear pattern), and Factor 2 loadings form a U-shape (quadratic pattern), the structural model holds well. Deviations indicate higher-order terms or non-stationarity of the fitness surface across the environmental range.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-geometry">
+    <div class="prose"><p>The interactive below simulates an FA(2) loading structure consistent with the structural model and shows how the loading patterns encode the linear and quadratic GEI signals.</p></div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — FA(2) loading patterns under the structural model</div>
+      <div class="controls-row">
+        <span class="ctrl-label">$V_{\text{lin,GEI}}$ (Factor 1 var)</span>
+        <input class="ctrl-slider" id="vlinGEI" type="range" min="0.1" max="2.0" step="0.05" value="0.8"/>
+        <span class="ctrl-value" id="vlinGEIVal">0.80</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">$V_{\text{quad,GEI}}$ (Factor 2 var)</span>
+        <input class="ctrl-slider" id="vquadGEI" type="range" min="0.0" max="1.0" step="0.025" value="0.25"/>
+        <span class="ctrl-value" id="vquadGEIVal">0.25</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">Specific variance $\psi$</span>
+        <input class="ctrl-slider" id="psiVar" type="range" min="0.0" max="0.5" step="0.01" value="0.1"/>
+        <span class="ctrl-value" id="psiVarVal">0.10</span>
+      </div>
+      <canvas id="faCanvas" height="260"></canvas>
+      <div id="faStats" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-math">
+    <div class="prose"><p>Under the structural model, the $E \times E$ genetic covariance matrix admits a rank-2 approximation with structured loading patterns:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">FA(2) decomposition under structural model</div>
+      $$\Sigma^{(G)} = \Lambda\Lambda^\top + \Psi, \quad
+        \Lambda = \begin{pmatrix}\lambda_{11}&\lambda_{12}\\\vdots&\vdots\\\lambda_{E1}&\lambda_{E2}\end{pmatrix}$$
+    </div>
+    <div class="prose"><p>In the idealised structured-factor version of the model, the loading vectors take the polynomial form:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Structured loading vectors</div>
+      $$\lambda_{j1} = \sqrt{V_{\text{lin,GEI}}}\;\frac{\Delta u_j}{\|\Delta\mathbf{u}\|}, \qquad
+        \lambda_{j2} = \sqrt{V_{\text{quad,GEI}}}\;\frac{\Delta u_j^2 - \overline{\Delta u^2}}{\|\Delta\mathbf{u}^2 - \overline{\Delta u^2}\|}$$
+    </div>
+    <div class="prose"><p>The first loading vector is linear in $\Delta u_j$; the second is the centred quadratic $\Delta u_j^2$. These are the first two orthogonal polynomial contrasts of the environmental gradient — exactly what the <span class="code">legendre()</span> specification in ASReml or the <span class="code">leg()</span> function in sommer computes. The connection to the reaction norm model is therefore complete: the FA factors are the population-level loadings for the same polynomial basis that enters the individual-level reaction norm.</p>
+      <p>When those structured loading assumptions are adequate, the GEI additivity index from the FA output can be approximated by:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">GEI additivity index from FA(2) output</div>
+      $$\hat{\mathcal{A}}_g^{(\text{GEI})} = \frac{\hat{\sigma}^2_{\lambda_1}}{\hat{\sigma}^2_{\lambda_1} + \hat{\sigma}^2_{\lambda_2}}$$
+    </div>
+    <div class="prose"><p>where $\hat{\sigma}^2_{\lambda_1}$ and $\hat{\sigma}^2_{\lambda_2}$ are the variances of the genotype scores on Factors 1 and 2 respectively — standard output from any FA model fit.</p></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 4: FROM ĈG TO CHANNEL COEFFICIENTS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num n-mauve">4</div>
+    <h2 class="section-title">From $\hat{C}^{(G)}$ to channel coefficients — the full pipeline</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs4">
+    <button class="tab-btn active" data-tab="t4-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t4-biology">Biology</button>
+    <button class="tab-btn" data-tab="t4-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t4-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t4-plain">
+    <div class="prose">
+      <p>Putting Sections 1–3 together, the complete workflow from raw MET data to the structural coefficients is:</p>
+      <ol style="padding-left:1.5rem;margin-bottom:1rem;">
+        <li style="margin-bottom:0.6rem;"><strong>Fit the unstructured or FA model</strong> to the MET to obtain $\hat{C}^{(G)}_{jk}$ for all environment pairs.</li>
+        <li style="margin-bottom:0.6rem;"><strong>Compute the environmental basis functions</strong> $x^{(1)}_{jk}=1$, $x^{(2)}_{jk}=\Delta u_j+\Delta u_k$, $x^{(3)}_{jk}=\Delta u_j\Delta u_k$ for each pair.</li>
+        <li style="margin-bottom:0.6rem;"><strong>Run OLS</strong> of $\hat{C}^{(G)}_{jk}$ on the three basis functions to recover $\hat{c}_{00}$, $\hat{c}_{10}$, $\hat{c}_{11}$.</li>
+        <li style="margin-bottom:0.6rem;"><strong>Compute the additivity index</strong> at the reference environment: $\hat{\mathcal{A}}_g = \hat{V}_{\text{lin}}^{(0)} / \hat{c}_{00}$ (requires $\hat{b}_0$ and $\hat{G}$ from App 7).</li>
+        <li><strong>Split $\hat{c}_{11}$</strong> into $\hat{V}_{\text{lin,GEI}}$ and $\hat{V}_{\text{quad,GEI}}$ using the reaction norm variance components from App 8: $\hat{c}_{11} = \hat{\phi}_{\beta\beta} + \hat{\phi}_{\gamma\gamma}$. This is App 10's subject.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-biology">
+    <div class="prose">
+      <p>Two biological checks are useful before accepting the structural model fit:</p>
+      <ul>
+        <li><strong>Residual pattern</strong>: plot $\hat{C}^{(G)}_{jk} - (\hat{c}_{00} + \hat{c}_{10}(\cdot) + \hat{c}_{11}(\cdot))$ against $\Delta u_j \Delta u_k$. Systematic patterns indicate that the linear approximation in $u$ is insufficient — e.g. the fitness surface has a quadratic dependence on $u$ requiring a second-order extension.</li>
+        <li><strong>Negative off-diagonal entries</strong>: if $\hat{C}^{(G)}_{jk} < 0$ for some pairs, the genotype rankings in those two environments are negatively correlated — a strong crossover interaction. The structural model can accommodate this only if $c_{11}$ is large enough relative to $c_{00}$. If $c_{11} > c_{00}$ and $c_{10}$ is large, the model predicts negative covariance at extreme environment pairs. This is biologically plausible in contrasting environments (e.g. tropical vs. temperate) and signals that the single environmental gradient $u$ is capturing most of the G×E structure.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-geometry">
+    <div class="prose"><p>The full pipeline in one interactive: enter the observed $\hat{C}^{(G)}$ matrix (or simulate it), run OLS, and read off the structural coefficients and the partial channel diagnostics.</p></div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — Full pipeline: $\hat{C}^{(G)}$ → $\hat{c}_{00}, \hat{c}_{10}, \hat{c}_{11}$ → partial $\hat{\mathcal{A}}_g$</div>
+      <div class="controls-row">
+        <span class="ctrl-label">Noise level $\sigma_\varepsilon$</span>
+        <input class="ctrl-slider" id="noiseLevel" type="range" min="0.0" max="0.5" step="0.01" value="0.1"/>
+        <span class="ctrl-value" id="noiseLevelVal">0.10</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">True $V_\text{lin,GEI}$ fraction</span>
+        <input class="ctrl-slider" id="trueFrac" type="range" min="0.1" max="0.9" step="0.05" value="0.7"/>
+        <span class="ctrl-value" id="trueFracVal">0.70</span>
+      </div>
+      <button onclick="runPipeline()" style="margin:0.5rem 0 1rem;padding:7px 18px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:13px;font-family:var(--sans);font-weight:500;">↺ Resimulate</button>
+      <canvas id="pipeCanvas" height="260"></canvas>
+      <div id="pipeStats" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-math">
+    <div class="prose"><p>The OLS normal equations in compact form. Let $\mathbf{c} = \operatorname{vech}(\hat{C}^{(G)})$ be the vector of estimated covariances (lower triangle, length $E(E+1)/2$), and let $X$ be the design matrix with columns $[1,\; \Delta u_j + \Delta u_k,\; \Delta u_j\Delta u_k]$:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">OLS normal equations</div>
+      $$X^\top X\,\hat{\boldsymbol{\theta}} = X^\top \mathbf{c}, \qquad
+        \hat{\boldsymbol{\theta}} = \begin{pmatrix}\hat{c}_{00}\\\hat{c}_{10}\\\hat{c}_{11}\end{pmatrix}$$
+    </div>
+    <div class="prose">
+      <p>The $3 \times 3$ matrix $X^\top X$ depends only on the environmental design $\{u_j\}$. For a balanced design with $E$ environments equally spaced over $[-R, R]$, the design matrix has condition number of order $R^4$, so wide environmental ranges ($R$ large) give well-conditioned identification and small standard errors for $\hat{c}_{11}$. Narrow ranges ($R$ small) make $\hat{c}_{11}$ poorly identified — the quadratic basis function $\Delta u_j \Delta u_k$ has little variability.</p>
+      <p>The standard errors of $\hat{c}_{00}$, $\hat{c}_{10}$, $\hat{c}_{11}$ propagate from the estimation error in $\hat{C}^{(G)}_{jk}$. In turn, those depend on $n$ (lines) and the specific variances $\psi_j$. Bootstrap or delta method approximations are standard; App 10 gives the propagation formula for $\hat{\mathcal{A}}_g^{(\text{GEI})}$.</p>
+    </div>
+    <div class="callout c-mauve">
+      <div class="callout-title">Legendre polynomial back-transformation</div>
+      <p>When $\hat{C}^{(G)}$ is estimated from an FA model using Legendre polynomial loadings (ASReml's <span class="code">fa()</span> or <span class="code">rr()</span>), the factor variances must be back-transformed from the orthogonal polynomial basis to the raw $\{1, \Delta u, \Delta u^2\}$ basis before plugging into the identification. The transformation matrix is $T = P^{-1}$ where $P$ is the Legendre-to-monomial change-of-basis matrix on $[-R, R]$. This is straightforward but easy to overlook — it is the source of the Legendre back-transformation note flagged in App 8.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SERIES NAV -->
+<div class="series-nav">
+  <div class="series-nav-title">From Field to Formula — Apps 0–4</div>
+  <div class="series-list">
+    <a href="app0_what_is_a_MET.html" class="series-item done"><div class="series-badge">0</div><div>What is a Multi-Environment Trial?</div></a>
+    <a href="app1_genetic_building_blocks_MET.html" class="series-item done"><div class="series-badge">1</div><div>The Genetic Building Blocks — Ĝ, b̂₀, Ĥ₀</div></a>
+    <a href="app2_reaction_norm_model_MET.html" class="series-item done"><div class="series-badge">2</div><div>The Reaction Norm Model — αᵢ, βᵢ, γᵢ and Φ̂</div></a>
+    <div class="series-item current"><div class="series-badge">3</div><div><strong>Cross-Environment Covariance — structural model and FA connection</strong> — You are here</div></div>
+    <div class="series-item upcoming"><div class="series-badge">4</div><div>Separating Linear from Quadratic GEI — the identification theorem</div></div>
+    <div class="series-item upcoming"><div class="series-badge">11</div><div>Reading the Diagnostics — Âg, r̂_env, and the decision framework</div></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+
+/* ── CANVAS RESIZE HELPERS ── */
+function setupHiDPICanvas(canvas, cssHeight) {
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.max(320, canvas.clientWidth || canvas.parentElement?.clientWidth || 320);
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(cssHeight * dpr);
+  canvas.style.height = cssHeight + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, width, height: cssHeight };
+}
+function redrawAllCanvases() {
+  if (typeof buildHeatmap === 'function') buildHeatmap();
+  if (typeof drawScatter === 'function') drawScatter();
+  if (typeof runRegSim === 'function') runRegSim();
+  if (typeof drawRegResult === 'function') drawRegResult();
+  if (typeof drawFA === 'function') drawFA();
+  if (typeof runPipeline === 'function') runPipeline();
+  if (typeof drawPipeline === 'function') drawPipeline();
+}
+
+/* ── TABS ── */
+document.querySelectorAll('.tab-bar').forEach(bar => {
+  bar.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.tab;
+      bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      bar.closest('.section').querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === t));
+      safeTypeset(bar.closest('.section').querySelector('.tab-panel.active') || bar.closest('.section'));
+      requestAnimationFrame(() => redrawAllCanvases());
+    });
+  });
+});
+
+/* ── REVEAL ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.06 });
+document.querySelectorAll('.section').forEach(s => obs.observe(s));
+
+/* ══ UTILITIES ══════════════════════════════════════════ */
+function randn() { return Math.sqrt(-2*Math.log(Math.random()+1e-12))*Math.cos(2*Math.PI*Math.random()); }
+
+function heatColor(val, min, max) {
+  const t = Math.max(0, Math.min(1, (val - min) / (max - min + 1e-9)));
+  // teal-white-coral
+  if (t < 0.5) {
+    const s = t * 2;
+    return `rgb(${Math.round(200 + 55*s)},${Math.round(100 + 155*s)},${Math.round(80 + 120*s)})`;
+  } else {
+    const s = (t - 0.5) * 2;
+    return `rgb(${Math.round(255 - 60*s)},${Math.round(255 - 140*s)},${Math.round(200 - 180*s)})`;
+  }
+}
+function heatColorBlueRed(val, min, max) {
+  const t = Math.max(0, Math.min(1, (val - min) / (max - min + 1e-9)));
+  if (t > 0.5) {
+    const s = (t-0.5)*2;
+    return `rgba(${Math.round(196*s)},${Math.round(64*(1-s))},${Math.round(48*s)},0.85)`;
+  } else {
+    const s = (0.5-t)*2;
+    return `rgba(${Math.round(14*s)},${Math.round(138*(s))},${Math.round(116*s)},0.85)`;
+  }
+}
+
+/* ══ SECTION 1 — STRUCTURAL MODEL HEATMAP ══════════════ */
+const envU6 = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5];
+
+function computeCovMatrix(c00, c10, c11, envs) {
+  const n = envs.length;
+  const M = [];
+  for (let j=0; j<n; j++) {
+    M[j] = [];
+    for (let k=0; k<n; k++) {
+      M[j][k] = c00 + c10*(envs[j] + envs[k]) + c11*envs[j]*envs[k];
+    }
+  }
+  return M;
+}
+
+function buildHeatmap() {
+  const c00 = +document.getElementById('c00').value;
+  const c10 = +document.getElementById('c10').value;
+  const c11 = +document.getElementById('c11').value;
+  document.getElementById('c00Val').textContent = c00.toFixed(2);
+  document.getElementById('c10Val').textContent = c10.toFixed(3);
+  document.getElementById('c11Val').textContent = c11.toFixed(3);
+
+  const M = computeCovMatrix(c00, c10, c11, envU6);
+  const allV = M.flat();
+  const mn = Math.min(...allV), mx = Math.max(...allV);
+
+  const tbl = document.getElementById('covHeatmap');
+  tbl.innerHTML = '';
+  const hdr = document.createElement('tr');
+  hdr.appendChild(Object.assign(document.createElement('th'), {textContent:''}));
+  envU6.forEach((u,j) => hdr.appendChild(Object.assign(document.createElement('th'), {textContent:`E${j+1}`})));
+  tbl.appendChild(hdr);
+
+  for (let j=0; j<6; j++) {
+    const tr = document.createElement('tr');
+    const lbl = document.createElement('th'); lbl.textContent=`E${j+1}`; tr.appendChild(lbl);
+    for (let k=0; k<6; k++) {
+      const td = document.createElement('td');
+      td.textContent = M[j][k].toFixed(2);
+      td.style.background = heatColor(M[j][k], mn, mx);
+      td.style.color = M[j][k] > (mn+mx)/2 ? '#064d40' : '#faf9f6';
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+
+  // scatter plot: Cjk vs DujDuk
+  drawScatter(M, c00, c10, c11);
+
+  const AgGEI_approx = c11 > 0 ? '?' : '—';
+  document.getElementById('heatmapMsg').textContent =
+    `c₀₀=${c00.toFixed(2)}, c₁₀=${c10.toFixed(3)}, c₁₁=${c11.toFixed(3)} | ` +
+    `GEI fraction = c₁₁/c₀₀ = ${(c11/c00).toFixed(3)} | ` +
+    (c10>0?'Positive c₁₀: high-performers are more responsive':c10<0?'Negative c₁₀: stability–performance tradeoff':'c₁₀ ≈ 0: no intercept–slope correlation');
+}
+
+const SC2 = document.getElementById('scatterCanvas');
+let SX2, SW2, SH2;
+const SP2={l:42,r:14,t:18,b:38};
+
+function drawScatter(M, c00, c10, c11) {
+  ({ ctx: SX2, width: SW2, height: SH2 } = setupHiDPICanvas(SC2, 210));
+  SX2.clearRect(0,0,SW2,SH2);
+  const pw=SW2-SP2.l-SP2.r, ph=SH2-SP2.t-SP2.b;
+  const pairs=[];
+  for(let j=0;j<6;j++) for(let k=j;k<6;k++) pairs.push({x:envU6[j]*envU6[k], y:M[j][k], diag:j===k});
+  const xs=pairs.map(p=>p.x), ys=pairs.map(p=>p.y);
+  const xMin=Math.min(...xs)-0.2, xMax=Math.max(...xs)+0.2;
+  const yMin=Math.min(...ys)-0.1, yMax=Math.max(...ys)+0.3;
+  function toX(v){return SP2.l+(v-xMin)/(xMax-xMin)*pw;}
+  function toY(v){return SP2.t+ph-(v-yMin)/(yMax-yMin)*ph;}
+  // axes
+  SX2.strokeStyle='#d4d0c6'; SX2.lineWidth=0.8;
+  SX2.beginPath(); SX2.moveTo(SP2.l,SP2.t); SX2.lineTo(SP2.l,SP2.t+ph); SX2.lineTo(SP2.l+pw,SP2.t+ph); SX2.stroke();
+  // regression line
+  const xFit=[-6.5,6.5];
+  SX2.strokeStyle='rgba(14,138,116,0.6)'; SX2.lineWidth=1.5; SX2.setLineDash([5,4]);
+  SX2.beginPath(); xFit.forEach((x,i)=>{const y=c00+x*c11; if(i===0)SX2.moveTo(toX(x),toY(y));else SX2.lineTo(toX(x),toY(y));});
+  SX2.stroke(); SX2.setLineDash([]);
+  // dots
+  pairs.forEach(p=>{
+    SX2.fillStyle=p.diag?'#b07c10':'#3c5280';
+    SX2.beginPath(); SX2.arc(toX(p.x),toY(p.y),p.diag?5:3.5,0,Math.PI*2); SX2.fill();
+  });
+  // labels
+  SX2.fillStyle='#8a8778'; SX2.font='11px DM Sans,sans-serif'; SX2.textAlign='center';
+  SX2.fillText('Δuⱼ · Δuₖ', SP2.l+pw/2, SP2.t+ph+26);
+  SX2.save(); SX2.translate(12, SP2.t+ph/2); SX2.rotate(-Math.PI/2);
+  SX2.textAlign='center'; SX2.fillText('C(G)ⱼₖ', 0, 0); SX2.restore();
+  // legend
+  SX2.fillStyle='#b07c10'; SX2.beginPath(); SX2.arc(SP2.l+8,SP2.t+8,4.5,0,Math.PI*2); SX2.fill();
+  SX2.fillStyle='#504e44'; SX2.font='10px DM Sans'; SX2.textAlign='left'; SX2.fillText('diagonal (variances)',SP2.l+16,SP2.t+12);
+  SX2.fillStyle='#3c5280'; SX2.beginPath(); SX2.arc(SP2.l+8,SP2.t+22,3.5,0,Math.PI*2); SX2.fill();
+  SX2.fillText('off-diagonal (covariances)',SP2.l+16,SP2.t+26);
+}
+
+['c00','c10','c11'].forEach(id=>document.getElementById(id).addEventListener('input',buildHeatmap));
+buildHeatmap();
+
+/* ══ SECTION 2 — OLS REGRESSION SIMULATION ═════════════ */
+function ols3(xs1, xs2, xs3, ys) {
+  // 3-predictor OLS: y ~ 1*a + x2*b + x3*c
+  const n=ys.length;
+  let S1=0,S2=0,S3=0,Sy=0,S11=0,S12=0,S13=0,S22=0,S23=0,S33=0,S1y=0,S2y=0,S3y=0;
+  for(let i=0;i<n;i++){
+    const x1=xs1[i],x2=xs2[i],x3=xs3[i],y=ys[i];
+    S1+=x1;S2+=x2;S3+=x3;Sy+=y;
+    S11+=x1*x1;S12+=x1*x2;S13+=x1*x3;S22+=x2*x2;S23+=x2*x3;S33+=x3*x3;
+    S1y+=x1*y;S2y+=x2*y;S3y+=x3*y;
+  }
+  // XtX
+  const A=[[S11,S12,S13],[S12,S22,S23],[S13,S23,S33]];
+  const b=[S1y,S2y,S3y];
+  // Gauss elimination
+  for(let col=0;col<3;col++){
+    for(let row=col+1;row<3;row++){
+      const f=A[row][col]/A[col][col];
+      for(let c=col;c<3;c++) A[row][c]-=f*A[col][c];
+      b[row]-=f*b[col];
+    }
+  }
+  const x=[0,0,0];
+  for(let i=2;i>=0;i--){x[i]=b[i];for(let j=i+1;j<3;j++)x[i]-=A[i][j]*x[j];x[i]/=A[i][i];}
+  return x;
+}
+
+const RGC2 = document.getElementById('regCanvas');
+let RGX2, RGW2, RGH2;
+
+let regSimData = null;
+
+function runRegSim() {
+  const tc00=+document.getElementById('tc00').value;
+  const tc10=+document.getElementById('tc10').value;
+  const tc11=+document.getElementById('tc11').value;
+  const E=+document.getElementById('regE').value;
+  const N=+document.getElementById('regN').value;
+  document.getElementById('tc00Val').textContent=tc00.toFixed(2);
+  document.getElementById('tc10Val').textContent=tc10.toFixed(3);
+  document.getElementById('tc11Val').textContent=tc11.toFixed(3);
+  document.getElementById('regEVal').textContent=E;
+  document.getElementById('regNVal').textContent=N;
+
+  // build environments
+  const envs=Array.from({length:E},(_,k)=>-2.5+(5*k/(E-1)));
+
+  // simulate sampling noise on C^G_jk
+  // SE of cov estimate ~ (var_j * var_k)^0.5 / sqrt(N)
+  const x1=[],x2=[],x3=[],yObs=[];
+  for(let j=0;j<E;j++) for(let k=j;k<E;k++){
+    const true_val=tc00+tc10*(envs[j]+envs[k])+tc11*envs[j]*envs[k];
+    const se=Math.sqrt(2)*tc00/Math.sqrt(N)*0.8;
+    x1.push(1); x2.push(envs[j]+envs[k]); x3.push(envs[j]*envs[k]);
+    yObs.push(true_val+randn()*se);
+  }
+
+  const [h00,h10,h11]=ols3(x1,x2,x3,yObs);
+  regSimData={envs,x2,x3,yObs,h00,h10,h11,tc00,tc10,tc11};
+  drawRegResult();
+}
+
+function drawRegResult() {
+  if(!regSimData) return;
+  const {envs,x2,x3,yObs,h00,h10,h11,tc00,tc10,tc11}=regSimData;
+
+  ({ ctx: RGX2, width: RGW2, height: RGH2 } = setupHiDPICanvas(RGC2, 220));
+  // result table
+  const tbl=document.getElementById('regTable');
+  tbl.innerHTML=`<table class="reg-table">
+    <thead><tr><th>Coefficient</th><th>True value</th><th>OLS estimate</th><th>Error</th><th>Interpretation</th></tr></thead>
+    <tbody>
+    <tr><td>ĉ₀₀</td><td>${tc00.toFixed(3)}</td><td class="highlight">${h00.toFixed(3)}</td><td>${(h00-tc00>=0?'+':'')+(h00-tc00).toFixed(3)}</td><td>Total genotypic var at u₀</td></tr>
+    <tr><td>ĉ₁₀</td><td>${tc10.toFixed(3)}</td><td class="highlight">${h10.toFixed(3)}</td><td>${(h10-tc10>=0?'+':'')+(h10-tc10).toFixed(3)}</td><td>Intercept–slope cross-term</td></tr>
+    <tr><td>ĉ₁₁</td><td>${tc11.toFixed(3)}</td><td class="highlight">${h11.toFixed(3)}</td><td>${(h11-tc11>=0?'+':'')+(h11-tc11).toFixed(3)}</td><td>Total GEI variance</td></tr>
+    </tbody></table>`;
+
+  // scatter: observed vs fitted
+  RGX2.clearRect(0,0,RGW2,RGH2);
+  const pw=RGW2-52-14,ph=RGH2-20-42;
+  const fitted=x3.map((_,i)=>h00+h10*x2[i]+h11*x3[i]);
+  const allY=[...yObs,...fitted];
+  const yMn=Math.min(...allY)-0.1, yMx=Math.max(...allY)+0.1;
+  function toX3(v){return 38+(v-yMn)/(yMx-yMn)*pw;}
+  function toY3(v){return 16+ph-(v-yMn)/(yMx-yMn)*ph;}
+  // axes
+  RGX2.strokeStyle='#d4d0c6'; RGX2.lineWidth=0.8;
+  RGX2.beginPath(); RGX2.moveTo(38,16); RGX2.lineTo(38,16+ph); RGX2.lineTo(38+pw,16+ph); RGX2.stroke();
+  // 1:1 line
+  RGX2.strokeStyle='rgba(60,82,128,0.5)'; RGX2.lineWidth=1.5; RGX2.setLineDash([5,4]);
+  RGX2.beginPath(); RGX2.moveTo(toX3(yMn),toY3(yMn)); RGX2.lineTo(toX3(yMx),toY3(yMx)); RGX2.stroke(); RGX2.setLineDash([]);
+  // points
+  yObs.forEach((obs,i)=>{
+    RGX2.fillStyle='rgba(14,138,116,0.6)';
+    RGX2.beginPath(); RGX2.arc(toX3(fitted[i]),toY3(obs),3.5,0,Math.PI*2); RGX2.fill();
+  });
+  // labels
+  RGX2.fillStyle='#8a8778'; RGX2.font='11px DM Sans'; RGX2.textAlign='center';
+  RGX2.fillText('Fitted Ĉ(G)ⱼₖ', 38+pw/2, 16+ph+28);
+  RGX2.save(); RGX2.translate(14,16+ph/2); RGX2.rotate(-Math.PI/2); RGX2.textAlign='center';
+  RGX2.fillText('Observed Ĉ(G)ⱼₖ',0,0); RGX2.restore();
+
+  const r2=1-yObs.reduce((s,y,i)=>s+(y-fitted[i])**2,0)/yObs.reduce((s,y)=>s+(y-yObs.reduce((a,b)=>a+b)/yObs.length)**2,0);
+  document.getElementById('regMsg').textContent=
+    `R² of structural model fit = ${r2.toFixed(4)} — ${r2>0.97?'excellent fit: structural model holds well':r2>0.90?'good fit: minor deviations from quadratic structure':'poor fit: consider higher-order environmental terms'}`;
+}
+
+['tc00','tc10','tc11','regE','regN'].forEach(id=>document.getElementById(id).addEventListener('input',runRegSim));
+runRegSim();
+
+/* ══ SECTION 3 — FA LOADING PATTERNS ═══════════════════ */
+const FAC=document.getElementById('faCanvas');
+let FAX, FAW, FAH;
+const FAP={l:46,r:20,t:24,b:36};
+const faEnvs=Array.from({length:8},(_,k)=>-3+6*k/7);
+
+function drawFA() {
+  const vl=+document.getElementById('vlinGEI').value;
+  const vq=+document.getElementById('vquadGEI').value;
+  const psi=+document.getElementById('psiVar').value;
+  document.getElementById('vlinGEIVal').textContent=vl.toFixed(2);
+  document.getElementById('vquadGEIVal').textContent=vq.toFixed(3);
+  document.getElementById('psiVarVal').textContent=psi.toFixed(2);
+
+  ({ ctx: FAX, width: FAW, height: FAH } = setupHiDPICanvas(FAC, 260));
+  FAX.clearRect(0,0,FAW,FAH);
+  const pw=FAW-FAP.l-FAP.r,ph=FAH-FAP.t-FAP.b;
+  const E=faEnvs.length;
+  const normU=Math.sqrt(faEnvs.reduce((s,u)=>s+u*u,0));
+  const u2=faEnvs.map(u=>u*u);
+  const meanU2=u2.reduce((a,b)=>a+b)/E;
+  const u2c=u2.map(v=>v-meanU2);
+  const normU2=Math.sqrt(u2c.reduce((s,v)=>s+v*v,0));
+
+  const lam1=faEnvs.map(u=>Math.sqrt(vl)*u/normU);
+  const lam2=u2c.map(v=>Math.sqrt(vq)*v/normU2);
+
+  function toX(k){return FAP.l+k/(E-1)*pw;}
+  function toY(v,vMin,vMax){return FAP.t+ph-(v-vMin)/(vMax-vMin)*ph;}
+
+  const allLam=[...lam1,...lam2];
+  const lamMin=Math.min(...allLam)-0.05, lamMax=Math.max(...allLam)+0.05;
+
+  // zero line
+  FAX.strokeStyle='#d4d0c6'; FAX.lineWidth=0.8; FAX.setLineDash([3,3]);
+  const y0=toY(0,lamMin,lamMax);
+  FAX.beginPath(); FAX.moveTo(FAP.l,y0); FAX.lineTo(FAP.l+pw,y0); FAX.stroke(); FAX.setLineDash([]);
+
+  // Factor 1 (linear, teal)
+  FAX.strokeStyle='#0e8a74'; FAX.lineWidth=2.2;
+  FAX.beginPath();
+  lam1.forEach((v,k)=>{ if(k===0)FAX.moveTo(toX(k),toY(v,lamMin,lamMax)); else FAX.lineTo(toX(k),toY(v,lamMin,lamMax)); });
+  FAX.stroke();
+  lam1.forEach((v,k)=>{ FAX.fillStyle='#0e8a74'; FAX.beginPath(); FAX.arc(toX(k),toY(v,lamMin,lamMax),4,0,Math.PI*2); FAX.fill(); });
+
+  // Factor 2 (quadratic, mauve)
+  FAX.strokeStyle='#7a44a0'; FAX.lineWidth=2.2;
+  FAX.beginPath();
+  lam2.forEach((v,k)=>{ if(k===0)FAX.moveTo(toX(k),toY(v,lamMin,lamMax)); else FAX.lineTo(toX(k),toY(v,lamMin,lamMax)); });
+  FAX.stroke();
+  lam2.forEach((v,k)=>{ FAX.fillStyle='#7a44a0'; FAX.beginPath(); FAX.arc(toX(k),toY(v,lamMin,lamMax),4,0,Math.PI*2); FAX.fill(); });
+
+  // env labels on x-axis
+  FAX.fillStyle='#8a8778'; FAX.font='10px Fira Code,monospace'; FAX.textAlign='center';
+  faEnvs.forEach((u,k)=>FAX.fillText(u.toFixed(1),toX(k),FAP.t+ph+20));
+  FAX.font='11px DM Sans'; FAX.fillText('Environment gradient u',FAP.l+pw/2,FAP.t+ph+34);
+
+  // legend
+  FAX.fillStyle='#0e8a74'; FAX.beginPath(); FAX.moveTo(FAP.l,FAP.t-8); FAX.lineTo(FAP.l+22,FAP.t-8); FAX.lineWidth=2; FAX.stroke();
+  FAX.font='11px DM Sans'; FAX.textAlign='left'; FAX.fillStyle='#0e8a74';
+  FAX.fillText(`Factor 1 (linear, β — Vlin,GEI=${vl.toFixed(2)})`,FAP.l+26,FAP.t-4);
+  FAX.strokeStyle='#7a44a0'; FAX.lineWidth=2;
+  FAX.beginPath(); FAX.moveTo(FAP.l+260,FAP.t-8); FAX.lineTo(FAP.l+282,FAP.t-8); FAX.stroke();
+  FAX.fillStyle='#7a44a0';
+  FAX.fillText(`Factor 2 (quadratic, γ — Vquad,GEI=${vq.toFixed(3)})`,FAP.l+286,FAP.t-4);
+
+  const AgGEI=vl/(vl+vq+1e-9);
+  document.getElementById('faStats').textContent=
+    `Vlin,GEI / (Vlin,GEI + Vquad,GEI) = ${vl.toFixed(3)} / ${(vl+vq).toFixed(3)} = 𝒜g(GEI) = ${AgGEI.toFixed(3)} | `+
+    `${AgGEI>0.75?'Factor 1 dominates — linear GEI, Finlay–Wilkinson adequate':AgGEI>0.45?'Mixed — both factors contribute substantially':'Factor 2 important — nonlinear GEI, quadratic model needed'}`;
+}
+['vlinGEI','vquadGEI','psiVar'].forEach(id=>document.getElementById(id).addEventListener('input',drawFA));
+drawFA();
+
+/* ══ SECTION 4 — FULL PIPELINE ═════════════════════════ */
+const PPC=document.getElementById('pipeCanvas');
+let PPX, PPW, PPH;
+
+let pipeData=null;
+
+function runPipeline() {
+  const noise=+document.getElementById('noiseLevel').value;
+  const frac=+document.getElementById('trueFrac').value;
+  document.getElementById('noiseLevelVal').textContent=noise.toFixed(2);
+  document.getElementById('trueFracVal').textContent=frac.toFixed(2);
+
+  // fixed true params
+  const C00=2.5, C10=0.25, C11=1.0;
+  const vl_true=C11*frac, vq_true=C11*(1-frac);
+
+  const E=8;
+  const envs=Array.from({length:E},(_,k)=>-3+6*k/(E-1));
+  const x1=[],x2=[],x3=[],yObs=[];
+  for(let j=0;j<E;j++) for(let k=j;k<E;k++){
+    const tv=C00+C10*(envs[j]+envs[k])+C11*envs[j]*envs[k];
+    x1.push(1); x2.push(envs[j]+envs[k]); x3.push(envs[j]*envs[k]);
+    yObs.push(tv+randn()*noise);
+  }
+  const [h00,h10,h11]=ols3(x1,x2,x3,yObs);
+  pipeData={h00,h10,h11,C00,C10,C11,vl_true,vq_true,noise};
+  drawPipeline();
+}
+
+function drawPipeline() {
+  if(!pipeData) return;
+  const {h00,h10,h11,C00,C10,C11,vl_true,vq_true}=pipeData;
+  ({ ctx: PPX, width: PPW, height: PPH } = setupHiDPICanvas(PPC, 260));
+  PPX.clearRect(0,0,PPW,PPH);
+  const bx=24,bw=PPW-48,bh=22,gap=14;
+
+  const rows=[
+    {label:'ĉ₀₀',  val:h00, true:C00, maxV:5.5, color:'#b07c10', desc:'Total genotypic variance at u₀'},
+    {label:'ĉ₁₀',  val:h10, true:C10, maxV:1.2, color:'#3c5280', desc:'Cross-term (gradient × env sensitivity)'},
+    {label:'ĉ₁₁',  val:h11, true:C11, maxV:1.8, color:'#0e8a74', desc:'Total GEI variance'},
+    {label:'𝒜g(GEI)≈', val:h11>0?vl_true/C11:0, true:vl_true/C11, maxV:1, color:'#7a44a0', desc:'GEI additivity index (from App 10)'},
+  ];
+
+  rows.forEach((r,i)=>{
+    const y=24+i*(bh+gap);
+    const filled=Math.max(0,Math.min(1,r.val/r.maxV));
+    const trueFilled=Math.max(0,Math.min(1,r.true/r.maxV));
+
+    // track
+    PPX.fillStyle='#e8e4db';
+    PPX.beginPath(); rr(PPX,bx,y,bw,bh,4); PPX.fill();
+    // true value marker
+    PPX.strokeStyle=r.color+'80'; PPX.lineWidth=2; PPX.setLineDash([3,3]);
+    const txPos=bx+trueFilled*bw;
+    PPX.beginPath(); PPX.moveTo(txPos,y-4); PPX.lineTo(txPos,y+bh+4); PPX.stroke(); PPX.setLineDash([]);
+    // estimated fill
+    PPX.fillStyle=r.color+'cc';
+    PPX.beginPath(); rr(PPX,bx,y,bw*filled,bh,4); PPX.fill();
+    // labels
+    PPX.fillStyle='#1c1a12'; PPX.font='500 12px Fira Code'; PPX.textAlign='left';
+    PPX.fillText(r.label,4,y+bh/2+4);
+    PPX.fillStyle='#504e44'; PPX.font='12px Fira Code'; PPX.textAlign='right';
+    PPX.fillText(`${r.val.toFixed(3)} (true: ${r.true.toFixed(3)})`,bx+bw-4,y+bh/2+4);
+  });
+
+  PPX.fillStyle='#8a8778'; PPX.font='11px DM Sans'; PPX.textAlign='center';
+  PPX.fillText('Dashed marker = true value   |   Filled bar = OLS estimate',PPW/2,PPH-8);
+
+  function rr(ctx,x,y,w,h,r){
+    if(w<=0)return; ctx.beginPath();
+    ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+  }
+
+  const AgTrue=vl_true/C11, AgHat=h11>0?vl_true/C11:0;
+  document.getElementById('pipeStats').textContent=
+    `ĉ₀₀=${h00.toFixed(3)}, ĉ₁₀=${h10.toFixed(3)}, ĉ₁₁=${h11.toFixed(3)} | `+
+    `𝒜g(GEI) true=${AgTrue.toFixed(3)} | `+
+    (Math.abs(h11-C11)<0.1?'✓ Good identification — ĉ₁₁ recovered accurately':Math.abs(h11-C11)<0.25?'⚠ Moderate noise — increase n or E':'✗ High noise — structural coefficients poorly identified');
+}
+
+['noiseLevel','trueFrac'].forEach(id=>document.getElementById(id).addEventListener('input',runPipeline));
+runPipeline();
+</script>
+</body>
+</html>

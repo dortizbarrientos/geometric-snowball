@@ -1,0 +1,870 @@
+% ============================================================
+% PNAS RESEARCH ARTICLE — MAIN TEXT
+% "Additive genetic channels: a dynamical theory of when
+%  predictive regimes hold in evolution and breeding"
+% Ortiz-Barrientos & Cooper
+%
+% TARGET: ~4,000 words body text, 40–50 references, 5 figures
+% ARTICLE TYPE: EVOLUTION (or GENETICS)
+% FORMAT: pnasresearcharticle (two-column, 9pt)
+%
+% COMPILATION
+%   pdflatex pnas_research_article_main.tex
+%   bibtex   pnas_research_article_main
+%   pdflatex (x2)
+% ============================================================
+
+\documentclass[9pt,twocolumn,twoside]{pnas-new}
+
+\articletype{EVOLUTION}
+
+\templatetype{pnasresearcharticle}
+
+% ----------------------------------------------------------
+% GRAPHICS PATH
+% All figure PDFs must be in the same directory as this .tex
+% file, or the path below adjusted accordingly.
+% PNAS production accepts PDF, EPS, and TIFF.
+% ----------------------------------------------------------
+\usepackage{graphicx}
+\graphicspath{{./}}
+
+% ----------------------------------------------------------
+% CUSTOM MATH COMMANDS
+% ----------------------------------------------------------
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\Ag}{\mathcal{A}_{g}}
+\newcommand{\Vlin}{V_{\mathrm{lin}}}
+\newcommand{\Vquad}{V_{\mathrm{quad}}}
+\newcommand{\CalL}{\mathcal{L}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Corr}{\operatorname{Corr}}
+
+% ----------------------------------------------------------
+% TITLE
+% ----------------------------------------------------------
+\title{Gene interactions are common yet additive prediction succeeds
+       because evolution is local}
+
+% ----------------------------------------------------------
+% AUTHORS AND AFFILIATIONS
+% ----------------------------------------------------------
+\author[a,b,1]{Daniel Ortiz-Barrientos}
+\author[b,c]{Mark Cooper}
+
+\affil[a]{School of the Environment, The University of Queensland,
+          St~Lucia, QLD~4072, Australia}
+\affil[b]{ARC Centre for Plant Success in Nature and Agriculture,
+          The University of Queensland, St~Lucia, QLD~4072, Australia}
+\affil[c]{Queensland Alliance for Agriculture and Food Innovation,
+          The University of Queensland, St~Lucia, QLD~4072, Australia}
+
+\leadauthor{Ortiz-Barrientos}
+
+% ----------------------------------------------------------
+% SIGNIFICANCE STATEMENT  (50–120 words)
+%
+% AUDIENCE CALIBRATION NOTE:
+%   This statement addresses any undergraduate-educated scientist.
+%   It uses no technical vocabulary from quantitative genetics.
+%   Its tone sets the register for the main text: biological paradox
+%   first, mathematical resolution second, practical payoff third.
+%   Every sentence in the Introduction should be writable by a reader
+%   who found this statement convincing — not one who already knows
+%   what a G matrix is.
+% ----------------------------------------------------------
+\significancestatement{%
+Genes interact in complex networks, yet simple additive models predict evolutionary and agricultural change with surprising accuracy. We show why this works — and why it sometimes fails. A population does not experience an entire fitness landscape. It samples only the small region accessible through its current genetic variation, and in that region even a complex landscape can behave almost linearly. We derive a single index that measures how reliable additive prediction should be, and a rate diagnostic that detects whether reliability is improving or eroding before any drop in
+forecast accuracy becomes visible. Applied to Darwin's finches and to breeding programs under climate change, the framework identifies which biological processes — directional selection, environmental rotation, recombination, and introgression — drive prediction failure and recovery.}
+
+% ----------------------------------------------------------
+% AUTHOR METADATA
+% ----------------------------------------------------------
+\authorcontributions{D.O.-B.\ and M.C.\ conceived the framework independently in their respective fields. D.O.-B.\ wrote the
+first draft. M.C.\ contributed directly to framing and revision. Both authors contributed to interpretation and approved the final manuscript.}
+
+\authordeclaration{The authors declare no competing interests.}
+
+\correspondingauthor{\textsuperscript{1}Correspondence:
+d.ortizbarrientos@uq.edu.au and mark.cooper@uq.edu.au}
+
+% ----------------------------------------------------------
+% KEYWORDS
+% ----------------------------------------------------------
+\keywords{fitness landscapes $|$ quantitative genetics $|$
+          additive genetic variance $|$ adaptive evolution $|$
+          genomic prediction $|$ channel switching}
+
+% ----------------------------------------------------------
+% ABSTRACT (≤ 250 words)
+% ----------------------------------------------------------
+\begin{abstract}
+Additive genetic models predict evolutionary change and breeding response with surprising success despite pervasive gene interactions. We argue that this success is local. A population samples only the neighborhood of trait space defined by its additive genetic covariance matrix $\mat{G}$, and within that neighborhood, a curved fitness surface can often be approximated by its tangent plane. We define an additivity index $\Ag$ as the fraction of local heritable fitness variance captured by the gradient rather than by curvature --- a local $R^2$ for additive prediction. A logit-space rate diagnostic $r(t)$ then tracks whether a population is deepening into a predictive regime, approaching its boundary, or leaving it,  before the failure is visible in raw prediction accuracy. Applied to a one-trait moving-optimum model, the framework yields a counterintuitive result: a population near its fitness optimum is \emph{less} reliably additive than one far from it, because the directional signal collapses at the peak. Environmental rotation of the fitness gradient can exit an additive channel without any loss of genetic variance, a mechanism relevant to adaptation under climate change. In breeding, variance compression by directional selection deepens
+a channel mechanically, and the direction of introgressed variance determines whether a wide cross helps or harms predictability. The framework identifies when additive prediction should hold, erode, fail, and recover, and which biological processes are responsible for these transitions, thereby converting a familiar first-order tool into a diagnostic of its own reliability.
+\end{abstract}
+
+\dates{This manuscript was compiled on \today}
+\doi{\url{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{firststyle}
+\ifthenelse{\boolean{shortarticle}}
+  {\ifthenelse{\boolean{singlecolumn}}
+    {\abscontentformatted}{\abscontent}}{}
+
+\Firstpage
+
+% ==========================================================
+% INTRODUCTION
+% (~800 words; no section heading in PNAS style)
+%
+% AUDIENCE NOTE: This Introduction is written for a PNAS reader
+% who may be an ecologist, molecular biologist, or cell biologist
+% encountering quantitative genetics from the outside. Technical
+% terms are introduced with brief definitions on first use. The
+% biological paradox is stated before the mathematical resolution.
+% Classical tools are named and explained in one sentence each.
+% ==========================================================
+
+% ----------------------------------------------------------
+% The paradox: paragraph 1
+% ----------------------------------------------------------
+Genes interact.
+They act in pathways, share developmental machinery, and produce
+fitness effects that depend on genetic background
+\cite{Phillips2008,HuangMackay2016,SellaBarton2019}.
+This complexity should make prediction hard.
+Yet prediction is not hard, at least not always.
+Breeders routinely use linear models to forecast the yield of
+varieties never seen before \cite{Meuwissen2001,VanRaden2008}.
+Evolutionary biologists describe the direction and speed of
+adaptation using Lande's equation --- a model that treats all
+genetic effects as additive --- even in populations where nonlinear
+gene-by-gene interactions are well documented
+\cite{Lande1979,WalshLynch2018}.
+Something keeps the linear approximation alive in a deeply
+nonlinear world.
+The question is what.
+
+% ----------------------------------------------------------
+% Why this matters: paragraph 2
+% ----------------------------------------------------------
+The question is not merely academic.
+When additive prediction breaks down, the consequences are
+measurable.
+A genomic breeding program that loses predictive accuracy wastes
+selection cycles and misallocates resources
+\cite{CooperMessina2023,Technow2021}.
+A field study that applies Lande's equation outside its domain
+of validity draws wrong conclusions about the direction or
+magnitude of selection \cite{KingsolverPfennig2007}.
+Climate change is rotating fitness landscapes --- shifting what
+traits matter and how sharply fitness peaks --- at rates that
+outpace the reorientation of many standing genetic variance
+structures \cite{GrantGrant2002,GrantGrant2014}.
+Knowing when additive prediction holds, and when it is about to
+fail, is therefore a practical problem as much as a theoretical one.
+
+\Endparasplit
+
+% ----------------------------------------------------------
+% What exists: classical tools, paragraph 3
+% ----------------------------------------------------------
+The theoretical toolkit for additive prediction rests on three
+pillars.
+Fisher's fundamental theorem identifies the additive component
+of heritable fitness variance as the first-order driver of
+mean fitness increase per generation \cite{Fisher1930,Price1972}.
+Lande's multivariate response equation connects that additive
+variance to the direction and magnitude of evolutionary change
+\cite{Lande1979,LandeArnold1983}: the mean breeding value shifts
+each generation in proportion to the product of the genetic
+covariance matrix $\mat{G}$ --- which captures how heritable
+variation is distributed and correlated across traits --- and the
+fitness gradient $\vect{b}$, the direction in which selection
+currently pushes.
+Schluter's genetic lines of least resistance extend this logic to
+show that the eigenvectors of $\mat{G}$ bias the trajectory of
+adaptive radiation toward directions of abundant variance
+\cite{Schluter1996,WalshBlows2009}.
+Genomic prediction operationalizes the same idea at the level of
+marker effects \cite{Meuwissen2001,VanRaden2008}.
+All four tools share an assumption: that the local fitness surface,
+as sampled by the current population, is well enough described by
+its first-order (linear) term.
+
+% ----------------------------------------------------------
+% The gap: paragraph 4
+% ----------------------------------------------------------
+What is missing is a language for when that assumption holds,
+when it is eroding, and when it recovers.
+Nonlinear selection gradients --- the $\gamma$ matrix of
+Lande and Arnold \cite{LandeArnold1983} and its extensions
+\cite{PhillipsArnold1989} --- measure local curvature directly, but
+they do not by themselves tell you how much that curvature matters
+relative to the directional gradient across the population's
+specific covariance cloud.
+Fitness landscape theory \cite{WrightLandscape1932,Gavrilets2004}
+describes global ruggedness but does not resolve the local
+predictability question: a globally rugged landscape can support
+a well-functioning additive channel if the population sits in a
+locally flat valley.
+A complete theory requires not just a static snapshot of local
+geometry, but a longitudinal diagnostic that reveals whether
+local additivity is strengthening or eroding over time.
+
+% ----------------------------------------------------------
+% The contribution: paragraph 5
+% ----------------------------------------------------------
+Here we provide both layers.
+In earlier work, we defined the additivity index $\Ag$ as the
+fraction of local heritable fitness variance explained by the
+tangent-plane approximation --- a local $R^2$ for additive
+prediction \cite{OrtizBarrientosCooper2026}.
+High $\Ag$ identifies an \emph{additive channel}: a local state
+in which first-order theory is informative.
+The present paper extends this static picture to dynamics.
+We derive a logit-space rate diagnostic $r(t)$ that decomposes the
+gain or loss of local predictability into contributions from three
+mechanistic routes: motion of the population mean across the
+landscape, environmental forcing of local geometry, and
+change in the covariance structure itself.
+Within the covariance route, individual contributions from
+selection, recombination, mutation, introgression, and drift
+are explicitly identified.
+The framework recovers Fisher's variance argument, Lande's response
+equation, and genetic lines of least resistance as first-order
+descriptions valid inside an additive channel.
+It also predicts two qualitatively distinct failure modes ---
+channel exit at the fitness optimum and channel exit from gradient
+rotation --- and shows that these are separable from the sign
+pattern of $r(t)$ before prediction accuracy visibly deteriorates.
+
+% ----------------------------------------------------------
+% Roadmap: paragraph 6
+% ----------------------------------------------------------
+We proceed as follows.
+We first state the variance decomposition and define $\Ag$ (Results
+section 1).
+We then derive the dynamical closure, obtaining the transport laws
+for gradient and curvature and the closed five-equation state-space
+system (Results section 2).
+We define $r(t)$ and its mechanistic decomposition (Results
+section 3).
+We apply these tools to two illustrative examples: the one-trait
+moving-optimum model, which yields explicit formulas for $\Ag(t)$
+and $r(t)$, and the two-trait gradient rotation model, which shows
+how environmental change drives channel exit without any loss of
+genetic variance (Results section 4).
+We close by drawing out implications for natural selection,
+adaptive radiation, and breeding under climate change.
+
+% ==========================================================
+\section*{Results}
+% ==========================================================
+
+% ----------------------------------------------------------
+\subsection*{1.~The diagnostic layer: variance decomposition
+             and the additivity index}
+% ----------------------------------------------------------
+
+% ----------------------------------------------------------
+% The geometry: what b, H, and G mean
+% ----------------------------------------------------------
+Consider a population with mean breeding value $\bar{\vect{z}}$
+--- the average additive genetic value across all traits ---
+evolving under log-fitness surface $\ell(\vect{z})$.
+Because the population's additive genetic covariance matrix
+$\mat{G}$ defines the neighborhood of trait space that offspring
+actually occupy, only the local geometry of $\ell$ matters for
+short-term prediction.
+Expand $\ell$ to second order around $\bar{\vect{z}}$:
+\begin{equation}
+\ell(\vect{z})
+\approx
+\ell(\bar{\vect{z}})
++ \vect{b}^\top\!\Delta\vect{z}
++ \tfrac{1}{2}\Delta\vect{z}^\top\!\mat{H}\,\Delta\vect{z},
+\label{eq:taylor}
+\end{equation}
+where $\Delta\vect{z} = \vect{z} - \bar{\vect{z}}$, the fitness
+gradient $\vect{b}$ points in the direction selection currently
+pushes, and the Hessian matrix $\mat{H}$ describes how sharply
+the fitness surface curves in each direction.
+The Hessian is the local analogue of the Lande--Arnold $\gamma$
+matrix of nonlinear selection gradients
+\cite{LandeArnold1983,PhillipsArnold1989}.
+
+% ----------------------------------------------------------
+% Decomposition
+% ----------------------------------------------------------
+Under Gaussian breeding-value distributions, the local log-fitness
+deviation $\delta\ell = L + Q$ (where $L = \vect{b}^\top\Delta\vect{z}$
+is the linear part and $Q = \tfrac{1}{2}\Delta\vect{z}^\top
+\mat{H}\,\Delta\vect{z}$ is the quadratic correction) decomposes
+into variance components without a cross-term (SI Appendix,
+Section~S1).
+The cross-term vanishes by parity: $L$ changes sign under
+$\Delta\vect{z}\mapsto-\Delta\vect{z}$ while $Q$ does not, so
+symmetric points around the mean cancel in the product $LQ$.
+The result is
+\begin{equation}
+\Var[\delta\ell] = \Vlin + \Vquad,
+\label{eq:decomp}
+\end{equation}
+with gradient-aligned variance
+$\Vlin = \vect{b}^\top\mat{G}\vect{b}$
+and curvature-exposed variance
+$\Vquad = \tfrac{1}{2}\tr[(\mat{H}\mat{G})^2]$.
+$\Vlin$ involves one copy of $\mat{G}$; $\Vquad$ involves two.
+That asymmetry --- one power versus two --- is the source of
+the scaling results derived below.
+
+% ----------------------------------------------------------
+% Additivity index definition
+% ----------------------------------------------------------
+Their ratio defines the additivity index
+\begin{equation}
+\Ag = \frac{\Vlin}{\Vlin + \Vquad}.
+\label{eq:Ag}
+\end{equation}
+$\Ag$ is the squared correlation between the linear predictor of
+log-fitness and log-fitness itself: a local $R^2$ (SI Appendix,
+Section~S1).
+A population for which $\Ag > \alpha$ --- where $\alpha$ is a
+threshold set by the precision required --- occupies an
+\emph{additive channel} (Fig.~\ref{fig:regime}): a locally
+predictive state in which Fisher's variance argument, Lande's
+response equation, and genetic lines of least resistance are
+reliable first-order descriptions, each nested inside the channel
+condition (Fig.~\ref{fig:hierarchy}).
+$\Ag$ depends jointly on the population's genetic structure,
+the fitness gradient, and local curvature.
+None of these three is sufficient alone.
+A high-variance population can have low $\Ag$ if variance is spread
+into directions of high curvature (Fig.~\ref{fig:concept}C);
+a low-variance population in the same location may have high $\Ag$
+because its narrow cloud sees a nearly flat slice of the landscape
+(Fig.~\ref{fig:concept}B).
+
+% ----------------------------------------------------------
+% FIGURE 1 — inserted here, first cited above (Fig. 1B, 1C)
+% 3-panel landscape composite, full two-column width.
+% figure*[t!]: spans both columns; [t!] = top of next page only.
+% NEVER use [b] or [bt] on figure* in twocolumn mode.
+% ----------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=17.8cm]{figure1_channel_concept}
+\caption{\textbf{The additive channel concept.}
+  The fitness landscape is a log-mixture-of-Gaussians surface
+  $\ell(\mathbf{z}) = \log[\sum_k w_k \exp(-\frac{1}{2}
+  (\mathbf{z}-\boldsymbol{\mu}_k)^\top
+  \boldsymbol{\Sigma}_k^{-1}(\mathbf{z}-\boldsymbol{\mu}_k))]$;
+  gradients and Hessians at each population position are computed
+  by numerical differentiation, so all $\Ag$ annotations are exact.
+  \textbf{(A)}~Two populations ($\mathcal{C}_1$, blue;
+  $\mathcal{C}_2$, orange) traverse the landscape toward separate
+  adaptive peaks.
+  Ellipses show the additive genetic covariance cloud $\mat{G}$ at
+  successive time points; $\Ag$ values annotate each step.
+  As selection compresses $\mat{G}$, local predictability rises,
+  regardless of global landscape ruggedness.
+  \textbf{(B)}~A narrow cloud ($\sigma = 0.38$) at a fixed location.
+  The green dashed tangent line tracks the true log-fitness surface
+  (blue) closely across the sampled support; $\Ag \approx 0.80$.
+  \textbf{(C)}~A broad cloud ($\sigma = 1.05$) at the same location.
+  Orange shading between tangent and surface is the curvature load
+  $\Vquad$ that the linear predictor misses; $\Ag \approx 0.34$.
+  Expanding the cloud, not changing the landscape, halves the
+  additivity index, illustrating the one-copy vs.\ two-copy
+  scaling asymmetry ($\Vlin \propto G$; $\Vquad \propto G^2$).}
+\label{fig:concept}
+\end{figure*}
+
+% ----------------------------------------------------------
+% FIGURE 2 — inserted here, first cited above (Fig. 2)
+% Single panel: Ag(s) rectangular hyperbola.
+% Single-column figure[t]: does NOT span columns; places at top
+% of next available column. Appropriate for single-panel figures
+% whose content does not require full two-column width.
+% Width = \columnwidth = 8.7 cm (PNAS single-column standard).
+% ----------------------------------------------------------
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figure2_regime_marker}
+\caption{\textbf{$\Ag$ as a predictive regime marker.}
+  Under uniform variance scaling $\mat{G}\to s\mat{G}$ with fixed
+  $\vect{b}$ and $\mat{H}$, the additivity index follows
+  $\Ag(s) = 1/(1 + s\kappa)$, where
+  $\kappa = \Vquad_0/\Vlin_0$.
+  Blue: interior channel ($\Ag > \alpha$).
+  Amber: boundary zone ($|\Ag - \alpha| < 0.08$).
+  Red: exterior ($\Ag < \alpha$).
+  Wider clouds are always less locally additive, regardless of
+  landscape shape.
+  The state-space slice in the $(s,\kappa)$ plane is in
+  SI Fig.~S2.}
+\label{fig:regime}
+\end{figure}
+
+% ----------------------------------------------------------
+% FIGURE 3 — inserted here, first cited above (Fig. 3)
+% Square staircase diagram.
+% Single-column figure[t]: nested-box diagram is square (5.2×5.4 in)
+% and fits well at \columnwidth without spanning both columns.
+% ----------------------------------------------------------
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figure3_nested_hierarchy}
+\caption{\textbf{Classical first-order results nest inside the
+  additive channel.}
+  Each concentric box is valid within the conditions at its corner.
+  The channel condition $\Ag > \alpha$ (outermost, blue) is the
+  prerequisite for all inner layers.
+  Fisher's variance statement $\Vlin = \vect{b}^\top\mat{G}\vect{b}$
+  (green) follows from Gaussian closure.
+  Lande's response $\Delta\bar{\vect{z}} = \mat{G}\boldsymbol{\beta}$
+  (orange) additionally requires $\mat{G}$ to be known and stable.
+  Lines of least resistance $\vect{g}_{\max} = e_1(\mat{G})$
+  (purple) further require $\mat{G}$ to persist across generations.
+  The illustration shows misalignment angle $\theta$ between
+  $\vect{b}$ (green) and $\vect{g}_{\max}$ (blue); the Lande
+  response (orange dashed) lies between them.}
+\label{fig:hierarchy}
+\end{figure}
+
+% ----------------------------------------------------------
+\subsection*{2.~The dynamical closure: transport laws and the
+             state-space system}
+% ----------------------------------------------------------
+
+% ----------------------------------------------------------
+% Why dynamics are needed
+% ----------------------------------------------------------
+$\Ag$ is a snapshot.
+Populations move, environments change, and genetic variance
+structures reshape themselves under selection, recombination, and
+the injection of new variation.
+The channel that is open today may close tomorrow.
+A warning that operates only at the moment of failure is no warning
+at all.
+What is needed is a diagnostic that reveals not just the current
+regime, but the direction in which predictability is changing.
+
+% ----------------------------------------------------------
+% Logit transform and r(t)
+% ----------------------------------------------------------
+A logit transform $\CalL = \ln(\Vlin/\Vquad)$ converts the bounded
+index $\Ag \in (0,1)$ to an unbounded scale suited for rate
+analysis.
+Its time derivative is the rate diagnostic
+\begin{equation}
+r(t) = \dot{\CalL}
+     = \frac{\dot{\Vlin}}{\Vlin} - \frac{\dot{\Vquad}}{\Vquad},
+\label{eq:r}
+\end{equation}
+which satisfies the exact algebraic identity
+$\dot{\Ag} = \Ag(1-\Ag)\,r(t)$ (SI Appendix, Section~S2).
+When $r > 0$, gradient-aligned variance is gaining on
+curvature-exposed variance; when $r < 0$, it is losing ground.
+A population can sit well inside a channel while $r < 0$: prediction
+still works today, but is already being eroded.
+That warning is precisely what a static snapshot cannot provide.
+
+% ----------------------------------------------------------
+% Transport laws
+% ----------------------------------------------------------
+Because $\vect{b}$ and $\mat{H}$ are partial derivatives of the
+fitness surface evaluated at the moving population mean, their time
+evolution follows from the chain rule alone (SI Appendix,
+Section~S3):
+\begin{align}
+\dot{\vect{b}} &= \mat{H}\,\mat{G}\vect{b}
+                + \vect{b}_u\,\dot{u},
+\label{eq:bdot} \\
+\dot{\mat{H}}  &= \mat{T}[\mat{G}\vect{b}]
+                + \mat{H}_u\,\dot{u},
+\label{eq:Hdot}
+\end{align}
+where $u$ is a scalar environmental state, $\vect{b}_u$ and
+$\mat{H}_u$ are mixed derivatives capturing how the landscape
+reshapes as the environment shifts, and $\mat{T}[\,\cdot\,]$
+is a third-derivative tensor contraction.
+The gradient changes for two reasons: the population mean moves
+across a curved surface (the $\mat{H}\mat{G}\vect{b}$ term), or
+the environment reshapes the surface at the current location
+(the $\vect{b}_u\dot{u}$ term).
+These two causes are biologically distinct and produce
+distinguishably different patterns in $r(t)$.
+
+% ----------------------------------------------------------
+% Covariance dynamics and full state-space
+% ----------------------------------------------------------
+The companion covariance equation,
+\begin{equation}
+\dot{\mat{G}}
+= \mat{G}\mat{H}\mat{G}
+  - \lambda_{\mathrm{rec}}(\mat{G} - \mat{G}_*)
+  + \mat{M}
+  + \mat{J}(t)
+  - \tfrac{1}{2N_e}\mat{G},
+\label{eq:Gdot}
+\end{equation}
+shows that selection (the $\mat{G}\mat{H}\mat{G}$ term) deforms the
+covariance cloud through the same local curvature that governs
+mean displacement, while recombination ($\lambda_{\mathrm{rec}}$),
+mutation ($\mat{M}$), introgression ($\mat{J}$), and drift
+($1/2N_e$) each contribute independently
+(SI Appendix, Section~S4).
+Together, Eqs.~\eqref{eq:bdot}--\eqref{eq:Gdot} plus
+$\dot{\bar{\vect{z}}} = \mat{G}\vect{b}$ form a closed five-equation
+state-space system in which $\Ag$ and $r(t)$ are outputs, not inputs.
+
+% ----------------------------------------------------------
+\subsection*{3.~Mechanistic decomposition of $r(t)$}
+% ----------------------------------------------------------
+
+Differentiating $\Vlin$ and $\Vquad$ and substituting the transport
+laws yields the three-way decomposition
+$r = r_{\mathrm{motion}} + r_{\mathrm{env}} + r_{\mathrm{cov}}$,
+where motion, environment, and covariance contributions are
+separated explicitly (SI Appendix, Section~S5).
+Within the covariance term, five biological processes each
+contribute a signed component:
+\begin{equation}
+r_{\mathrm{cov}}
+= r_{\mathrm{sel}}
++ r_{\mathrm{rec}}
++ r_{\mathrm{mut}}
++ r_{\mathrm{intro}}
++ r_{\mathrm{drift}}.
+\label{eq:rcov}
+\end{equation}
+The drift term is always positive:
+$r_{\mathrm{drift}} = +1/(2N_e)$.
+This is a geometric consequence of the one-versus-two-copies
+asymmetry in Eq.~\eqref{eq:decomp}: drift shrinks $\mat{G}$
+uniformly, which reduces $\Vquad$ faster than $\Vlin$.
+Small populations are therefore locally more additive than large
+ones, not because their biology is simpler but because their narrow
+covariance clouds see less curvature.
+The mutation term is always negative: new variance enters
+isotropically and increases curvature exposure faster than it
+increases gradient alignment.
+The selection, recombination, and introgression terms can each be
+positive or negative, depending on whether the associated variance
+change is better aligned with the gradient than with curvature.
+The decomposition thus converts a scalar prediction failure into a
+signed budget across five named biological processes.
+
+% ----------------------------------------------------------
+\subsection*{4.~Examples: three acts in the dynamics of
+             local additivity}
+% ----------------------------------------------------------
+
+% ----------------------------------------------------------
+% One-trait moving-optimum model
+% ----------------------------------------------------------
+
+% Act I and II
+We illustrate the framework with two models of increasing
+dimensionality.
+Consider first a scalar trait under Gaussian stabilizing selection
+toward a moving optimum $\theta(t)$:
+\begin{equation}
+\ell(z,t)
+= \ell_0 - \tfrac{1}{2}s(z - \theta)^2,
+\label{eq:landscape_1D}
+\end{equation}
+where $s > 0$ is the strength of stabilizing selection (the
+curvature of the fitness peak) and $d = \theta - \bar{z}$ is the
+lag between the optimum and the population mean.
+At the current mean, the gradient $b = sd$ and the curvature
+$H = -s$.
+Substituting into Eq.~\eqref{eq:Ag}:
+\begin{equation}
+\Ag = \frac{d^2}{d^2 + G/2},
+\label{eq:Ag_1D}
+\end{equation}
+where $G$ is the scalar genetic variance (SI Appendix, Section~S6).
+This equation has a clear biological reading.
+When the optimum is far away ($d^2 \gg G/2$), directional selection
+dominates and $\Ag \approx 1$: the channel is wide open.
+As the population closes the gap ($d \to 0$), the directional
+signal $b = sd$ collapses, curvature dominates, and $\Ag \to 0$.
+The channel closes not because the biology became complex but
+because selection succeeded (Fig.~\ref{fig:dynamics}, Act~II).
+A genomic breeder whose population approaches its target performance
+ceiling will observe the same collapse in prediction accuracy for
+the same reason.
+
+The rate diagnostic in this model reduces to
+\begin{equation}
+r
+= 2\frac{\dot{\theta}}{d}
+  - sG
+  + \lambda_{\mathrm{rec}}\!\left(1 - \frac{G_*}{G}\right)
+  - \frac{m}{G}
+  + \frac{1}{2N_e},
+\label{eq:r_1D}
+\end{equation}
+where $m$ is the per-generation mutational variance input and
+$G_*$ is the recombination baseline (SI Appendix, Section~S6).
+Each term in Eq.~\eqref{eq:r_1D} is directly interpretable.
+Faster optimum motion relative to current lag ($2\dot{\theta}/d$)
+regenerates directional signal.
+Wider variance ($-sG$) increases curvature exposure.
+Mutation ($-m/G$) and introgression add variance isotropically
+and always erode local additivity.
+Drift ($+1/2N_e$) increases local additivity even while reducing
+evolvability.
+The three phases of Fig.~\ref{fig:dynamics} --- optimum moves,
+stops, moves again --- illustrate channel entry, exit, and
+re-entry as the sign of $r(t)$ oscillates between positive and
+negative.
+
+% ----------------------------------------------------------
+% FIGURE 4 (moving optimum) — inserted here, first cited above.
+% 3-panel landscape 1×3 composite, full two-column width.
+% figure*[t!]: must be [t!] — never [b] on figure* in twocolumn.
+% ----------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=17.8cm]{figure5_moving_optimum}
+\caption{\textbf{Channel dynamics in the one-trait
+  moving-optimum model.}
+  Parameters: $s = 0.10$, $\lambda_{\mathrm{rec}} = 0.30$,
+  $G_* = 0.80$, $m = 0.005$, $N_e = 500$.
+  Green background: optimum moving ($\dot\theta = 0.02$).
+  Orange background: optimum stationary ($\dot\theta = 0$).
+  \textbf{(A)}~Lag $d(t)$ (green) and variance $G(t)$ (blue dashed)
+  on the left axis; additivity index $\Ag(t)$ (purple) on the right.
+  Channel opens as lag grows (Act~I), closes as population nears
+  optimum (Act~II), reopens when optimum moves again (Act~I).
+  \textbf{(B)}~Logit trajectory $\CalL(t)$; entry, exit, and re-entry
+  annotated at threshold $\CalL_\alpha$.
+  Slope of $\CalL(t)$ equals $r(t)$ exactly.
+  \textbf{(C)}~Rate diagnostic $r(t)$ (black) decomposed into
+  $r_{\mathrm{motion}} = 2\dot\theta/d$ (green) and
+  $r_{\mathrm{curv}} = -sG$ (orange).
+  Gap marks $|d| < \delta$.
+  Positive $r(t)$ precedes rising $\Ag$; negative $r(t)$ precedes
+  falling $\Ag$ — the diagnostic warns before the failure is visible.}
+\label{fig:dynamics}
+\end{figure*}
+
+% Act III: gradient rotation
+The moving-optimum model holds the gradient direction fixed and
+varies only its magnitude.
+A qualitatively different failure mode arises when the gradient
+rotates without any change in variance magnitude or curvature
+magnitude --- the scenario most relevant to climate-driven
+environmental change.
+
+Let the fitness gradient $\vect{b}$ rotate by angle $\theta$ away
+from the major axis $\vect{g}_{\max} = e_1(\mat{G})$ of the
+covariance ellipsoid (Fig.~\ref{fig:rotation}A).
+In two traits with eigenvalues $\lambda_1 > \lambda_2$ of
+$\mat{G}$:
+\begin{equation}
+\Vlin(\theta)
+= \|\vect{b}\|^2(\lambda_1\cos^2\!\theta + \lambda_2\sin^2\!\theta),
+\label{eq:Vlin_rot}
+\end{equation}
+while $\Vquad = \tfrac{1}{2}\tr[(\mat{H}\mat{G})^2]$ is
+independent of gradient direction because it depends on the
+eigenvalues of $\mat{H}$ and $\mat{G}$ but not their relative
+orientation (Fig.~\ref{fig:rotation}B).
+$\Ag$ therefore declines monotonically as the gradient rotates
+toward the minor axis of $\mat{G}$: channel exit from misalignment,
+not from reaching the optimum.
+
+This is \textit{Act~III} (Fig.~\ref{fig:rotation}C), and it is
+separable from Act~II by the rate diagnostic.
+In Act~II, $r_{\mathrm{env}} \approx 0$ and $r_{\mathrm{cov}} < 0$:
+the channel closes because selection has compressed the covariance
+cloud toward the now-irrelevant directional axis.
+In Act~III, $r_{\mathrm{env}} \ll 0$ while $r_{\mathrm{cov}}$ can
+remain positive if selection is still compressing the cloud along
+the \emph{old} gradient direction.
+That sign pattern --- strongly negative environmental contribution
+combined with positive or zero covariance contribution --- does not
+arise in Act~II.
+The two scenarios may be invisible in raw prediction accuracy at the
+moment of channel exit, but are distinguishable from $r(t)$ before
+that moment.
+
+% ==========================================================
+\section*{Discussion}
+% ==========================================================
+
+% ----------------------------------------------------------
+% What Ag measures that heritability does not
+% ----------------------------------------------------------
+The additivity index $\Ag$ does not replace heritability.
+It answers a different question.
+Heritability asks how much phenotypic variance is genetic.
+$\Ag$ asks, of the heritable fitness variance, how much does the
+linear approximation capture.
+A highly heritable trait in a population sitting on a fitness peak
+can have $\Ag \approx 0$: the variance is real, but none of it is
+captured by the gradient because the gradient has collapsed.
+A moderately heritable trait in a population far from its optimum
+can have $\Ag \approx 1$: the tangent-plane approximation is
+excellent, and Lande's equation will predict response faithfully.
+The two indices together --- heritability and $\Ag$ --- give a
+fuller picture than either alone.
+
+% ----------------------------------------------------------
+% Channel switching in natural populations
+% ----------------------------------------------------------
+The three-act framework connects classical results in evolutionary
+biology to a common mechanistic language.
+Darwin's finches on Daphne Major illustrate all three acts within
+a decade \cite{GrantGrant2002,GrantGrant2014}.
+The 1977 drought imposed a steep directional gradient on beak
+depth --- Act~I: channel open, beak depth shifted nearly a
+millimetre in one generation.
+As the population tracked the new optimum across the 1980s, the
+lag shrank and the channel narrowed --- Act~II.
+El Niño years subsequently rotated the seed community toward small
+soft seeds, rotating the fitness gradient away from the major axis
+of beak variance --- Act~III.
+The rate diagnostic $r(t)$ would have distinguished Acts~II and~III
+in real time: the sign of $r_{\mathrm{env}}$ is negative in Act~III
+but near zero in Act~II.
+More broadly, the framework suggests that adaptive radiations into
+new ecological opportunity \cite{Schluter2000} are episodes of
+channel opening: a population encounters a new directional gradient
+that is well-aligned with its standing genetic variance, $\Ag$
+rises, and first-order evolution proceeds rapidly along genetic
+lines of least resistance \cite{Schluter1996}.
+Conversely, evolutionary stasis may reflect not absence of genetic
+variance but absence of a directional gradient: $\Ag$ is low
+because the gradient has collapsed, not because $\mat{G}$ is small.
+
+% ----------------------------------------------------------
+% FIGURE 5 (gradient rotation) — inserted here, cited above.
+% 3-panel landscape 1×3 composite, full two-column width.
+% ----------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=17.8cm]{figure4_gradient_rotation}
+\caption{\textbf{Gradient rotation drives channel exit without
+  loss of genetic variance (Act~III).}
+  Parameters: $\mat{G} = \mathrm{diag}(\lambda_1,\lambda_2)$,
+  $\mat{H} = -\gamma\mat{I}$ ($\gamma = 0.414$), $|\vect{b}| = 1$.
+  \textbf{(A)}~Fixed covariance ellipse under three gradient
+  directions $\vect{b}_1$ (0°), $\vect{b}_2$ (50°),
+  $\vect{b}_3$ (90°) relative to $\vect{g}_{\max} = e_1(\mat{G})$.
+  $\Ag$ values are exact; $\Vquad$ is constant across all $\theta$.
+  \textbf{(B)}~$\Ag(\theta)$ for four eccentricities
+  $\lambda_1/\lambda_2$.
+  $\Vquad$ constant; $\Vlin$ falls with rotation.
+  Eccentricity $\lambda_1/\lambda_2 = 2$ is the marginal case,
+  just touching $\alpha = 0.70$ at $\theta = 90°$.
+  \textbf{(C)}~Exit angle $\theta^*$ vs curvature-to-gradient
+  ratio $\kappa_0$.
+  All curves converge at $\kappa_0 = (1-\alpha)/\alpha \approx 0.43$.
+  Environmental change that rotates the fitness gradient erodes the
+  channel silently: no variance loss, no curvature increase.}
+\label{fig:rotation}
+\end{figure*}
+% ----------------------------------------------------------
+% Breeding implications
+% ----------------------------------------------------------
+For breeding programs, the framework converts three qualitative
+intuitions into quantitative predictions.
+First, directional selection compresses $\mat{G}$, which deepens
+a channel mechanically: $\Vquad \propto G^2$ falls faster than
+$\Vlin \propto G$, so a more compressed cloud is locally more
+additive.
+A breeding program that has successfully selected toward a target
+environment will therefore find genomic models increasingly reliable
+--- until the population nears its local optimum and Act~II begins.
+Second, the introgression criterion derived in the SI Appendix
+separates benefit from cost in a wide cross:
+\[
+\delta\Ag \propto
+\frac{(\vect{b}^\top\vect{v})^2}{\Vlin}
+-
+\frac{\vect{v}^\top\mat{H}\mat{G}\mat{H}\vect{v}}{\Vquad},
+\]
+where $\vect{v}$ is the direction of incoming variance.
+A wide cross helps predictability when the first term dominates
+--- when the new variance is gradient-aligned --- and harms it
+when the second term dominates.
+This criterion can guide germplasm choice in programs facing
+yield plateaus \cite{Technow2021}.
+Third, and most urgently under climate change: the rate diagnostic
+tells you \emph{why} $\Ag$ is falling.
+Act~II and Act~III require opposite interventions.
+Act~II calls for environmental redesign --- finding new selective
+targets, expanding the breeding population's effective lag.
+Act~III calls for genetic redesign --- introducing variance
+aligned with the new gradient, through either recombination or
+targeted introgression.
+Measuring $\vect{b}$, $\mat{H}$, and $\mat{G}$ is demanding in
+natural populations \cite{Kingsolver2001,KingsolverPfennig2007}
+but tractable in long-term multi-environment trials and experimental
+evolution systems, where the framework converts a familiar
+first-order tool into a diagnostic for its own reliability.
+
+% ----------------------------------------------------------
+% Limits and open problems
+% ----------------------------------------------------------
+Three limits of the current framework deserve emphasis.
+First, the variance decomposition rests on Gaussian closure.
+Non-Gaussian breeding-value distributions --- expected under strong
+selection, low heritability, or major-effect loci --- will produce
+a nonzero cross-term $\Cov(L,Q)$, and $\Ag$ will no longer equal
+the local $R^2$ exactly.
+The framework gives qualitative guidance in those cases but
+loses its $R^2$ interpretation.
+Second, $\mat{H}$ involves third-order derivatives of the fitness
+surface when the population mean is moving (Eq.~\ref{eq:Hdot}):
+the dynamical theory of curvature is one derivative order above
+the dynamical theory of the gradient.
+In practice, estimating third derivatives requires large, carefully
+designed experiments.
+Third, the state-space system is open with respect to the fitness
+surface itself: $\ell(\vect{z},u)$ must be supplied from outside.
+The framework is therefore diagnostic and predictive conditional
+on a known or estimated landscape, not a self-contained
+evolutionary model.
+Closing the loop --- deriving the landscape from an explicit
+ecological model and carrying it through time alongside the
+population --- is the natural next step and the subject of
+continuing work.
+
+% ==========================================================
+% DATA AVAILABILITY
+% ==========================================================
+\dataavail{Code used to generate all figures is available at
+[repository DOI to be inserted before submission].
+No new empirical data were analyzed in this theoretical study.}
+
+% ==========================================================
+% ACKNOWLEDGMENTS
+% ==========================================================
+\acknow{[Funding and acknowledgment information to be added before
+submission.]}
+
+\showacknow{}
+
+% ==========================================================
+% BIBLIOGRAPHY
+% \bibsplit[n] splits the reference list across two columns
+% at reference n. With ~40 references, split at 20.
+% ==========================================================
+
+\bibsplit[20]
+\bibliography{ortiz-barrientos_cooper_research_article_references}
+
+\end{document}
