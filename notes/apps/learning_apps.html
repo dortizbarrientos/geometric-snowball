@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Apps — Additive Channels</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS — matches tutorial1–5 palette exactly
+   ============================================================ */
+:root {
+  --bg:     #faf8f3;
+  --card:   #ffffff;
+  --ink:    #1a1a2e;
+  --muted:  #6b6b80;
+  --green:  #2d8a5e;
+  --orange: #c97c2a;
+  --red:    #b03030;
+  --blue:   #2a5fa8;
+  --purple: #7c3d8a;
+  --teal:   #1a7a6e;
+  --border: #e0ddd5;
+  --serif:  'Lora', Georgia, serif;
+  --mono:   'Space Mono', monospace;
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  font-family: var(--serif);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.75;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  background: var(--ink);
+  color: #fff;
+  padding: 2.2rem 2rem 1.8rem;
+  text-align: center;
+}
+.series-tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #f0e442;
+  margin-bottom: 0.7rem;
+}
+.header h1 {
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.4rem;
+}
+.header p { color: #a0a8c0; font-style: italic; font-size: 1rem; }
+
+/* ============================================================
+   TAB NAV
+   ============================================================ */
+.tab-nav {
+  display: flex;
+  overflow-x: auto;
+  background: #f0ece4;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  padding: 0.9rem 1.3rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.70rem;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active { color: var(--ink); border-bottom-color: var(--ink); font-weight: 700; }
+.tab-num { color: var(--orange); margin-right: 0.4em; }
+
+/* ============================================================
+   PANELS
+   ============================================================ */
+.panel { display: none; }
+.panel.active { display: block; }
+.container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+/* ============================================================
+   GRID
+   ============================================================ */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2rem;
+  align-items: start;
+}
+.two-col-eq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .two-col, .two-col-eq { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.4rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.card:last-child { margin-bottom: 0; }
+.card-label {
+  font-family: var(--mono);
+  font-size: 0.60rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 0.7rem;
+}
+h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.6rem; }
+h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+p { margin-bottom: 0.75em; }
+p:last-child { margin-bottom: 0; }
+
+/* ============================================================
+   CALLOUTS
+   ============================================================ */
+.callout {
+  border-left: 3px solid var(--blue);
+  background: #eef3fc;
+  padding: 0.75rem 1rem;
+  border-radius: 0 6px 6px 0;
+  margin: 0.9rem 0;
+  font-size: 0.95em;
+}
+.callout.green  { border-left-color: var(--green);  background: #f0f9f4; }
+.callout.orange { border-left-color: var(--orange); background: #fdf5ea; }
+.callout.purple { border-left-color: var(--purple); background: #f7f0fa; }
+.callout.teal   { border-left-color: var(--teal);   background: #f0f7f6; }
+
+/* ============================================================
+   SVG PLOTS
+   ============================================================ */
+.plot-wrap {
+  background: #fdfaf4;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+}
+.plot-wrap svg { display: block; width: 100%; }
+.plot-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+  padding: 0.3rem 0.6rem 0.5rem;
+}
+
+/* ============================================================
+   METRICS
+   ============================================================ */
+.metric-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 0.8rem 0; }
+.metric {
+  background: #f5f3ed;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0.45rem 0.9rem;
+  text-align: center;
+  min-width: 80px;
+}
+.metric .lbl {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 0.1rem;
+}
+.metric .val { font-family: var(--mono); font-size: 1rem; font-weight: 700; }
+.metric.blue .val   { color: var(--blue); }
+.metric.green .val  { color: var(--green); }
+.metric.orange .val { color: var(--orange); }
+.metric.purple .val { color: var(--purple); }
+.metric.teal .val   { color: var(--teal); }
+.metric.red .val    { color: var(--red); }
+
+/* ============================================================
+   SLIDERS
+   ============================================================ */
+.slider-group { margin-top: 0.6rem; }
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.65rem;
+}
+.slider-row label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  width: 140px;
+  flex-shrink: 0;
+}
+input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #ddd;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid #fff;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.slider-val {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--ink);
+  width: 46px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   INTRO BADGES
+   ============================================================ */
+.badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+.badge {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--bg);
+}
+
+/* ============================================================
+   FOOTER NAV
+   ============================================================ */
+.nav-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.4rem 0;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.nav-footer a {
+  background: var(--ink);
+  color: #fff;
+  padding: 0.5rem 1.1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.72rem;
+}
+
+/* intro grid */
+.intro-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 760px) { .intro-grid { grid-template-columns: 1fr; } }
+.app-list { list-style: none; padding: 0; }
+.app-list li {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95em;
+  display: flex;
+  gap: 0.6rem;
+}
+.app-list li:last-child { border-bottom: none; }
+.app-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--orange);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="series-tag">Teaching Companion · Six Interactive Apps</div>
+  <h1>Additive Channels — Learning Apps</h1>
+  <p>From high-school calculus to the hardest results in the paper</p>
+</header>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="show(0)"><span class="tab-num">00</span>Start here</button>
+  <button class="tab-btn" onclick="show(1)"><span class="tab-num">01</span>Tangent &amp; curvature</button>
+  <button class="tab-btn" onclick="show(2)"><span class="tab-num">02</span>Population spread</button>
+  <button class="tab-btn" onclick="show(3)"><span class="tab-num">03</span>Moving optimum</button>
+  <button class="tab-btn" onclick="show(4)"><span class="tab-num">04</span>Gradient rotation</button>
+  <button class="tab-btn" onclick="show(5)"><span class="tab-num">05</span>Introgression</button>
+</nav>
+
+<!-- ============================================================
+     PANEL 0 — START HERE
+     ============================================================ -->
+<div class="panel active" id="p0">
+<div class="container">
+  <div class="intro-grid">
+    <div class="card">
+      <div class="card-label">About these apps</div>
+      <h2>A staged path through the mathematics</h2>
+      <p>The paper can feel dense because it compresses several ideas into compact notation. These apps slow the argument down. Each step asks the same question in a slightly richer setting: <strong>when does a straight-line approximation describe selection well enough to be useful?</strong></p>
+      <p>The sequence is deliberate. You begin with slope and curvature in one variable — high-school calculus. Then you add a population spread. Then you measure how much fitness variation the linear part captures. Then you watch that quantity change through time. Only after that do you explore the two-trait geometric cases.</p>
+      <p>No app requires anything beyond single-variable calculus and an intuition for normal distributions. The harder notation is introduced only after the idea it encodes is already visible in a picture.</p>
+      <div class="badge-row">
+        <span class="badge">1D calculus first</span>
+        <span class="badge">Normal distribution intuition</span>
+        <span class="badge">Two-trait geometry after</span>
+        <span class="badge">Dynamics last</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">What each app teaches</div>
+      <ul class="app-list">
+        <li><span class="app-num">01</span><span><strong>Tangent and curvature.</strong> Why a smooth curve can look linear locally. The first idea behind additive channels.</span></li>
+        <li><span class="app-num">02</span><span><strong>Population spread.</strong> Why a narrow population sees less curvature than a broad one. This is the scaling asymmetry at the heart of the paper.</span></li>
+        <li><span class="app-num">03</span><span><strong>Moving optimum.</strong> Why $\mathcal{A}_g$ can rise during adaptation but collapse near an optimum. Acts I and II.</span></li>
+        <li><span class="app-num">04</span><span><strong>Gradient rotation.</strong> How prediction can fail without any loss of genetic variance. Act III.</span></li>
+        <li><span class="app-num">05</span><span><strong>Introgression direction.</strong> Why new genetic variance can help or hurt, depending on where it points relative to the gradient.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="nav-footer">
+    <span>Six apps · no prerequisites beyond high-school calculus</span>
+    <button class="nav-footer" style="background:var(--ink);color:#fff;padding:0.5rem 1.1rem;border-radius:6px;border:none;cursor:pointer;font-family:var(--mono);font-size:0.72rem;" onclick="show(1)">Begin with App 01 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================
+     PANEL 1 — TANGENT & CURVATURE
+     ============================================================ -->
+<div class="panel" id="p1">
+<div class="container">
+  <div class="two-col">
+
+    <!-- LEFT: plot + controls -->
+    <div>
+      <div class="card">
+        <div class="card-label">App 01 — Interactive</div>
+        <h2>Tangent line and curvature</h2>
+        <p style="font-size:0.92em;color:var(--muted)">Drag the point. Watch the dashed tangent line stay close or diverge.</p>
+        <div class="plot-wrap">
+          <svg id="svg1" viewBox="0 0 520 240"></svg>
+          <div class="plot-label">Black: fitness curve. Blue dashed: tangent at red dot. Drag the slider to move the point.</div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-row">
+            <label>expansion point $\mu$</label>
+            <input type="range" id="s1_mu" min="-2.5" max="2.5" step="0.02" value="0.8">
+            <span class="slider-val" id="s1_mu_v">0.80</span>
+          </div>
+          <div class="slider-row">
+            <label>curvature strength</label>
+            <input type="range" id="s1_curv" min="0.05" max="1.4" step="0.01" value="0.7">
+            <span class="slider-val" id="s1_curv_v">0.70</span>
+          </div>
+          <div class="slider-row">
+            <label>extra nonlinearity</label>
+            <input type="range" id="s1_wig" min="0" max="0.35" step="0.01" value="0.15">
+            <span class="slider-val" id="s1_wig_v">0.15</span>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div class="metric green"><span class="lbl">slope $b = f'(\mu)$</span><span class="val" id="m1_b">—</span></div>
+          <div class="metric orange"><span class="lbl">curvature $f''(\mu)$</span><span class="val" id="m1_H">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: explanation -->
+    <div>
+      <div class="card">
+        <div class="card-label">The idea</div>
+        <h2>Local linearity</h2>
+        <p>Every smooth curve has a <strong>tangent line</strong> at every point. The tangent line is the best linear approximation to the curve at that point:</p>
+        <div style="background:#f5f3ed;border-radius:6px;padding:0.7rem 1rem;font-family:var(--mono);font-size:0.92rem;margin:0.8rem 0;text-align:center">
+          f(x) ≈ f(μ) + f'(μ)·(x − μ)
+        </div>
+        <p>How good is this approximation? It depends on two things:</p>
+        <p><strong>1. Curvature $f''(\mu)$.</strong> Strong curvature means the surface bends sharply — the tangent becomes unreliable quickly. Weak curvature means the surface is nearly flat over a wide region.</p>
+        <p><strong>2. How far you are from $\mu$.</strong> The tangent is exact at $\mu$ itself. Errors grow as you move away.</p>
+        <div class="callout green">
+          <strong>Connection to the paper.</strong> In the paper, $\ell(z)$ is log-fitness, $\mu = \bar{z}$ is the population mean, $b = f'(\bar{z})$ is the <em>fitness gradient</em>, and $H = f''(\bar{z})$ is the <em>Hessian</em>. The tangent line is the additive prediction. This app shows when that prediction is trustworthy.
+        </div>
+        <div class="callout orange">
+          <strong>Try this.</strong> Set curvature to maximum, extra nonlinearity to zero. Move $\mu$ to the peak of the curve ($b \approx 0$). The tangent is flat — no directional selection. This is the Act II collapse.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <button onclick="show(0)" style="background:transparent;border:1px solid var(--border);color:var(--ink);padding:0.5rem 1.1rem;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">← Start here</button>
+    <span>App 01 / 05</span>
+    <button onclick="show(2)" style="background:var(--ink);color:#fff;padding:0.5rem 1.1rem;border-radius:6px;border:none;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">Next: Spread →</button>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================
+     PANEL 2 — POPULATION SPREAD
+     ============================================================ -->
+<div class="panel" id="p2">
+<div class="container">
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-label">App 02 — Interactive</div>
+        <h2>Population spread on a curved landscape</h2>
+        <div class="plot-wrap">
+          <svg id="svg2" viewBox="0 0 520 240"></svg>
+          <div class="plot-label">Green shading: population distribution (±2σ). Blue dashed: tangent. Orange fill: curvature load $V_{\rm quad}$.</div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-row">
+            <label>mean $\mu$</label>
+            <input type="range" id="s2_mu" min="-1.5" max="2.0" step="0.02" value="0.9">
+            <span class="slider-val" id="s2_mu_v">0.90</span>
+          </div>
+          <div class="slider-row">
+            <label>spread $\sigma$</label>
+            <input type="range" id="s2_sig" min="0.12" max="1.4" step="0.01" value="0.55">
+            <span class="slider-val" id="s2_sig_v">0.55</span>
+          </div>
+          <div class="slider-row">
+            <label>curvature $|H|$</label>
+            <input type="range" id="s2_curv" min="0.05" max="1.2" step="0.02" value="0.45">
+            <span class="slider-val" id="s2_curv_v">0.45</span>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div class="metric green"><span class="lbl">$V_{\rm lin} = b^2 G$</span><span class="val" id="m2_vl">—</span></div>
+          <div class="metric orange"><span class="lbl">$V_{\rm quad} = \frac{1}{2}H^2 G^2$</span><span class="val" id="m2_vq">—</span></div>
+          <div class="metric purple"><span class="lbl">$\mathcal{A}_g$</span><span class="val" id="m2_ag">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-label">The idea</div>
+        <h2>The scaling asymmetry</h2>
+        <p>The landscape has not changed between a narrow and a broad population. Only the spread changes. Yet the additivity index $\mathcal{A}_g$ falls as $\sigma$ rises. Why?</p>
+        <p>The linear variance $V_{\rm lin}$ involves <strong>one copy</strong> of $G = \sigma^2$:</p>
+        <div style="background:#f5f3ed;border-radius:6px;padding:0.6rem 1rem;font-family:var(--mono);font-size:0.88rem;margin:0.7rem 0;text-align:center">
+          V_lin = b² · G
+        </div>
+        <p>The curvature variance $V_{\rm quad}$ involves <strong>two copies</strong> of $G$:</p>
+        <div style="background:#f5f3ed;border-radius:6px;padding:0.6rem 1rem;font-family:var(--mono);font-size:0.88rem;margin:0.7rem 0;text-align:center">
+          V_quad = ½ · H² · G²
+        </div>
+        <p>So doubling $\sigma$ (quadrupling $G$) quadruples $V_{\rm lin}$ but <em>sixteen-fold</em> increases $V_{\rm quad}$. The curvature term grows faster, so $\mathcal{A}_g$ falls.</p>
+        <div class="callout green">
+          <strong>The important corollary.</strong> Under directional selection, $G$ compresses. Because $V_{\rm quad} \propto G^2$ falls faster than $V_{\rm lin} \propto G$, selection <em>mechanically deepens the channel</em>. A more selected, narrower population is always more locally additive — even without any change to the landscape.
+        </div>
+        <div class="callout orange">
+          <strong>Try this.</strong> Set $\sigma$ to maximum. Now hold $\sigma$ fixed and increase curvature. Notice that large $|H|$ can close the channel even when the population is narrow — but it has less impact than changing $\sigma$, because $\sigma$ appears twice.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-footer">
+    <button onclick="show(1)" style="background:transparent;border:1px solid var(--border);color:var(--ink);padding:0.5rem 1.1rem;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">← Tangent</button>
+    <span>App 02 / 05</span>
+    <button onclick="show(3)" style="background:var(--ink);color:#fff;padding:0.5rem 1.1rem;border-radius:6px;border:none;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">Next: Moving optimum →</button>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================
+     PANEL 3 — MOVING OPTIMUM
+     ============================================================ -->
+<div class="panel" id="p3">
+<div class="container">
+
+  <div class="two-col-eq" style="margin-bottom:1.5rem">
+    <div class="card">
+      <div class="card-label">Simulation — $\mathcal{A}_g(t)$, lag $d(t)$, variance $G(t)$</div>
+      <div class="plot-wrap">
+        <svg id="svg3a" viewBox="0 0 500 220"></svg>
+        <div class="plot-label">Purple: $\mathcal{A}_g(t)$. Green solid: lag $d(t)$. Teal dashed: $G(t)$.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Rate diagnostic $r(t)$</div>
+      <div class="plot-wrap">
+        <svg id="svg3b" viewBox="0 0 500 220"></svg>
+        <div class="plot-label">Positive $r$ → predictability improving. Negative → eroding. Black dashed: zero line.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-label">The idea</div>
+      <h2>Three acts</h2>
+      <p><strong>Act I (optimum moving, population lagging):</strong> $d$ is large, $V_{\rm lin} = (sd)^2 G$ is large, and $\mathcal{A}_g$ is high. The channel is open. Additive prediction works.</p>
+      <p><strong>Act II (optimum reached, $d \to 0$):</strong> The gradient $b = sd$ collapses toward zero. $V_{\rm lin} \to 0$ while $V_{\rm quad}$ persists. $\mathcal{A}_g$ falls — not because the biology became complex, but because <em>selection succeeded</em>.</p>
+      <p><strong>Act I again (optimum resumes moving):</strong> The lag rebuilds, $V_{\rm lin}$ recovers, $\mathcal{A}_g$ rises. Channel re-entry.</p>
+      <div class="callout purple">
+        <strong>The counterintuitive result.</strong> A population <em>near</em> its optimum is less reliably additive than one <em>far</em> from it. The channel width is driven by the lag, not just by variance magnitude.
+      </div>
+      <div class="callout orange">
+        <strong>The rate diagnostic $r(t)$.</strong> Before $\mathcal{A}_g$ visibly falls, $r(t)$ goes negative. This is the early warning. A population can still be inside the channel while $r < 0$: prediction still works but is already being eroded.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">App 03 — Controls</div>
+      <div class="slider-group">
+        <div class="slider-row"><label>curvature $s$</label>
+          <input type="range" id="s3_s" min="0.03" max="0.25" step="0.005" value="0.10">
+          <span class="slider-val" id="s3_s_v">0.100</span></div>
+        <div class="slider-row"><label>initial variance $G_0$</label>
+          <input type="range" id="s3_g0" min="0.2" max="2.5" step="0.05" value="1.0">
+          <span class="slider-val" id="s3_g0_v">1.00</span></div>
+        <div class="slider-row"><label>initial mean $z_0$</label>
+          <input type="range" id="s3_z0" min="-3" max="1.0" step="0.05" value="-2.0">
+          <span class="slider-val" id="s3_z0_v">-2.00</span></div>
+        <div class="slider-row"><label>mid-period optimum $\theta_1$</label>
+          <input type="range" id="s3_th1" min="0.5" max="3.0" step="0.05" value="2.0">
+          <span class="slider-val" id="s3_th1_v">2.00</span></div>
+        <div class="slider-row"><label>optimum speed</label>
+          <input type="range" id="s3_spd" min="0.005" max="0.06" step="0.001" value="0.025">
+          <span class="slider-val" id="s3_spd_v">0.025</span></div>
+        <div class="slider-row"><label>recombination $\lambda$</label>
+          <input type="range" id="s3_lam" min="0" max="0.8" step="0.01" value="0.3">
+          <span class="slider-val" id="s3_lam_v">0.30</span></div>
+        <div class="slider-row"><label>rec. baseline $G_*$</label>
+          <input type="range" id="s3_gs" min="0.2" max="2.0" step="0.05" value="0.8">
+          <span class="slider-val" id="s3_gs_v">0.80</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <button onclick="show(2)" style="background:transparent;border:1px solid var(--border);color:var(--ink);padding:0.5rem 1.1rem;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">← Spread</button>
+    <span>App 03 / 05</span>
+    <button onclick="show(4)" style="background:var(--ink);color:#fff;padding:0.5rem 1.1rem;border-radius:6px;border:none;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">Next: Rotation →</button>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================
+     PANEL 4 — GRADIENT ROTATION
+     ============================================================ -->
+<div class="panel" id="p4">
+<div class="container">
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-label">App 04 — $\mathcal{A}_g$ as a function of gradient angle</div>
+        <div class="plot-wrap">
+          <svg id="svg4a" viewBox="0 0 500 220"></svg>
+          <div class="plot-label">$\mathcal{A}_g(\theta)$ vs gradient angle. Red dot: current angle. Dashed: $\alpha = 0.70$ threshold.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">Geometric view — ellipse and gradient arrows</div>
+        <div class="plot-wrap">
+          <svg id="svg4b" viewBox="0 0 500 220"></svg>
+          <div class="plot-label">Blue ellipse: covariance cloud $\mathbf{G}$. Green: $\mathbf{g}_{\max}$. Red: current gradient $\mathbf{b}$.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-label">The idea</div>
+        <h2>Act III — misalignment without variance loss</h2>
+        <p>This is the most important result for climate-change applications. The covariance cloud $\mathbf{G}$ has not changed. The curvature $\gamma$ has not changed. The only thing that changes is the <strong>direction</strong> of the fitness gradient.</p>
+        <p>Because $V_{\rm lin} = |\mathbf{b}|^2 (\lambda_1 \cos^2\theta + \lambda_2 \sin^2\theta)$ depends on alignment while $V_{\rm quad}$ does not, rotating $\mathbf{b}$ away from $\mathbf{g}_{\max}$ reduces $V_{\rm lin}$ and therefore $\mathcal{A}_g$ — without any loss of genetic variance and without any increase in landscape ruggedness.</p>
+        <div class="callout purple">
+          <strong>How to read the plot.</strong> The curve shows $\mathcal{A}_g$ as a function of the angle $\theta$ between the gradient and $\mathbf{g}_{\max}$. It is highest when $\theta = 0$ (perfect alignment) and lowest when $\theta = 90°$ (gradient perpendicular to the major axis).
+        </div>
+        <div class="callout orange">
+          <strong>Key finding.</strong> A highly eccentric $\mathbf{G}$ (large $\lambda_1/\lambda_2$) is the most vulnerable to gradient rotation. The channel can exit at a small rotation angle when variance is concentrated in one direction. A rounder $\mathbf{G}$ is more robust to environmental rotation.
+        </div>
+        <div class="callout teal">
+          <strong>Try this.</strong> Set eccentricity ($\lambda_1/\lambda_2$) to maximum. Even a small rotation from $\theta = 0$ collapses $\mathcal{A}_g$ dramatically. Now set both eigenvalues equal (round $\mathbf{G}$). $\mathcal{A}_g$ is now flat — a round cloud is equally additive in all directions.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Controls</div>
+        <div class="slider-group">
+          <div class="slider-row"><label>major var $\lambda_1$</label>
+            <input type="range" id="s4_l1" min="0.6" max="3.0" step="0.02" value="2.0">
+            <span class="slider-val" id="s4_l1_v">2.00</span></div>
+          <div class="slider-row"><label>minor var $\lambda_2$</label>
+            <input type="range" id="s4_l2" min="0.1" max="1.5" step="0.02" value="0.5">
+            <span class="slider-val" id="s4_l2_v">0.50</span></div>
+          <div class="slider-row"><label>curvature $\gamma$</label>
+            <input type="range" id="s4_gam" min="0.1" max="0.8" step="0.005" value="0.414">
+            <span class="slider-val" id="s4_gam_v">0.414</span></div>
+          <div class="slider-row"><label>gradient size $|\mathbf{b}|$</label>
+            <input type="range" id="s4_bn" min="0.4" max="2.0" step="0.02" value="1.0">
+            <span class="slider-val" id="s4_bn_v">1.00</span></div>
+          <div class="slider-row"><label>rotation angle $\theta$</label>
+            <input type="range" id="s4_th" min="0" max="180" step="0.5" value="35">
+            <span class="slider-val" id="s4_th_v">35°</span></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric purple"><span class="lbl">$\mathcal{A}_g(\theta)$</span><span class="val" id="m4_ag">—</span></div>
+          <div class="metric blue"><span class="lbl">$\lambda_1/\lambda_2$</span><span class="val" id="m4_ecc">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-footer">
+    <button onclick="show(3)" style="background:transparent;border:1px solid var(--border);color:var(--ink);padding:0.5rem 1.1rem;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">← Moving optimum</button>
+    <span>App 04 / 05</span>
+    <button onclick="show(5)" style="background:var(--ink);color:#fff;padding:0.5rem 1.1rem;border-radius:6px;border:none;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">Next: Introgression →</button>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================
+     PANEL 5 — INTROGRESSION
+     ============================================================ -->
+<div class="panel" id="p5">
+<div class="container">
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-label">App 05 — Net $\mathcal{A}_g$ score vs introgression direction</div>
+        <div class="plot-wrap">
+          <svg id="svg5a" viewBox="0 0 500 220"></svg>
+          <div class="plot-label">Benefit minus cost as incoming variance direction sweeps 0°–180°. Red dot: current direction.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">Directional geometry</div>
+        <div class="plot-wrap">
+          <svg id="svg5b" viewBox="0 0 500 220"></svg>
+          <div class="plot-label">Green: gradient $\mathbf{b}$. Amber: curvature-sensitive direction. Red: incoming variance direction $\mathbf{v}$.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-label">The idea</div>
+        <h2>New variance can help or hurt</h2>
+        <p>When a wide cross or migration event introduces new genetic variance along direction $\mathbf{v}$, the change in $\mathcal{A}_g$ has two components:</p>
+        <div style="background:#f5f3ed;border-radius:6px;padding:0.7rem 1rem;font-family:var(--mono);font-size:0.85rem;margin:0.8rem 0;text-align:center;line-height:1.8">
+          δA_g ∝  <span style="color:var(--green)">(b·v)²/V_lin</span>  −  <span style="color:var(--orange)">v'HGHv / V_quad</span>
+        </div>
+        <p>The <span style="color:var(--green);font-weight:600">green benefit term</span> is gradient alignment: how much the new variance points where selection wants to push. It grows when $\mathbf{v}$ is aligned with $\mathbf{b}$.</p>
+        <p>The <span style="color:var(--orange);font-weight:600">amber cost term</span> is curvature exposure: how much the new variance points into directions where the landscape bends. It grows when $\mathbf{v}$ is aligned with the direction of high curvature.</p>
+        <div class="callout green">
+          <strong>Practical implication.</strong> A wide cross that introduces variance aligned with the <em>current fitness gradient</em> deepens the channel and improves genomic prediction. A wide cross that introduces variance aligned with curvature directions loads $V_{\rm quad}$ and can harm prediction — even if it increases total genetic variance.
+        </div>
+        <div class="callout orange">
+          <strong>Try this.</strong> Align the gradient and the curvature-sensitive direction (set them to the same angle). Now any introgression direction is equally good or bad relative to both — no choice is optimal. Then separate them and find the optimal introgression direction for your current gradient.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Controls</div>
+        <div class="slider-group">
+          <div class="slider-row"><label>gradient direction</label>
+            <input type="range" id="s5_ba" min="0" max="180" step="0.5" value="20">
+            <span class="slider-val" id="s5_ba_v">20°</span></div>
+          <div class="slider-row"><label>curvature direction</label>
+            <input type="range" id="s5_ca" min="0" max="180" step="0.5" value="95">
+            <span class="slider-val" id="s5_ca_v">95°</span></div>
+          <div class="slider-row"><label>introgression direction</label>
+            <input type="range" id="s5_va" min="0" max="180" step="0.5" value="30">
+            <span class="slider-val" id="s5_va_v">30°</span></div>
+          <div class="slider-row"><label>benefit weight</label>
+            <input type="range" id="s5_wt" min="0.2" max="1.8" step="0.02" value="1.0">
+            <span class="slider-val" id="s5_wt_v">1.00</span></div>
+          <div class="slider-row"><label>cost weight</label>
+            <input type="range" id="s5_pen" min="0.2" max="1.8" step="0.02" value="0.8">
+            <span class="slider-val" id="s5_pen_v">0.80</span></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric green"><span class="lbl">benefit</span><span class="val" id="m5_ben">—</span></div>
+          <div class="metric orange"><span class="lbl">cost</span><span class="val" id="m5_cost">—</span></div>
+          <div class="metric purple"><span class="lbl">net score</span><span class="val" id="m5_net">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-footer">
+    <button onclick="show(4)" style="background:transparent;border:1px solid var(--border);color:var(--ink);padding:0.5rem 1.1rem;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:0.72rem;">← Rotation</button>
+    <span>App 05 / 05</span>
+    <a href="math_tutorial.html" style="background:var(--ink);color:#fff;padding:0.5rem 1.1rem;border-radius:6px;text-decoration:none;font-family:var(--mono);font-size:0.72rem;">Advanced app →</a>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ============================================================
+// UTILITIES
+// ============================================================
+const W = 500, H = 220;
+
+function range(lo, hi, step){
+  const out = [];
+  for(let x = lo; x <= hi + 1e-9; x += step) out.push(x);
+  return out;
+}
+
+function toSVGPath(pts, xMin, xMax, yMin, yMax, w=W, h=H){
+  return pts.map((p,i)=>{
+    const sx = ((p.x-xMin)/(xMax-xMin))*w;
+    const sy = h - ((p.y-yMin)/(yMax-yMin))*h;
+    return `${i===0?'M':'L'} ${sx.toFixed(1)} ${sy.toFixed(1)}`;
+  }).join(' ');
+}
+
+function toSX(x, xMin, xMax, w=W){ return ((x-xMin)/(xMax-xMin))*w; }
+function toSY(y, yMin, yMax, h=H){ return h - ((y-yMin)/(yMax-yMin))*h; }
+
+function normalPdf(x, mu, sig){
+  const z=(x-mu)/sig;
+  return Math.exp(-0.5*z*z)/(sig*Math.sqrt(2*Math.PI));
+}
+
+function integrate(xs, ys){
+  let s=0;
+  for(let i=1;i<xs.length;i++) s+=0.5*(ys[i]+ys[i-1])*(xs[i]-xs[i-1]);
+  return s;
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function show(idx){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  setTimeout(()=>{
+    if(idx===1) drawApp1();
+    if(idx===2) drawApp2();
+    if(idx===3) drawApp3();
+    if(idx===4) drawApp4();
+    if(idx===5) drawApp5();
+  }, 20);
+}
+
+// ============================================================
+// APP 1 — TANGENT & CURVATURE
+// ============================================================
+function getP1(){
+  return {
+    mu:   parseFloat(document.getElementById('s1_mu').value),
+    curv: parseFloat(document.getElementById('s1_curv').value),
+    wig:  parseFloat(document.getElementById('s1_wig').value),
+  };
+}
+function f1(x,p){ return 1.2 + 0.9*x - 0.5*p.curv*x*x + p.wig*Math.sin(2.5*x); }
+function fp1(x,p){ return 0.9 - p.curv*x + p.wig*2.5*Math.cos(2.5*x); }
+function fpp1(x,p){ return -p.curv - p.wig*6.25*Math.sin(2.5*x); }
+
+function drawApp1(){
+  const p = getP1();
+  const xs = range(-3, 3, 0.03);
+  const curve = xs.map(x=>({x, y:f1(x,p)}));
+  const y0 = f1(p.mu,p), m = fp1(p.mu,p);
+  const tang = xs.map(x=>({x, y: y0+m*(x-p.mu)}));
+  const allY = [...curve.map(c=>c.y), ...tang.map(c=>c.y)];
+  const yMin = Math.min(...allY)-0.3, yMax = Math.max(...allY)+0.3;
+
+  const svg = document.getElementById('svg1');
+  svg.innerHTML = '';
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  // curve
+  const pathEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+  pathEl.setAttribute('d', toSVGPath(curve,-3,3,yMin,yMax));
+  pathEl.setAttribute('fill','none'); pathEl.setAttribute('stroke','#1a1a2e');
+  pathEl.setAttribute('stroke-width','2.5');
+  svg.appendChild(pathEl);
+
+  // tangent
+  const tanEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+  tanEl.setAttribute('d', toSVGPath(tang,-3,3,yMin,yMax));
+  tanEl.setAttribute('fill','none'); tanEl.setAttribute('stroke','#2a5fa8');
+  tanEl.setAttribute('stroke-width','2'); tanEl.setAttribute('stroke-dasharray','7 5');
+  svg.appendChild(tanEl);
+
+  // dot
+  const cx = toSX(p.mu,-3,3), cy = toSY(y0,yMin,yMax);
+  const dotEl = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dotEl.setAttribute('cx',cx); dotEl.setAttribute('cy',cy);
+  dotEl.setAttribute('r','6'); dotEl.setAttribute('fill','#b03030');
+  svg.appendChild(dotEl);
+
+  document.getElementById('m1_b').textContent = m.toFixed(3);
+  document.getElementById('m1_H').textContent = fpp1(p.mu,p).toFixed(3);
+}
+
+['s1_mu','s1_curv','s1_wig'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'_v').textContent = parseFloat(this.value).toFixed(2);
+    drawApp1();
+  });
+});
+
+// ============================================================
+// APP 2 — POPULATION SPREAD
+// ============================================================
+function getP2(){
+  return {
+    mu:   parseFloat(document.getElementById('s2_mu').value),
+    sig:  parseFloat(document.getElementById('s2_sig').value),
+    curv: parseFloat(document.getElementById('s2_curv').value),
+  };
+}
+
+function drawApp2(){
+  const p = getP2();
+  const xs = range(-3, 3, 0.025);
+  const b = 0.8 - p.curv*p.mu;
+  const y0_val = 1.0 + 0.8*p.mu - 0.5*p.curv*p.mu*p.mu;
+  const f = x => 1.0 + 0.8*x - 0.5*p.curv*x*x;
+  const tang = x => y0_val + b*(x-p.mu);
+  const curve = xs.map(x=>({x, y:f(x)}));
+  const tanPts = xs.map(x=>({x, y:tang(x)}));
+  const allY = [...curve.map(c=>c.y), ...tanPts.map(c=>c.y)];
+  const yMin = Math.min(...allY)-0.4, yMax = Math.max(...allY)+0.4;
+
+  const G = p.sig*p.sig;
+  const vl = b*b*G;
+  const vq = 0.5*p.curv*p.curv*G*G;
+  const ag = vl/(vl+vq);
+
+  document.getElementById('m2_vl').textContent = vl.toFixed(3);
+  document.getElementById('m2_vq').textContent = vq.toFixed(3);
+  document.getElementById('m2_ag').textContent = ag.toFixed(3);
+
+  const svg = document.getElementById('svg2');
+  svg.innerHTML = '';
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  // curvature load fill (between tangent and curve, within ±2σ)
+  const innerXs = xs.filter(x=>Math.abs(x-p.mu)<=2*p.sig);
+  if(innerXs.length > 2){
+    let d='';
+    innerXs.forEach((x,i)=>{
+      const px=toSX(x,-3,3), py=toSY(tang(x),yMin,yMax);
+      d += (i===0?'M':'L')+` ${px.toFixed(1)} ${py.toFixed(1)} `;
+    });
+    for(let i=innerXs.length-1;i>=0;i--){
+      const x=innerXs[i];
+      d += `L ${toSX(x,-3,3).toFixed(1)} ${toSY(f(x),yMin,yMax).toFixed(1)} `;
+    }
+    d += 'Z';
+    const loadEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+    loadEl.setAttribute('d',d);
+    loadEl.setAttribute('fill','rgba(201,124,42,0.25)');
+    loadEl.setAttribute('stroke','none');
+    svg.appendChild(loadEl);
+  }
+
+  // population density rug at bottom
+  const rugY = H-18;
+  innerXs.forEach(x=>{
+    const px = toSX(x,-3,3);
+    const ht = 14*normalPdf(x,p.mu,p.sig)/normalPdf(p.mu,p.mu,p.sig);
+    const fill = `rgba(45,138,94,${0.5*Math.exp(-0.5*((x-p.mu)/p.sig)**2)})`;
+    const rectEl = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rectEl.setAttribute('x',px-1); rectEl.setAttribute('y',rugY-ht);
+    rectEl.setAttribute('width','2'); rectEl.setAttribute('height',ht.toFixed(1));
+    rectEl.setAttribute('fill',fill);
+    svg.appendChild(rectEl);
+  });
+
+  // curve
+  const cEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+  cEl.setAttribute('d',toSVGPath(curve,-3,3,yMin,yMax));
+  cEl.setAttribute('fill','none'); cEl.setAttribute('stroke','#1a1a2e');
+  cEl.setAttribute('stroke-width','2.5');
+  svg.appendChild(cEl);
+
+  // tangent
+  const tEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+  tEl.setAttribute('d',toSVGPath(tanPts,-3,3,yMin,yMax));
+  tEl.setAttribute('fill','none'); tEl.setAttribute('stroke','#2a5fa8');
+  tEl.setAttribute('stroke-width','2'); tEl.setAttribute('stroke-dasharray','7 5');
+  svg.appendChild(tEl);
+
+  // mean dot
+  const dotEl = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dotEl.setAttribute('cx',toSX(p.mu,-3,3)); dotEl.setAttribute('cy',toSY(f(p.mu),yMin,yMax));
+  dotEl.setAttribute('r','5'); dotEl.setAttribute('fill','#b03030');
+  svg.appendChild(dotEl);
+}
+
+['s2_mu','s2_sig','s2_curv'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'_v').textContent = parseFloat(this.value).toFixed(2);
+    drawApp2();
+  });
+});
+
+// ============================================================
+// APP 3 — MOVING OPTIMUM
+// ============================================================
+function getP3(){
+  return {
+    s:   parseFloat(document.getElementById('s3_s').value),
+    g0:  parseFloat(document.getElementById('s3_g0').value),
+    z0:  parseFloat(document.getElementById('s3_z0').value),
+    th1: parseFloat(document.getElementById('s3_th1').value),
+    spd: parseFloat(document.getElementById('s3_spd').value),
+    lam: parseFloat(document.getElementById('s3_lam').value),
+    gs:  parseFloat(document.getElementById('s3_gs').value),
+    m:   0.005, Ne: 500,
+  };
+}
+
+function runSim3(p){
+  const dt=0.5, tMax=80, out=[];
+  let z=p.z0, G=p.g0;
+  for(let t=0;t<=tMax+1e-9;t+=dt){
+    const theta = t<25 ? -1+p.spd*t*6 : t<50 ? p.th1 : p.th1+p.spd*(t-50)*5;
+    const d = theta-z;
+    const Ag = (d*d)/(d*d+G/2);
+    const tdot = t<25?p.spd*6:t<50?0:p.spd*5;
+    const r = 2*tdot/Math.max(Math.abs(d),0.08) - p.s*G + p.lam*(1-p.gs/G) - p.m/G + 1/(2*p.Ne);
+    out.push({t,theta,z,G,d:Math.abs(d),Ag,r});
+    z += dt*G*p.s*d;
+    G = Math.max(0.03, G+dt*(-p.s*G*G - p.lam*(G-p.gs) + p.m - G/(2*p.Ne)));
+  }
+  return out;
+}
+
+function drawSVGLines(svgId, datasets, tMax=80){
+  const svg = document.getElementById(svgId);
+  svg.innerHTML=''; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  // background
+  const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bg.setAttribute('width',W); bg.setAttribute('height',H); bg.setAttribute('fill','#fdfaf4');
+  svg.appendChild(bg);
+
+  datasets.forEach(({pts, color, dash})=>{
+    if(!pts||pts.length<2) return;
+    const allY=pts.map(p=>p.y);
+    const yMin=Math.min(...allY)-0.05, yMax=Math.max(...allY)+0.05;
+    const el=document.createElementNS('http://www.w3.org/2000/svg','path');
+    el.setAttribute('d',toSVGPath(pts,0,tMax,yMin,yMax));
+    el.setAttribute('fill','none'); el.setAttribute('stroke',color);
+    el.setAttribute('stroke-width','2.2');
+    if(dash) el.setAttribute('stroke-dasharray','7 4');
+    svg.appendChild(el);
+  });
+}
+
+function drawSharedAxes(svgId, datasets, tMax=80){
+  const svg = document.getElementById(svgId);
+  svg.innerHTML=''; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bg.setAttribute('width',W); bg.setAttribute('height',H); bg.setAttribute('fill','#fdfaf4');
+  svg.appendChild(bg);
+
+  const allY = datasets.flatMap(d=>d.pts.map(p=>p.y));
+  const yMin = Math.min(...allY) - Math.abs(Math.min(...allY))*0.1 - 0.05;
+  const yMax = Math.max(...allY) + Math.abs(Math.max(...allY))*0.1 + 0.05;
+
+  // zero line
+  if(yMin < 0 && yMax > 0){
+    const z0El=document.createElementNS('http://www.w3.org/2000/svg','line');
+    z0El.setAttribute('x1',0); z0El.setAttribute('x2',W);
+    const zy=toSY(0,yMin,yMax);
+    z0El.setAttribute('y1',zy); z0El.setAttribute('y2',zy);
+    z0El.setAttribute('stroke','rgba(0,0,0,0.15)'); z0El.setAttribute('stroke-width','1');
+    z0El.setAttribute('stroke-dasharray','4 4');
+    svg.appendChild(z0El);
+  }
+
+  datasets.forEach(({pts,color,dash})=>{
+    const el=document.createElementNS('http://www.w3.org/2000/svg','path');
+    el.setAttribute('d',toSVGPath(pts,0,tMax,yMin,yMax));
+    el.setAttribute('fill','none'); el.setAttribute('stroke',color);
+    el.setAttribute('stroke-width','2.2');
+    if(dash) el.setAttribute('stroke-dasharray','7 4');
+    svg.appendChild(el);
+  });
+}
+
+function drawApp3(){
+  const p = getP3();
+  const sim = runSim3(p);
+  const agPts = sim.map(d=>({x:d.t, y:d.Ag}));
+  const dPts  = sim.map(d=>({x:d.t, y:d.d}));
+  const gPts  = sim.map(d=>({x:d.t, y:d.G}));
+  const rPts  = sim.map(d=>({x:d.t, y:d.r}));
+
+  drawSharedAxes('svg3a',[
+    {pts:agPts, color:'#7c3d8a'},
+    {pts:dPts,  color:'#2d8a5e'},
+    {pts:gPts,  color:'#1a7a6e', dash:true},
+  ]);
+  drawSharedAxes('svg3b',[
+    {pts:rPts, color:'#1a1a2e'},
+  ]);
+}
+
+['s3_s','s3_g0','s3_z0','s3_th1','s3_spd','s3_lam','s3_gs'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'_v').textContent = parseFloat(this.value).toFixed(3);
+    drawApp3();
+  });
+});
+
+// ============================================================
+// APP 4 — GRADIENT ROTATION
+// ============================================================
+function getP4(){
+  return {
+    l1:  parseFloat(document.getElementById('s4_l1').value),
+    l2:  parseFloat(document.getElementById('s4_l2').value),
+    gam: parseFloat(document.getElementById('s4_gam').value),
+    bn:  parseFloat(document.getElementById('s4_bn').value),
+    th:  parseFloat(document.getElementById('s4_th').value)*Math.PI/180,
+  };
+}
+
+function agRot(th, l1, l2, gam, bn){
+  const Vlin = bn*bn*(l1*Math.cos(th)**2 + l2*Math.sin(th)**2);
+  const Vquad = 0.5*gam*gam*(l1*l1+l2*l2);
+  return Vlin/(Vlin+Vquad);
+}
+
+function drawApp4(){
+  const p = getP4();
+  const thArr = range(0,Math.PI,0.02);
+  const agArr = thArr.map(t=>agRot(t,p.l1,p.l2,p.gam,p.bn));
+  const agPts = thArr.map((t,i)=>({x:t*180/Math.PI, y:agArr[i]}));
+  const agNow = agRot(p.th,p.l1,p.l2,p.gam,p.bn);
+
+  document.getElementById('m4_ag').textContent  = agNow.toFixed(3);
+  document.getElementById('m4_ecc').textContent = (p.l1/p.l2).toFixed(2);
+
+  // — Plot A: Ag vs angle —
+  const svgA = document.getElementById('svg4a');
+  svgA.innerHTML=''; svgA.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const bgA=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bgA.setAttribute('width',W); bgA.setAttribute('height',H); bgA.setAttribute('fill','#fdfaf4');
+  svgA.appendChild(bgA);
+
+  // alpha threshold
+  const alphaLine=document.createElementNS('http://www.w3.org/2000/svg','line');
+  const ay=toSY(0.70,0,1);
+  alphaLine.setAttribute('x1',0); alphaLine.setAttribute('x2',W);
+  alphaLine.setAttribute('y1',ay); alphaLine.setAttribute('y2',ay);
+  alphaLine.setAttribute('stroke','#b03030'); alphaLine.setAttribute('stroke-width','1.2');
+  alphaLine.setAttribute('stroke-dasharray','5 4');
+  svgA.appendChild(alphaLine);
+
+  const lineEl=document.createElementNS('http://www.w3.org/2000/svg','path');
+  lineEl.setAttribute('d',toSVGPath(agPts,0,180,0,1));
+  lineEl.setAttribute('fill','none'); lineEl.setAttribute('stroke','#2a5fa8');
+  lineEl.setAttribute('stroke-width','2.5');
+  svgA.appendChild(lineEl);
+
+  const dotEl=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dotEl.setAttribute('cx',toSX(p.th*180/Math.PI,0,180));
+  dotEl.setAttribute('cy',toSY(agNow,0,1));
+  dotEl.setAttribute('r','6'); dotEl.setAttribute('fill','#b03030');
+  svgA.appendChild(dotEl);
+
+  // x-axis labels
+  ['0°','45°','90°','135°','180°'].forEach((lbl,i)=>{
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',toSX(i*45,0,180)-6); t.setAttribute('y',H-4);
+    t.setAttribute('font-size','9'); t.setAttribute('fill','#6b6b80');
+    t.setAttribute('font-family','Space Mono, monospace');
+    t.textContent=lbl; svgA.appendChild(t);
+  });
+
+  // — Plot B: geometric view —
+  const svgB = document.getElementById('svg4b');
+  svgB.innerHTML=''; svgB.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const bgB=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bgB.setAttribute('width',W); bgB.setAttribute('height',H); bgB.setAttribute('fill','#fdfaf4');
+  svgB.appendChild(bgB);
+
+  const cx=W/2, cy=H/2, sc=65;
+  const a=Math.sqrt(p.l1)*sc, b2=Math.sqrt(p.l2)*sc;
+
+  // ellipse
+  const ell=document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+  ell.setAttribute('cx',cx); ell.setAttribute('cy',cy);
+  ell.setAttribute('rx',a); ell.setAttribute('ry',b2);
+  ell.setAttribute('fill','rgba(42,95,168,0.10)');
+  ell.setAttribute('stroke','#2a5fa8'); ell.setAttribute('stroke-width','2');
+  svgB.appendChild(ell);
+
+  // gmax (horizontal = major axis since G is axis-aligned)
+  const gmL=a*0.88;
+  addArrow(svgB, cx, cy, cx+gmL, cy, '#2d8a5e', 3);
+  addLabel(svgB, cx+gmL+5, cy-10, 'g_max', '#2d8a5e', 10);
+
+  // gradient b
+  const bL=sc*1.3;
+  const bx=cx+Math.cos(p.th)*bL, by_=cy-Math.sin(p.th)*bL;
+  addArrow(svgB, cx, cy, bx, by_, '#b03030', 3);
+  addLabel(svgB, bx+5, by_-5, 'b', '#b03030', 11);
+
+  // angle arc
+  if(Math.abs(p.th)>0.05){
+    const arcEl=document.createElementNS('http://www.w3.org/2000/svg','path');
+    const r2=sc*0.42;
+    const ax1=cx+r2, ay1=cy;
+    const ax2=cx+r2*Math.cos(p.th), ay2=cy-r2*Math.sin(p.th);
+    arcEl.setAttribute('d',`M ${ax1} ${ay1} A ${r2} ${r2} 0 0 0 ${ax2.toFixed(1)} ${ay2.toFixed(1)}`);
+    arcEl.setAttribute('fill','none'); arcEl.setAttribute('stroke','rgba(0,0,0,0.3)');
+    arcEl.setAttribute('stroke-width','1.2');
+    svgB.appendChild(arcEl);
+    addLabel(svgB, cx+r2*0.6, cy-r2*0.25, 'θ', 'rgba(0,0,0,0.5)', 10);
+  }
+}
+
+function addArrow(svg, x1, y1, x2, y2, color, sw){
+  const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+  line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+  line.setAttribute('stroke',color); line.setAttribute('stroke-width',sw);
+  svg.appendChild(line);
+  const ang=Math.atan2(y2-y1,x2-x1);
+  const hLen=10;
+  const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  const p1=`${x2},${y2}`;
+  const p2=`${x2-hLen*Math.cos(ang-0.4)},${y2-hLen*Math.sin(ang-0.4)}`;
+  const p3=`${x2-hLen*Math.cos(ang+0.4)},${y2-hLen*Math.sin(ang+0.4)}`;
+  poly.setAttribute('points',`${p1} ${p2} ${p3}`);
+  poly.setAttribute('fill',color);
+  svg.appendChild(poly);
+}
+
+function addLabel(svg, x, y, text, color, size){
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',x); t.setAttribute('y',y);
+  t.setAttribute('font-size',size); t.setAttribute('fill',color);
+  t.setAttribute('font-family','Space Mono, monospace');
+  t.textContent=text; svg.appendChild(t);
+}
+
+['s4_l1','s4_l2','s4_gam','s4_bn'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'_v').textContent=parseFloat(this.value).toFixed(3);
+    drawApp4();
+  });
+});
+document.getElementById('s4_th').addEventListener('input',function(){
+  document.getElementById('s4_th_v').textContent=parseFloat(this.value).toFixed(0)+'°';
+  drawApp4();
+});
+
+// ============================================================
+// APP 5 — INTROGRESSION
+// ============================================================
+function getP5(){
+  return {
+    ba:  parseFloat(document.getElementById('s5_ba').value)*Math.PI/180,
+    ca:  parseFloat(document.getElementById('s5_ca').value)*Math.PI/180,
+    va:  parseFloat(document.getElementById('s5_va').value)*Math.PI/180,
+    wt:  parseFloat(document.getElementById('s5_wt').value),
+    pen: parseFloat(document.getElementById('s5_pen').value),
+  };
+}
+
+function drawApp5(){
+  const p = getP5();
+  const b=[Math.cos(p.ba),Math.sin(p.ba)];
+  const c=[Math.cos(p.ca),Math.sin(p.ca)];
+  const v=[Math.cos(p.va),Math.sin(p.va)];
+
+  const dot=(a,b2)=>a[0]*b2[0]+a[1]*b2[1];
+  const benefit=(vv)=>p.wt*dot(b,vv)**2;
+  const cost=(vv)=>p.pen*dot(c,vv)**2;
+  const score=(vv)=>benefit(vv)-cost(vv);
+
+  const curBen=benefit(v), curCost=cost(v), curScore=score(v);
+  document.getElementById('m5_ben').textContent = curBen.toFixed(3);
+  document.getElementById('m5_cost').textContent = curCost.toFixed(3);
+  document.getElementById('m5_net').textContent  = curScore.toFixed(3);
+  document.getElementById('m5_net').style.color = curScore>0?'#2d8a5e':'#b03030';
+
+  const degArr = range(0,180,1);
+  const scorePts = degArr.map(d=>{
+    const vv=[Math.cos(d*Math.PI/180),Math.sin(d*Math.PI/180)];
+    return {x:d, y:score(vv)};
+  });
+  const allY=scorePts.map(p2=>p2.y);
+  const yMin=Math.min(...allY)-0.05, yMax=Math.max(...allY)+0.05;
+
+  // — Plot A: score curve —
+  const svgA=document.getElementById('svg5a');
+  svgA.innerHTML=''; svgA.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const bgA=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bgA.setAttribute('width',W); bgA.setAttribute('height',H); bgA.setAttribute('fill','#fdfaf4');
+  svgA.appendChild(bgA);
+
+  // zero line
+  if(yMin<0&&yMax>0){
+    const zEl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    const zy=toSY(0,yMin,yMax);
+    zEl.setAttribute('x1',0); zEl.setAttribute('x2',W);
+    zEl.setAttribute('y1',zy); zEl.setAttribute('y2',zy);
+    zEl.setAttribute('stroke','rgba(0,0,0,0.15)'); zEl.setAttribute('stroke-width','1');
+    zEl.setAttribute('stroke-dasharray','4 4');
+    svgA.appendChild(zEl);
+  }
+
+  const lEl=document.createElementNS('http://www.w3.org/2000/svg','path');
+  lEl.setAttribute('d',toSVGPath(scorePts,0,180,yMin,yMax));
+  lEl.setAttribute('fill','none'); lEl.setAttribute('stroke','#7c3d8a');
+  lEl.setAttribute('stroke-width','2.5');
+  svgA.appendChild(lEl);
+
+  const dotEl=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dotEl.setAttribute('cx',toSX(p.va*180/Math.PI,0,180));
+  dotEl.setAttribute('cy',toSY(curScore,yMin,yMax));
+  dotEl.setAttribute('r','6'); dotEl.setAttribute('fill','#b03030');
+  svgA.appendChild(dotEl);
+
+  // — Plot B: directional geometry —
+  const svgB=document.getElementById('svg5b');
+  svgB.innerHTML=''; svgB.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const bgB=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bgB.setAttribute('width',W); bgB.setAttribute('height',H); bgB.setAttribute('fill','#fdfaf4');
+  svgB.appendChild(bgB);
+
+  const cx=W/2, cy=H/2, aLen=W*0.28;
+  addArrow(svgB, cx, cy, cx+b[0]*aLen, cy-b[1]*aLen, '#2d8a5e', 3);
+  addLabel(svgB, cx+b[0]*aLen+5, cy-b[1]*aLen-4, 'b (gradient)', '#2d8a5e', 9);
+  addArrow(svgB, cx, cy, cx+c[0]*aLen, cy-c[1]*aLen, '#c97c2a', 3);
+  addLabel(svgB, cx+c[0]*aLen+5, cy-c[1]*aLen-4, 'curvature dir.', '#c97c2a', 9);
+  addArrow(svgB, cx, cy, cx+v[0]*aLen, cy-v[1]*aLen, '#b03030', 3);
+  addLabel(svgB, cx+v[0]*aLen+5, cy-v[1]*aLen-4, 'v (incoming)', '#b03030', 9);
+  addLabel(svgB, cx+2, cy+12, 'origin', 'rgba(0,0,0,0.3)', 8);
+  const dotO=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dotO.setAttribute('cx',cx); dotO.setAttribute('cy',cy);
+  dotO.setAttribute('r','4'); dotO.setAttribute('fill','#1a1a2e');
+  svgB.appendChild(dotO);
+}
+
+['s5_ba','s5_ca','s5_va'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'_v').textContent=parseFloat(this.value).toFixed(0)+'°';
+    drawApp5();
+  });
+});
+['s5_wt','s5_pen'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'_v').textContent=parseFloat(this.value).toFixed(2);
+    drawApp5();
+  });
+});
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load',()=>{
+  drawApp1();
+});
+window.addEventListener('resize',()=>{
+  const idx=[...document.querySelectorAll('.panel')].findIndex(p=>p.classList.contains('active'));
+  if(idx===1) drawApp1();
+  if(idx===2) drawApp2();
+  if(idx===3) drawApp3();
+  if(idx===4) drawApp4();
+  if(idx===5) drawApp5();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorials 3–5 — Variance, Taylor, Eigenvalues</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f6f1; --card:#fff; --ink:#1a1a2e; --muted:#6b6b80;
+  --green:#2d8a5e; --orange:#c97c2a; --blue:#2a5fa8; --red:#b03030;
+  --purple:#7c3d8a; --teal:#1a7a6e; --border:#e2ddd5;
+  --serif:'Lora',Georgia,serif; --mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:var(--serif);color:var(--ink);font-size:16px;line-height:1.75;}
+.header{background:var(--ink);color:#fff;padding:2rem 2rem 1.6rem;text-align:center;}
+.series-tag{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:#f0e442;margin-bottom:0.6rem;}
+.header h1{font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:600;margin-bottom:0.3rem;}
+.header p{color:#a0a8c0;font-style:italic;font-size:0.95rem;}
+
+/* SUB-TAB NAV */
+.sub-nav{display:flex;background:#f0ece4;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.sub-nav::-webkit-scrollbar{display:none;}
+.sub-btn{flex-shrink:0;padding:0.9rem 1.3rem;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:var(--mono);font-size:0.72rem;letter-spacing:0.05em;color:var(--muted);white-space:nowrap;transition:color 0.2s,border-color 0.2s;}
+.sub-btn:hover{color:var(--ink);}
+.sub-btn.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:700;}
+.sub-num{color:var(--orange);margin-right:0.4em;}
+
+.panel{display:none; max-width:940px; margin:0 auto; padding:2rem 1.5rem;}
+.panel.active{display:block;}
+
+/* SHARED */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;}
+@media(max-width:700px){.two-col{grid-template-columns:1fr;}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);}
+.card-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.7rem;}
+h2{font-size:1.15rem;font-weight:600;margin-bottom:0.6rem;}
+p{margin-bottom:0.75em;} p:last-child{margin-bottom:0;}
+strong{color:var(--ink);}
+.callout{border-left:3px solid var(--blue);background:#eef3fc;padding:0.75rem 0.9rem;border-radius:0 6px 6px 0;margin:0.9rem 0;font-size:0.95em;}
+.callout.green{border-left-color:var(--green);background:#f0f9f4;}
+.callout.orange{border-left-color:var(--orange);background:#fdf5ea;}
+.callout.purple{border-left-color:var(--purple);background:#f7f0fa;}
+canvas{display:block;width:100%;border-radius:8px;background:#faf8f2;border:1px solid var(--border);}
+.metric-row{display:flex;gap:0.6rem;flex-wrap:wrap;margin:0.7rem 0;}
+.metric{background:#f5f3ed;border:1px solid var(--border);border-radius:7px;padding:0.45rem 0.85rem;text-align:center;min-width:80px;}
+.metric .lbl{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.1rem;}
+.metric .val{font-family:var(--mono);font-size:0.98rem;font-weight:700;}
+.metric.blue .val{color:var(--blue);} .metric.green .val{color:var(--green);}
+.metric.orange .val{color:var(--orange);} .metric.red .val{color:var(--red);}
+.metric.purple .val{color:var(--purple);}
+.slider-row{display:flex;align-items:center;gap:0.7rem;margin-bottom:0.6rem;}
+.slider-row label{font-family:var(--mono);font-size:0.7rem;color:var(--muted);width:120px;flex-shrink:0;}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#ddd;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--blue);border:2px solid #fff;cursor:pointer;}
+.slider-val{font-family:var(--mono);font-size:0.73rem;color:var(--blue);width:42px;text-align:right;}
+.code-box{background:#f0ece4;border-radius:6px;padding:0.7rem 1rem;font-family:var(--mono);font-size:0.88rem;margin:0.7rem 0;text-align:center;letter-spacing:0.02em;}
+.quiz-opt{display:block;width:100%;text-align:left;background:#f5f3ed;border:1px solid var(--border);border-radius:6px;padding:0.55rem 0.9rem;margin-bottom:0.35rem;cursor:pointer;font-family:var(--serif);font-size:0.93rem;transition:background 0.15s;}
+.quiz-opt:hover{background:#e8e2d6;}
+.quiz-opt.correct{background:#d4ecd4;border-color:var(--green);color:var(--green);font-weight:600;}
+.quiz-opt.wrong{background:#fde4e4;border-color:var(--red);color:var(--red);}
+.quiz-feedback{font-style:italic;font-size:0.88rem;color:var(--muted);margin-top:0.35rem;}
+.nav-footer{display:flex;justify-content:space-between;align-items:center;padding:1.4rem 0;border-top:1px solid var(--border);margin-top:2rem;font-family:var(--mono);font-size:0.72rem;color:var(--muted);}
+.nav-footer a{background:var(--ink);color:#fff;padding:0.5rem 1.1rem;border-radius:6px;text-decoration:none;font-size:0.72rem;}
+.big-eq{text-align:center;font-family:var(--mono);font-size:1.1rem;background:#f5f3ed;border-radius:6px;padding:0.8rem 1rem;margin:0.8rem 0;}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="series-tag">Basic Math · Tutorials 03 – 05</div>
+  <h1>Variance, Local Thinking &amp; Eigenvalues</h1>
+  <p>The three remaining building blocks of the framework</p>
+</header>
+
+<nav class="sub-nav">
+  <button class="sub-btn active" onclick="showPanel(0)"><span class="sub-num">03</span>Variance &amp; Covariance</button>
+  <button class="sub-btn" onclick="showPanel(1)"><span class="sub-num">04</span>Taylor's Theorem</button>
+  <button class="sub-btn" onclick="showPanel(2)"><span class="sub-num">05</span>Eigenvalues &amp; g_max</button>
+</nav>
+
+<!-- ============================================================
+     PANEL 3 — Variance & Covariance
+     ============================================================ -->
+<div class="panel active" id="p0">
+<div class="two-col">
+  <div>
+    <div class="card">
+      <div class="card-label" style="color:var(--green)">Tutorial 03 — Core concept</div>
+      <h2>Spread and shared spread</h2>
+      <p><strong>Variance</strong> answers: how spread out is a population? It is the average squared distance of each individual from the mean.</p>
+      <div class="big-eq">Var[z] = E[(z − z̄)²]</div>
+      <p>A high-variance population spans a wide range of trait values — lots of raw material for selection. A low-variance population is tightly clustered around its mean.</p>
+      <p><strong>Covariance</strong> answers: do two traits tend to move together?</p>
+      <div class="big-eq">Cov[z₁, z₂] = E[(z₁ − z̄₁)(z₂ − z̄₂)]</div>
+      <p>Positive covariance: when one trait is above average, the other tends to be too. Negative: when one is high, the other tends to be low. Zero: no relationship.</p>
+      <div class="callout green">
+        <strong>The G matrix is just a table of variances and covariances.</strong> The diagonal entries are genetic variances of each trait. The off-diagonal entries are genetic covariances between pairs of traits.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--green)">Why variance appears in V_lin</div>
+      <h2>One copy vs two copies of G</h2>
+      <p>The paper's key structural fact is that $V_{\rm lin}$ involves <em>one</em> copy of $\mathbf{G}$ while $V_{\rm quad}$ involves <em>two</em> copies:</p>
+      <div class="big-eq">V_lin = b² · Var[Δz] = b²G</div>
+      <div class="big-eq">V_quad = ½H² · Var[Δz²] = ½H²G²</div>
+      <p>The second equation uses the fact that for a Gaussian variable $\Delta z$, the variance of $\Delta z^2$ equals $2G^2$. This is why $V_{\rm quad}$ has two powers of $G$.</p>
+      <div class="callout orange">
+        <strong>The consequence:</strong> If you halve $G$ (selection compresses variance), $V_{\rm lin}$ halves but $V_{\rm quad}$ <em>quarters</em>. The curvature load shrinks faster. Narrow clouds are always more locally additive.
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-label" style="color:var(--green)">Interactive — drag the slider</div>
+      <canvas id="c_var" height="240"></canvas>
+      <div style="margin-top:0.8rem">
+        <div class="slider-row">
+          <label>population σ</label>
+          <input type="range" id="sl_v_sigma" min="0.1" max="2.5" step="0.05" value="0.8">
+          <span class="slider-val" id="sl_v_sigma_v">0.80</span>
+        </div>
+        <div class="slider-row">
+          <label>gradient b</label>
+          <input type="range" id="sl_v_b" min="0.1" max="2.0" step="0.05" value="0.8">
+          <span class="slider-val" id="sl_v_b_v">0.80</span>
+        </div>
+        <div class="slider-row">
+          <label>curvature |H|</label>
+          <input type="range" id="sl_v_H" min="0.1" max="2.5" step="0.05" value="1.0">
+          <span class="slider-val" id="sl_v_H_v">1.00</span>
+        </div>
+      </div>
+      <div class="metric-row">
+        <div class="metric blue"><span class="lbl">Var[Δz] = G</span><span class="val" id="mv3_g">—</span></div>
+        <div class="metric green"><span class="lbl">V_lin = b²G</span><span class="val" id="mv3_vl">—</span></div>
+        <div class="metric orange"><span class="lbl">V_quad = ½H²G²</span><span class="val" id="mv3_vq">—</span></div>
+        <div class="metric purple"><span class="lbl">Ag</span><span class="val" id="mv3_ag">—</span></div>
+      </div>
+      <div id="var_story" class="callout" style="font-size:0.9em">Adjust σ to see how variance compression deepens the channel.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--green)">Quiz</div>
+      <div id="quiz3">
+        <p style="font-weight:600;margin-bottom:0.5rem">Selection halves the genetic variance $G \to G/2$. What happens to the additivity index?</p>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz3','wrong','qf3')">It halves too — everything scales proportionally</button>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz3','correct','qf3')">It increases — $V_{\rm quad}$ drops four times faster than $V_{\rm lin}$</button>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz3','wrong','qf3')">It stays the same — variance compression doesn't affect the ratio</button>
+        <div class="quiz-feedback" id="qf3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================
+     PANEL 4 — Taylor's Theorem
+     ============================================================ -->
+<div class="panel" id="p1">
+<div class="two-col">
+  <div>
+    <div class="card">
+      <div class="card-label" style="color:var(--orange)">Tutorial 04 — Core concept</div>
+      <h2>Every smooth curve is locally a straight line</h2>
+      <p>Here is one of the most powerful ideas in mathematics: <strong>any smooth function, zoomed in close enough, looks like a straight line</strong>. Zoom in more and it looks like a parabola. Zoom in even more and you get higher-order terms.</p>
+      <p>This is <strong>Taylor's theorem</strong>. It says we can always approximate a smooth function near a point using a polynomial:</p>
+      <div class="big-eq">f(x) ≈ f(x₀) + f'(x₀)·(x−x₀) + ½f''(x₀)·(x−x₀)² + ...</div>
+      <p>In the paper, the function is log-fitness $\ell(z)$, the point is the population mean $\bar{z}$, the first derivative is the gradient $b$, and the second derivative is the Hessian $H$:</p>
+      <div class="big-eq">ℓ(z) ≈ ℓ(z̄) + b·Δz + ½H·Δz²</div>
+      <div class="callout orange">
+        <strong>The local approximation works because</strong> the population's covariance cloud $G$ defines how far $\Delta z$ typically reaches. If that range is small relative to the curvature scale, the linear term dominates and additive prediction works.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--orange)">Why two terms, not one?</div>
+      <h2>The gradient alone isn't enough</h2>
+      <p>The <strong>first term</strong> ($b \cdot \Delta z$) captures directional selection: the slope of the fitness surface at the mean. It drives mean evolution.</p>
+      <p>The <strong>second term</strong> ($\tfrac{1}{2}H \cdot \Delta z^2$) captures curvature: stabilising selection (bending toward a peak, $H < 0$) or disruptive selection (bending away, $H > 0$).</p>
+      <p>The key is that the <em>variance</em> of the first term is $b^2 G$ (linear in $G$) while the variance of the second term is $\tfrac{1}{2}H^2 G^2$ (quadratic in $G$). This asymmetry is everything.</p>
+      <div class="callout">
+        <strong>Geometric picture:</strong> The first term is the tangent line. The second term is the gap between the tangent and the true curve. When the cloud is narrow, you barely see the gap. When it is wide, the gap dominates.
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-label" style="color:var(--orange)">Interactive — zoom into the curve</div>
+      <canvas id="c_taylor" height="280"></canvas>
+      <div style="margin-top:0.8rem">
+        <div class="slider-row">
+          <label>zoom level</label>
+          <input type="range" id="sl_zoom" min="0.1" max="3.0" step="0.05" value="1.5">
+          <span class="slider-val" id="sl_zoom_v">1.50</span>
+        </div>
+        <div class="slider-row">
+          <label>curve complexity</label>
+          <input type="range" id="sl_complex" min="0.1" max="2.0" step="0.05" value="0.8">
+          <span class="slider-val" id="sl_complex_v">0.80</span>
+        </div>
+      </div>
+      <div id="taylor_story" class="callout orange" style="font-size:0.9em">Drag the zoom slider to see how the curve flattens as you zoom in.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--orange)">The remainder — when does the approximation break?</div>
+      <canvas id="c_remainder" height="200"></canvas>
+      <div style="margin-top:0.8rem;font-size:0.92em">
+        <p>The <span style="color:var(--green);font-weight:600">green bar</span> shows $V_{\rm lin}$ (the tangent captures this fraction of fitness variance). The <span style="color:var(--orange);font-weight:600">orange bar</span> shows $V_{\rm quad}$ (the gap).</p>
+        <p>As $\sigma$ grows, the orange bar grows faster — because it scales as $G^2$. This is the visual proof of why narrow clouds are always more additive.</p>
+      </div>
+      <div class="slider-row" style="margin-top:0.6rem">
+        <label>σ (cloud width)</label>
+        <input type="range" id="sl_rem_sigma" min="0.05" max="2.0" step="0.05" value="0.5">
+        <span class="slider-val" id="sl_rem_sigma_v">0.50</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric green"><span class="lbl">V_lin</span><span class="val" id="mv4_vl">—</span></div>
+        <div class="metric orange"><span class="lbl">V_quad</span><span class="val" id="mv4_vq">—</span></div>
+        <div class="metric purple"><span class="lbl">Ag</span><span class="val" id="mv4_ag">—</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--orange)">Quiz</div>
+      <div id="quiz4">
+        <p style="font-weight:600;margin-bottom:0.5rem">Why does the paper use a second-order Taylor expansion rather than just a first-order (linear) one?</p>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz4','correct','qf4')">The first-order term drives mean evolution (Lande's equation), but the second-order term captures stabilising/disruptive selection and lets us define when the first-order is adequate</button>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz4','wrong','qf4')">First-order expansions are always inaccurate — you always need at least second order</button>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz4','wrong','qf4')">Higher-order terms cancel out under Gaussian distributions, so second order is exact</button>
+        <div class="quiz-feedback" id="qf4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================
+     PANEL 5 — Eigenvalues & g_max
+     ============================================================ -->
+<div class="panel" id="p2">
+<div class="two-col">
+  <div>
+    <div class="card">
+      <div class="card-label" style="color:var(--purple)">Tutorial 05 — Core concept</div>
+      <h2>A matrix has natural directions</h2>
+      <p>Every symmetric matrix — including $\mathbf{G}$ — has special directions called <strong>eigenvectors</strong>. When you apply the matrix to one of these directions, the vector doesn't rotate; it only stretches or shrinks.</p>
+      <p>The amount of stretching is the <strong>eigenvalue</strong>. Formally:</p>
+      <div class="big-eq">G · v = λ · v</div>
+      <p>Here $\mathbf{v}$ is an eigenvector and $\lambda$ is its eigenvalue. The matrix $\mathbf{G}$ just multiplies $\mathbf{v}$ by $\lambda$ — no rotation, only scaling.</p>
+      <div class="callout purple">
+        <strong>Biological reading:</strong> The eigenvectors of $\mathbf{G}$ are the <em>principal axes of genetic variation</em> — the directions in trait space along which breeding values are most and least spread. The eigenvalues are the amounts of spread along each axis.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--purple)">g_max: the direction of most variation</div>
+      <h2>The leading eigenvector</h2>
+      <p>The eigenvector with the <strong>largest eigenvalue</strong> is called $\mathbf{g}_{\max} = e_1(\mathbf{G})$. It points in the direction of greatest genetic variance — the <em>genetic line of least resistance</em>.</p>
+      <p>Why "least resistance"? Because selection on a trait combination aligned with $\mathbf{g}_{\max}$ finds the most genetic variation to act on — evolution proceeds fastest in that direction.</p>
+      <p>Conversely, selecting for a trait combination perpendicular to $\mathbf{g}_{\max}$ finds very little genetic variance — evolution is slow or constrained.</p>
+      <div class="callout green">
+        <strong>Schluter (1996):</strong> Adaptive radiations tend to follow $\mathbf{g}_{\max}$ because it is the direction of maximum genetic evolvability. In the interactive panel, drag the selection gradient arrow and watch how the evolutionary response (blue arrow) is biased toward $\mathbf{g}_{\max}$.
+      </div>
+
+      <h2 style="margin-top:1.2rem">Connection to the paper</h2>
+      <p>The misalignment angle $\theta$ between the fitness gradient $\mathbf{b}$ and $\mathbf{g}_{\max}$ determines how much of the gradient-aligned variance $V_{\rm lin}$ the population can generate:</p>
+      <div class="big-eq">V_lin(θ) = |b|² · (λ₁cos²θ + λ₂sin²θ)</div>
+      <p>When $\mathbf{b}$ is aligned with $\mathbf{g}_{\max}$ ($\theta = 0$), $V_{\rm lin}$ is maximised and the channel is wide open. As the gradient rotates away, $V_{\rm lin}$ falls — this is <strong>Act III</strong>: channel exit from gradient misalignment.</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-label" style="color:var(--purple)">Interactive — drag the gradient arrow</div>
+      <canvas id="c_eig" height="300" style="cursor:grab;"></canvas>
+      <div style="margin-top:0.8rem">
+        <div class="slider-row">
+          <label>G eccentricity r = λ₁/λ₂</label>
+          <input type="range" id="sl_ecc" min="1.0" max="8.0" step="0.1" value="3.0">
+          <span class="slider-val" id="sl_ecc_v">3.0</span>
+        </div>
+      </div>
+      <div class="metric-row">
+        <div class="metric purple"><span class="lbl">λ₁ (max)</span><span class="val" id="mv5_l1">—</span></div>
+        <div class="metric blue"><span class="lbl">λ₂ (min)</span><span class="val" id="mv5_l2">—</span></div>
+        <div class="metric orange"><span class="lbl">angle θ</span><span class="val" id="mv5_th">—</span></div>
+        <div class="metric green"><span class="lbl">V_lin</span><span class="val" id="mv5_vl">—</span></div>
+        <div class="metric red"><span class="lbl">Ag</span><span class="val" id="mv5_ag">—</span></div>
+      </div>
+      <div id="eig_story" class="callout purple" style="font-size:0.9em">Click anywhere on the canvas to set the gradient direction. Watch how Ag falls as you rotate away from g_max.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--purple)">Eigenvalue intuition — stretching a ball</div>
+      <canvas id="c_stretch" height="200"></canvas>
+      <div style="margin-top:0.8rem;font-size:0.92em">
+        <p>The unit circle (grey) represents equal variation in all directions. Applying $\mathbf{G}$ stretches it into an ellipse. The stretching factors are the eigenvalues.</p>
+        <p>The <span style="color:var(--purple);font-weight:600">major axis</span> (largest eigenvalue $\lambda_1$) is $\mathbf{g}_{\max}$. The <span style="color:var(--blue);font-weight:600">minor axis</span> is the direction of minimum genetic variance.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="color:var(--purple)">Quiz</div>
+      <div id="quiz5">
+        <p style="font-weight:600;margin-bottom:0.5rem">Climate change rotates the fitness gradient 90° away from g_max. Genetic variance is unchanged. What happens?</p>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz5','wrong','qf5')">Nothing changes — $\mathcal{A}_g$ depends only on variance magnitude, not direction</button>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz5','correct','qf5')">$\mathcal{A}_g$ falls — $V_{\rm lin}$ decreases because the gradient is now aligned with the direction of minimum variance</button>
+        <button class="quiz-opt" onclick="checkQ(this,'quiz5','wrong','qf5')">$\mathcal{A}_g$ increases — the population escapes the fitness peak and enters a new directional regime</button>
+        <div class="quiz-feedback" id="qf5"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-footer" style="max-width:940px;margin:0 auto;padding:1.4rem 1.5rem;">
+  <a href="tutorial2_matrix.html">← Tutorial 02</a>
+  <span>Tutorials 03 – 05 / 05</span>
+  <a href="math_tutorial.html">Advanced App →</a>
+</div>
+</div>
+
+<script>
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function showPanel(idx){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  document.querySelectorAll('.sub-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  setTimeout(()=>{
+    if(idx===0){drawVar(); drawRemaining();}
+    if(idx===1){drawTaylor(); drawRemainder();}
+    if(idx===2){drawEig(); drawStretch();}
+  },20);
+}
+
+// ============================================================
+// SHARED UTILS
+// ============================================================
+function checkQ(btn,quizId,result,fbId){
+  document.querySelectorAll(`#${quizId} .quiz-opt`).forEach(b=>{b.disabled=true;});
+  btn.classList.add(result);
+  const fb=document.getElementById(fbId);
+  const msgs={
+    'qf3':{
+      correct:'✓ Correct! $V_{\\rm quad} = \\tfrac{1}{2}H^2 G^2$. Halving $G$ reduces $V_{\\rm quad}$ to $\\tfrac{1}{4}$ of its original value, but $V_{\\rm lin} = b^2 G$ only halves. The ratio improves — selection compresses the cloud and deepens the channel.',
+      wrong:'Not quite. The key is the asymmetry: $V_{\\rm lin} \\propto G$ but $V_{\\rm quad} \\propto G^2$. Halving $G$ reduces $V_{\\rm lin}$ by a factor of 2 but $V_{\\rm quad}$ by a factor of 4.'
+    },
+    'qf4':{
+      correct:'✓ Correct! The first-order term gives Lande\'s equation and Fisher\'s theorem. The second-order term gives the curvature load $V_{\\rm quad}$. Together they let us define $\\mathcal{A}_g$ — the fraction of fitness variance that is first-order. Without the second-order term, we could not measure when the first-order approximation is adequate.',
+      wrong:'Not quite. First-order approximations work fine when the cloud is narrow. The paper uses second order specifically to quantify when first order is insufficient — the second term is the benchmark, not the necessity.'
+    },
+    'qf5':{
+      correct:'✓ Correct! This is Act III. $V_{\\rm lin}(\\theta) = |b|^2(\\lambda_1 \\cos^2\\theta + \\lambda_2 \\sin^2\\theta)$. At $\\theta = 90°$, only the small eigenvalue $\\lambda_2$ contributes, so $V_{\\rm lin}$ collapses. No variance was lost — just misaligned.',
+      wrong:'Not quite. $\\mathcal{A}_g$ depends on alignment between $\\mathbf{b}$ and $\\mathbf{G}$. Rotating $\\mathbf{b}$ 90° puts it along the minor axis of the covariance ellipse — the direction of minimum genetic variance. $V_{\\rm lin}$ shrinks dramatically.'
+    }
+  };
+  if(msgs[fbId]){
+    fb.textContent=msgs[fbId][result]||'';
+    fb.style.color=result==='correct'?'#2d8a5e':'#b03030';
+  }
+}
+
+// ============================================================
+// PANEL 3 — Variance canvas
+// ============================================================
+function drawVar(){
+  const sig=parseFloat(document.getElementById('sl_v_sigma').value);
+  const bv=parseFloat(document.getElementById('sl_v_b').value);
+  const Hv=parseFloat(document.getElementById('sl_v_H').value);
+  const G=sig*sig, vl=bv*bv*G, vq=0.5*Hv*Hv*G*G, ag=vl/(vl+vq);
+  document.getElementById('mv3_g').textContent=G.toFixed(3);
+  document.getElementById('mv3_vl').textContent=vl.toFixed(3);
+  document.getElementById('mv3_vq').textContent=vq.toFixed(3);
+  document.getElementById('mv3_ag').textContent=ag.toFixed(3);
+
+  const c=document.getElementById('c_var');
+  const W=c.offsetWidth||400, H=240; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#faf8f2'; ctx.fillRect(0,0,W,H);
+
+  // Draw population distribution
+  const cx=W/2, cy=H-30, scale=W/8;
+  ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+
+  // Distribution fill
+  ctx.beginPath();
+  for(let i=0;i<=200;i++){
+    const x=(i-100)/100*3.5*sig;
+    const y=Math.exp(-0.5*(x/sig)**2)/(sig*Math.sqrt(2*Math.PI));
+    const px=cx+x*scale, py=cy-y*80;
+    i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+  }
+  ctx.lineTo(cx+3.5*sig*scale,cy); ctx.lineTo(cx-3.5*sig*scale,cy); ctx.closePath();
+  ctx.fillStyle='rgba(42,95,168,0.18)'; ctx.fill();
+  ctx.strokeStyle='#2a5fa8'; ctx.lineWidth=2; ctx.stroke();
+
+  // ±1σ markers
+  ctx.strokeStyle='rgba(42,95,168,0.5)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  [-1,1].forEach(s=>{
+    const px=cx+s*sig*scale;
+    ctx.beginPath(); ctx.moveTo(px,cy-80); ctx.lineTo(px,cy+8); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // Mean dot
+  ctx.beginPath(); ctx.arc(cx,cy,5,0,2*Math.PI);
+  ctx.fillStyle='#b03030'; ctx.fill();
+
+  // Labels
+  ctx.fillStyle='#2a5fa8'; ctx.font='10px Space Mono';
+  ctx.fillText('z̄', cx+6, cy-4);
+  ctx.fillText(`σ = ${sig.toFixed(2)}`, cx+sig*scale+4, cy-30);
+  ctx.fillText(`G = σ² = ${G.toFixed(2)}`, 8, 16);
+
+  const story=ag>0.75
+    ?`<strong>Narrow cloud, high Ag = ${ag.toFixed(2)}.</strong> $V_{\\rm lin}$ dominates. The tangent plane captures most of the fitness variance. Additive prediction is reliable.`
+    :ag>0.45
+    ?`<strong>Moderate width, Ag = ${ag.toFixed(2)}.</strong> Both terms contribute significantly. Prediction is reasonable but curvature is already loading the variance budget.`
+    :`<strong>Wide cloud, low Ag = ${ag.toFixed(2)}.</strong> $V_{\\rm quad}$ dominates — the cloud spans so much trait space that curvature overwhelms the gradient. Additive prediction is unreliable.`;
+  document.getElementById('var_story').innerHTML=story;
+}
+
+function drawRemaining(){} // placeholder — Ag bar drawn by drawVar
+
+['sl_v_sigma','sl_v_b','sl_v_H'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'_v').textContent=parseFloat(this.value).toFixed(2);
+    drawVar();
+  });
+});
+
+// ============================================================
+// PANEL 4 — Taylor canvas
+// ============================================================
+function drawTaylor(){
+  const zoom=parseFloat(document.getElementById('sl_zoom').value);
+  const comp=parseFloat(document.getElementById('sl_complex').value);
+  const c=document.getElementById('c_taylor');
+  const W=c.offsetWidth||400, H=280; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#fdf9f2'; ctx.fillRect(0,0,W,H);
+
+  // True function: cubic curve
+  const x0=0;
+  const f=x=>-comp*x*x-0.3*x*x*x+0.5*x;
+  const fp=x=>-2*comp*x-0.9*x*x+0.5;
+  const fpp=x=>-2*comp-1.8*x;
+
+  const b=fp(x0), H2=fpp(x0);
+  const xRange=4/zoom;
+  const xMin=x0-xRange, xMax=x0+xRange;
+  const yPad=0.15*H;
+  const N=300;
+  const xs=Array.from({length:N},(_,i)=>xMin+(xMax-xMin)*i/(N-1));
+  const ys=xs.map(f);
+  const tang=xs.map(x=>f(x0)+b*(x-x0));
+  const taylor2=xs.map(x=>f(x0)+b*(x-x0)+0.5*H2*(x-x0)**2);
+
+  const yMin=Math.min(...ys,f(x0))-0.3, yMax=Math.max(...ys,f(x0))+0.3;
+  const toX=x=>(x-xMin)/(xMax-xMin)*W;
+  const toY=y=>(1-(y-yMin)/(yMax-yMin))*(H-yPad)+yPad/2;
+
+  // Grid
+  ctx.strokeStyle='rgba(0,0,0,0.06)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(toX(x0),0); ctx.lineTo(toX(x0),H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,toY(f(x0))); ctx.lineTo(W,toY(f(x0))); ctx.stroke();
+
+  // True curve
+  ctx.beginPath();
+  xs.forEach((x,i)=>i===0?ctx.moveTo(toX(x),toY(ys[i])):ctx.lineTo(toX(x),toY(ys[i])));
+  ctx.strokeStyle='#1a1a2e'; ctx.lineWidth=2.5; ctx.stroke();
+
+  // 1st order tangent
+  ctx.beginPath();
+  xs.forEach((x,i)=>i===0?ctx.moveTo(toX(x),toY(tang[i])):ctx.lineTo(toX(x),toY(tang[i])));
+  ctx.strokeStyle='#2d8a5e'; ctx.lineWidth=2; ctx.setLineDash([5,4]); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 2nd order Taylor
+  ctx.beginPath();
+  xs.forEach((x,i)=>i===0?ctx.moveTo(toX(x),toY(taylor2[i])):ctx.lineTo(toX(x),toY(taylor2[i])));
+  ctx.strokeStyle='#c97c2a'; ctx.lineWidth=2; ctx.setLineDash([3,3]); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Center dot
+  ctx.beginPath(); ctx.arc(toX(x0),toY(f(x0)),6,0,2*Math.PI);
+  ctx.fillStyle='#b03030'; ctx.fill();
+
+  ctx.font='10px Space Mono';
+  ctx.fillStyle='#1a1a2e'; ctx.fillText('true curve', 8,16);
+  ctx.fillStyle='#2d8a5e'; ctx.fillText('1st order (tangent)', 8,30);
+  ctx.fillStyle='#c97c2a'; ctx.fillText('2nd order (parabola)', 8,44);
+
+  const err1=xs.reduce((s,x,i)=>{const e=tang[i]-ys[i];return s+e*e;},0)/N;
+  const err2=xs.reduce((s,x,i)=>{const e=taylor2[i]-ys[i];return s+e*e;},0)/N;
+  const improved=err2<err1;
+  const story=zoom>2.0
+    ?`<strong>Zoomed in close:</strong> both approximations nearly perfectly follow the true curve. This is the local regime where additive prediction works.`
+    :zoom<0.5
+    ?`<strong>Zoomed out wide:</strong> the linear approximation (green) diverges badly. The parabola (orange) is better but also fails far from the centre. The Taylor approximation is only valid locally.`
+    :`Zoom scale = ${zoom.toFixed(2)}. Mean squared error: linear = ${err1.toFixed(4)}, quadratic = ${err2.toFixed(4)}. ${improved?'Adding the curvature term helps.':'The linear term already captures most of the local behaviour.'}`;
+  document.getElementById('taylor_story').innerHTML=story;
+}
+
+function drawRemainder(){
+  const sig=parseFloat(document.getElementById('sl_rem_sigma').value);
+  const b=0.8, H=1.0, G=sig*sig;
+  const vl=b*b*G, vq=0.5*H*H*G*G, ag=vl/(vl+vq);
+  document.getElementById('mv4_vl').textContent=vl.toFixed(3);
+  document.getElementById('mv4_vq').textContent=vq.toFixed(3);
+  document.getElementById('mv4_ag').textContent=ag.toFixed(3);
+
+  const c=document.getElementById('c_remainder');
+  const W=c.offsetWidth||400, H2=200; c.width=W; c.height=H2;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#fdf9f2'; ctx.fillRect(0,0,W,H2);
+
+  const barH=40, y1=50, y2=110;
+  const total=vl+vq;
+  const wl=Math.min((vl/Math.max(total,0.001))*W*0.9+8, W*0.9);
+  const wq=Math.min((vq/Math.max(total,0.001))*W*0.9+8, W*0.9);
+
+  // V_lin bar
+  ctx.fillStyle='rgba(45,138,94,0.15)';
+  ctx.fillRect(8,y1,wl,barH);
+  ctx.strokeStyle='#2d8a5e'; ctx.lineWidth=2;
+  ctx.strokeRect(8,y1,wl,barH);
+  ctx.fillStyle='#2d8a5e'; ctx.font='10px Space Mono';
+  ctx.fillText('V_lin = '+vl.toFixed(3), 14, y1+barH/2+4);
+
+  // V_quad bar
+  ctx.fillStyle='rgba(201,124,42,0.15)';
+  ctx.fillRect(8,y2,wq,barH);
+  ctx.strokeStyle='#c97c2a'; ctx.lineWidth=2;
+  ctx.strokeRect(8,y2,wq,barH);
+  ctx.fillStyle='#c97c2a'; ctx.font='10px Space Mono';
+  ctx.fillText('V_quad = '+vq.toFixed(3), 14, y2+barH/2+4);
+
+  ctx.fillStyle='#1a1a2e'; ctx.font='10px Space Mono';
+  ctx.fillText('G = σ² = '+G.toFixed(3)+',  Ag = '+ag.toFixed(3), 8, y1-10);
+}
+
+['sl_zoom','sl_complex'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'_v').textContent=parseFloat(this.value).toFixed(2);
+    drawTaylor();
+  });
+});
+document.getElementById('sl_rem_sigma').addEventListener('input',function(){
+  document.getElementById('sl_rem_sigma_v').textContent=parseFloat(this.value).toFixed(2);
+  drawRemainder();
+});
+
+// ============================================================
+// PANEL 5 — Eigenvalue canvas
+// ============================================================
+let eigAngle=0.3; // gradient direction in radians
+
+function drawEig(){
+  const ecc=parseFloat(document.getElementById('sl_ecc').value);
+  const l1=ecc*0.5, l2=0.5; // eigenvalues
+  const b_vec=[Math.cos(eigAngle), Math.sin(eigAngle)];
+  const vlin=b_vec[0]*b_vec[0]*l1+b_vec[1]*b_vec[1]*l2;
+  const vquad=0.5*(l1*l1+l2*l2)*0.3; // fixed curvature
+  const ag=vlin/(vlin+vquad);
+
+  document.getElementById('mv5_l1').textContent=l1.toFixed(2);
+  document.getElementById('mv5_l2').textContent=l2.toFixed(2);
+  document.getElementById('mv5_th').textContent=(eigAngle*180/Math.PI).toFixed(0)+'°';
+  document.getElementById('mv5_vl').textContent=vlin.toFixed(3);
+  document.getElementById('mv5_ag').textContent=ag.toFixed(3);
+
+  const c=document.getElementById('c_eig');
+  const W=c.offsetWidth||400, H=300; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#f8f5fd'; ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H/2, sc=Math.min(W,H)/5;
+
+  // Axes
+  ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
+
+  // G ellipse
+  const a=2*Math.sqrt(l1)*sc, b2=2*Math.sqrt(l2)*sc;
+  ctx.beginPath(); ctx.ellipse(cx,cy,a,b2,0,0,2*Math.PI);
+  ctx.fillStyle='rgba(124,61,138,0.1)'; ctx.fill();
+  ctx.strokeStyle='#7c3d8a'; ctx.lineWidth=2.2; ctx.stroke();
+
+  // Sample cloud
+  for(let i=0;i<200;i++){
+    const u=(Math.random()-0.5)*4, v=(Math.random()-0.5)*4;
+    const r=Math.exp(-0.5*(u*u/l1+v*v/l2));
+    if(Math.random()>r) continue;
+    ctx.beginPath(); ctx.arc(cx+u*sc,cy-v*sc,2,0,2*Math.PI);
+    ctx.fillStyle='rgba(124,61,138,0.3)'; ctx.fill();
+  }
+
+  // gmax arrow (x-axis, since G is axis-aligned with l1>l2)
+  const gmLen=a*0.85;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+gmLen,cy);
+  ctx.strokeStyle='#b03030'; ctx.lineWidth=3; ctx.stroke();
+  const headLen=12;
+  ctx.beginPath();
+  ctx.moveTo(cx+gmLen,cy);
+  ctx.lineTo(cx+gmLen-headLen,cy-6);
+  ctx.lineTo(cx+gmLen-headLen,cy+6);
+  ctx.closePath(); ctx.fillStyle='#b03030'; ctx.fill();
+  ctx.fillStyle='#b03030'; ctx.font='11px Space Mono';
+  ctx.fillText('g_max', cx+gmLen-30, cy-12);
+
+  // Fitness gradient b arrow
+  const bLen=sc*1.2;
+  const bx=cx+Math.cos(eigAngle)*bLen, by=cy-Math.sin(eigAngle)*bLen;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(bx,by);
+  ctx.strokeStyle='#2d8a5e'; ctx.lineWidth=3; ctx.stroke();
+  const bang=Math.atan2(by-cy,bx-cx);
+  ctx.beginPath();
+  ctx.moveTo(bx,by);
+  ctx.lineTo(bx-12*Math.cos(bang-0.4),by-12*Math.sin(bang-0.4));
+  ctx.lineTo(bx-12*Math.cos(bang+0.4),by-12*Math.sin(bang+0.4));
+  ctx.closePath(); ctx.fillStyle='#2d8a5e'; ctx.fill();
+  ctx.fillStyle='#2d8a5e'; ctx.font='11px Space Mono';
+  ctx.fillText('b (gradient)', bx+6, by-4);
+
+  // Lande response Δz = Gb
+  const dz=[l1*b_vec[0], l2*b_vec[1]];
+  const dzLen=Math.sqrt(dz[0]**2+dz[1]**2);
+  const dzNorm=[dz[0]/dzLen, dz[1]/dzLen];
+  const dzPx=cx+dzNorm[0]*bLen*0.8, dzPy=cy-dzNorm[1]*bLen*0.8;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(dzPx,dzPy);
+  ctx.strokeStyle='#2a5fa8'; ctx.lineWidth=2; ctx.setLineDash([5,3]); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#2a5fa8'; ctx.font='10px Space Mono';
+  ctx.fillText('Δz̄ = Gb', dzPx+5, dzPy);
+
+  // Angle arc
+  if(Math.abs(eigAngle)>0.05){
+    ctx.beginPath(); ctx.arc(cx,cy,sc*0.4,0,-eigAngle,eigAngle>0);
+    ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.font='10px Space Mono';
+    ctx.fillText('θ', cx+sc*0.45,cy-sc*0.15);
+  }
+
+  // Ag indicator
+  const barW=80, barH=8;
+  ctx.fillStyle='#e8e4f0'; ctx.fillRect(W-barW-8,8,barW,barH);
+  ctx.fillStyle=ag>0.7?'#2d8a5e':ag>0.45?'#c97c2a':'#b03030';
+  ctx.fillRect(W-barW-8,8,ag*barW,barH);
+  ctx.fillStyle='#1a1a2e'; ctx.font='9px Space Mono';
+  ctx.fillText('Ag='+ag.toFixed(2), W-barW-8, 28);
+
+  const story=ag>0.70
+    ?`Gradient nearly aligned with g_max (θ = ${(eigAngle*180/Math.PI).toFixed(0)}°). <strong>Channel open.</strong> Lots of gradient-aligned variance.`
+    :`Gradient rotated ${(eigAngle*180/Math.PI).toFixed(0)}° from g_max. <strong>Act III:</strong> channel erosion. V_lin has fallen because the gradient hits the narrow part of the ellipse.`;
+  document.getElementById('eig_story').innerHTML=story;
+}
+
+function drawStretch(){
+  const c=document.getElementById('c_stretch');
+  const W=c.offsetWidth||400, H=200; c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#f8f5fd'; ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H/2, r=65;
+
+  // Unit circle
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
+  ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=1.5; ctx.setLineDash([3,3]); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // G = diag(l1, l2) ellipse
+  const ecc=parseFloat(document.getElementById('sl_ecc').value);
+  const l1=ecc*0.5, l2=0.5;
+  const a=r*l1*0.9, b=r*l2*1.8;
+  ctx.beginPath(); ctx.ellipse(cx,cy,a,b,0,0,2*Math.PI);
+  ctx.fillStyle='rgba(124,61,138,0.1)'; ctx.fill();
+  ctx.strokeStyle='#7c3d8a'; ctx.lineWidth=2; ctx.stroke();
+
+  // Axis arrows
+  ctx.strokeStyle='#b03030'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+a,cy); ctx.stroke();
+  ctx.fillStyle='#b03030'; ctx.font='10px Space Mono';
+  ctx.fillText('λ₁='+l1.toFixed(1), cx+a+4, cy);
+
+  ctx.strokeStyle='#2a5fa8'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy-b); ctx.stroke();
+  ctx.fillStyle='#2a5fa8'; ctx.font='10px Space Mono';
+  ctx.fillText('λ₂='+l2.toFixed(1), cx+4, cy-b-4);
+
+  ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.font='9px Space Mono';
+  ctx.fillText('unit circle', cx-r-2, cy-r-4);
+  ctx.fillStyle='#7c3d8a';
+  ctx.fillText('G·circle = ellipse', cx-40, 12);
+}
+
+document.getElementById('sl_ecc').addEventListener('input',function(){
+  document.getElementById('sl_ecc_v').textContent=parseFloat(this.value).toFixed(1);
+  drawEig(); drawStretch();
+});
+
+// Click to set gradient direction on eig canvas
+document.getElementById('c_eig').addEventListener('click',function(e){
+  const rect=this.getBoundingClientRect();
+  const x=(e.clientX-rect.left)-this.offsetWidth/2;
+  const y=-((e.clientY-rect.top)-this.height/2*this.offsetWidth/this.width);
+  if(Math.abs(x)>5||Math.abs(y)>5){
+    eigAngle=Math.atan2(y,x);
+    drawEig();
+  }
+});
+
+window.addEventListener('load',()=>{
+  drawVar(); drawTaylor(); drawRemainder(); drawEig(); drawStretch();
+});
+window.addEventListener('resize',()=>{
+  const active=[...document.querySelectorAll('.panel')].findIndex(p=>p.classList.contains('active'));
+  if(active===0) drawVar();
+  if(active===1){drawTaylor(); drawRemainder();}
+  if(active===2){drawEig(); drawStretch();}
+});
+</script>
+</body>
+</html>

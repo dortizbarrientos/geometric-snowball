@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App 2 · The Rate Diagnostic r(t) — Additive Channels</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;500&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] }, options: { skipHtmlTags: ['script','noscript','style','textarea'] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  :root {
+    --forest:#1A6B4A;--forest-mid:#2E9B6A;--forest-lt:rgba(46,155,106,0.13);--forest-xlt:rgba(46,155,106,0.06);--green-border:rgba(46,155,106,0.28);
+    --blue:#1A6899;--blue-mid:#5EB0D8;--blue-lt:rgba(26,104,153,0.11);--blue-xlt:rgba(26,104,153,0.05);--blue-border:rgba(26,104,153,0.24);
+    --orange:#C05C00;--orange-lt:rgba(192,92,0,0.09);--orange-border:rgba(192,92,0,0.28);
+    --purple:#6B3FA0;--purple-lt:rgba(107,63,160,0.10);--purple-border:rgba(107,63,160,0.25);
+    --dark:#1C2E26;--mid:#3D5A4A;--muted:#7A9A87;--faint:#B8D0C4;--page-bg:#F7FCF9;--white:#FFFFFF;
+    --shadow-sm:0 1px 6px rgba(26,107,74,0.07);--shadow-md:0 4px 18px rgba(26,107,74,0.10);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Nunito',sans-serif;background:var(--page-bg);color:var(--dark);line-height:1.70;font-size:16px;}
+  .progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,var(--forest-mid),var(--blue-mid));z-index:200;transition:width 0.1s;}
+  nav{position:sticky;top:0;z-index:100;background:rgba(247,252,249,0.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--green-border);display:flex;align-items:center;padding:0 1.5rem;height:52px;overflow-x:auto;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none}
+  .nav-series{font-family:'Lora',serif;font-size:0.78rem;color:var(--muted);white-space:nowrap;margin-right:1.2rem;flex-shrink:0;border-right:1px solid var(--green-border);padding-right:1.2rem;}
+  .nav-title{font-family:'Lora',serif;font-size:0.95rem;font-weight:600;color:var(--forest);white-space:nowrap;margin-right:1.5rem;flex-shrink:0;}
+  .nav-links{display:flex;gap:0.1rem;list-style:none;flex-shrink:0;}
+  .nav-links a{display:block;padding:0.30rem 0.75rem;color:var(--mid);text-decoration:none;font-size:0.80rem;font-weight:600;border-radius:100px;white-space:nowrap;transition:background 0.18s,color 0.18s;}
+  .nav-links a:hover,.nav-links a.active{background:var(--forest-lt);color:var(--forest);}
+  .nav-app-links{display:flex;gap:0.1rem;list-style:none;margin-left:auto;flex-shrink:0;}
+  .nav-app-links a{display:block;padding:0.25rem 0.60rem;color:var(--muted);text-decoration:none;font-size:0.72rem;font-weight:600;border-radius:100px;border:1px solid transparent;transition:all 0.18s;}
+  .nav-app-links a:hover{border-color:var(--green-border);color:var(--forest);}
+  .nav-app-links a.current{background:var(--blue);color:var(--white);border-color:var(--blue);}
+  .hero{background:linear-gradient(135deg,rgba(214,238,248,0.55) 0%,rgba(214,240,228,0.38) 55%,rgba(247,252,249,0.08) 100%);border-bottom:1px solid var(--blue-border);padding:3.5rem 2rem 3rem;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 65% at 90% 35%,rgba(46,155,106,0.14) 0%,transparent 65%),radial-gradient(ellipse 38% 50% at 3% 85%,rgba(94,176,216,0.12) 0%,transparent 60%);pointer-events:none;}
+  .hero-inner{max-width:840px;margin:0 auto;position:relative;}
+  .app-badge{display:inline-flex;align-items:center;gap:0.5rem;padding:0.28rem 0.85rem;border-radius:100px;background:var(--blue-lt);border:1px solid var(--blue-border);font-size:0.76rem;font-weight:700;color:var(--blue);font-family:'Source Code Pro',monospace;letter-spacing:0.06em;margin-bottom:1rem;}
+  .hero h1{font-family:'Lora',serif;font-size:clamp(2rem,4.5vw,3rem);color:var(--blue);line-height:1.15;margin-bottom:0.6rem;}
+  .hero h1 em{font-style:italic;color:var(--forest);}
+  .hero .bio-question{font-size:1.08rem;color:var(--mid);max-width:580px;margin-bottom:1.4rem;font-style:italic;font-family:'Lora',serif;border-left:3px solid var(--blue-mid);padding-left:1rem;}
+  .hero-pills{display:flex;flex-wrap:wrap;gap:0.6rem;}
+  .pill{display:inline-flex;align-items:center;padding:0.28rem 0.85rem;border-radius:100px;font-size:0.78rem;font-weight:600;}
+  .pill-green{background:var(--forest-lt);color:var(--forest);border:1px solid var(--green-border);}
+  .pill-blue{background:var(--blue-lt);color:var(--blue);border:1px solid var(--blue-border);}
+  .pill-orange{background:var(--orange-lt);color:var(--orange);border:1px solid var(--orange-border);}
+  main{max-width:860px;margin:0 auto;padding:0 1.5rem 5rem;}
+  section{margin-bottom:3.5rem;scroll-margin-top:62px;opacity:0;transform:translateY(14px);transition:opacity 0.42s,transform 0.42s;}
+  section.visible{opacity:1;transform:none;}
+  .section-header{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.4rem;padding-bottom:0.6rem;border-bottom:1.5px solid rgba(168,213,190,0.50);}
+  .section-num{font-family:'Lora',serif;font-size:1.9rem;color:var(--faint);line-height:1;}
+  .section-title{font-family:'Lora',serif;font-size:1.50rem;color:var(--forest);line-height:1.2;}
+  p{margin-bottom:1rem;color:var(--mid);}p:last-child{margin-bottom:0;}
+  h3.sub{font-family:'Lora',serif;color:var(--forest);font-size:1.12rem;margin:1.6rem 0 0.55rem;}
+  .layer-block{margin:1.5rem 0;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .layer-tab-row{display:flex;border-bottom:1px solid var(--green-border);}
+  .layer-tab{flex:1;padding:0.55rem 0.5rem;font-size:0.78rem;font-weight:700;letter-spacing:0.04em;text-align:center;cursor:pointer;background:rgba(255,255,255,0.55);border:none;border-right:1px solid var(--green-border);color:var(--muted);transition:background 0.18s,color 0.18s;font-family:'Nunito',sans-serif;}
+  .layer-tab:last-child{border-right:none;}
+  .layer-tab.active{background:var(--white);color:var(--forest);}
+  .layer-panel{display:none;padding:1.3rem 1.5rem;background:rgba(255,255,255,0.72);}
+  .layer-panel.active{display:block;}
+  .layer-panel.eng-panel{border-left:4px solid var(--forest);}
+  .layer-panel.geo-panel{border-left:4px solid var(--blue);}
+  .layer-panel.bio-panel{border-left:4px solid var(--forest-mid);}
+  .layer-panel.math-panel{border-left:4px solid var(--orange);}
+  .layer-panel p{color:var(--dark);font-size:0.95rem;}
+  .eq-box{background:rgba(255,255,255,0.80);border:1px solid var(--blue-border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.3rem 0;text-align:center;box-shadow:var(--shadow-sm);font-size:1.08rem;}
+  .eq-label{font-size:0.73rem;font-weight:700;letter-spacing:0.08em;color:var(--muted);font-family:'Source Code Pro',monospace;margin-bottom:0.5rem;text-align:left;}
+  .eq-note{font-size:0.85rem;color:var(--mid);margin-top:0.7rem;text-align:left;font-style:italic;}
+  .key-result{background:var(--blue-lt);border:1.5px solid var(--blue-border);border-radius:10px;padding:1.1rem 1.4rem;margin:1.4rem 0;display:flex;gap:0.8rem;align-items:flex-start;}
+  .key-result-icon{font-size:1.3rem;flex-shrink:0;}
+  .key-result-body p{color:var(--blue);font-weight:600;font-size:0.94rem;margin:0;}
+  .key-result-body span{color:var(--mid);font-size:0.88rem;font-weight:400;}
+  .note-box{background:var(--orange-lt);border:1px solid var(--orange-border);border-radius:8px;padding:0.85rem 1.1rem;margin:1.2rem 0;display:flex;gap:0.7rem;align-items:flex-start;}
+  .note-box p{color:var(--orange);font-size:0.91rem;margin:0;font-weight:600;}
+  .explorer{background:rgba(255,255,255,0.70);border:1px solid var(--green-border);border-radius:12px;padding:1.6rem;margin:1.5rem 0;box-shadow:var(--shadow-sm);}
+  .explorer-title{font-family:'Lora',serif;color:var(--forest);font-size:1.05rem;margin-bottom:1.2rem;}
+  .slider-row{display:flex;align-items:center;gap:1rem;margin-bottom:1.0rem;flex-wrap:wrap;}
+  .slider-label{font-size:0.88rem;font-weight:700;color:var(--dark);min-width:90px;font-family:'Source Code Pro',monospace;}
+  .slider-label span{color:var(--muted);font-size:0.78rem;font-weight:400;font-family:'Nunito',sans-serif;}
+  input[type=range]{flex:1;min-width:120px;-webkit-appearance:none;appearance:none;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--forest-mid) var(--pct,50%),rgba(168,213,190,0.40) var(--pct,50%));cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--forest);border:2px solid var(--white);box-shadow:0 1px 4px rgba(26,107,74,0.25);cursor:pointer;}
+  .slider-val{min-width:52px;text-align:right;font-family:'Source Code Pro',monospace;font-size:0.88rem;font-weight:500;color:var(--forest);}
+  .output-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.8rem;margin-top:1.3rem;}
+  .output-card{background:rgba(255,255,255,0.80);border:1px solid var(--green-border);border-radius:8px;padding:0.9rem 1rem;text-align:center;}
+  .output-card .oc-label{font-size:0.72rem;font-weight:700;letter-spacing:0.06em;color:var(--muted);font-family:'Source Code Pro',monospace;margin-bottom:0.3rem;}
+  .output-card .oc-val{font-size:1.55rem;font-weight:700;font-family:'Source Code Pro',monospace;color:var(--forest);}
+  .output-card .oc-eq{font-size:0.78rem;color:var(--muted);margin-top:0.2rem;}
+  .output-card.blue .oc-val{color:var(--blue);}
+  .output-card.orange .oc-val{color:var(--orange);}
+  .canvas-wrap{margin:1.3rem 0;background:rgba(255,255,255,0.60);border:1px solid var(--green-border);border-radius:10px;overflow:hidden;}
+  svg{display:block;width:100%;height:auto;}
+  .mma-box{background:var(--purple-lt);border:1px solid var(--purple-border);border-radius:10px;padding:1.1rem 1.4rem;margin:1.5rem 0;display:flex;gap:0.85rem;align-items:flex-start;}
+  .mma-icon{font-size:1.25rem;flex-shrink:0;margin-top:0.1rem;}
+  .mma-body strong{display:block;color:var(--purple);font-size:0.90rem;margin-bottom:0.3rem;}
+  .mma-body p{color:var(--mid);font-size:0.87rem;margin:0;}
+  .mma-body code{font-family:'Source Code Pro',monospace;font-size:0.82rem;background:var(--purple-lt);color:var(--purple);padding:0.1em 0.4em;border-radius:4px;}
+  footer{background:rgba(214,240,228,0.30);border-top:1px solid var(--green-border);padding:2.2rem;text-align:center;font-size:0.83rem;color:var(--muted);}
+  footer a{color:var(--forest);text-decoration:none;}footer a:hover{text-decoration:underline;}
+  .app-nav-footer{display:flex;justify-content:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+  .app-nav-footer a{padding:0.35rem 0.9rem;border-radius:100px;border:1px solid var(--green-border);font-size:0.80rem;font-weight:600;color:var(--mid);text-decoration:none;transition:all 0.18s;}
+  .app-nav-footer a:hover{background:var(--forest-lt);color:var(--forest);}
+  .app-nav-footer a.current{background:var(--blue);color:var(--white);border-color:var(--blue);}
+  .back-top{position:fixed;bottom:2rem;right:2rem;width:42px;height:42px;background:rgba(255,255,255,0.82);backdrop-filter:blur(8px);color:var(--forest);border:1.5px solid var(--green-border);border-radius:50%;font-size:1.1rem;cursor:pointer;box-shadow:var(--shadow-md);opacity:0;transform:translateY(10px);transition:opacity 0.25s,transform 0.25s;display:flex;align-items:center;justify-content:center;}
+  .back-top:hover{background:var(--forest-lt);}
+  .back-top.show{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <span class="nav-series">Additive Channels · Math Series</span>
+  <span class="nav-title">App 2 · The Rate Diagnostic</span>
+  <ul class="nav-links">
+    <li><a href="#question">Question</a></li>
+    <li><a href="#logit">Logit</a></li>
+    <li><a href="#identity">Identity</a></li>
+    <li><a href="#decomp">Decomposition</a></li>
+    <li><a href="#explorer">Explorer</a></li>
+    <li><a href="#notebook">Notebook</a></li>
+  </ul>
+  <ul class="nav-app-links">
+    <li><a href="app1_additivity_index.html">1</a></li>
+    <li><a href="#" class="current">2</a></li>
+    <li><a href="app3_moving_optimum.html">3</a></li>
+    <li><a href="app4_gradient_rotation.html">4</a></li>
+    <li><a href="app5_introgression.html">5</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="app-badge">APP 02 / 05 · LOGIT IDENTITY &amp; RATE DIAGNOSTIC</div>
+    <h1>The Rate Diagnostic<br><em>$r(t)$</em></h1>
+    <p class="bio-question">"Can we detect that a predictive regime is eroding before the accuracy actually drops?"</p>
+    <div class="hero-pills">
+      <span class="pill pill-green">Prerequisite: App 1</span>
+      <span class="pill pill-blue">Key identity: $\dot{\mathcal{A}}_g = \mathcal{A}_g(1-\mathcal{A}_g)\,r(t)$</span>
+      <span class="pill pill-orange">Notebook: Section 4</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="question">
+  <div class="section-header"><span class="section-num">01</span><h2 class="section-title">The diagnostic question</h2></div>
+  <p>App 1 defined $\mathcal{A}_g$ as a snapshot — the fraction of heritable fitness variance captured by the linear predictor at this moment. But a snapshot is not a warning. A population can sit well inside a predictive channel ($\mathcal{A}_g = 0.85$) while already moving toward its boundary.</p>
+  <p>What we need is a <em>rate</em>: is $\mathcal{A}_g$ rising or falling, and how fast? That rate is $r(t)$, and it acts like a speedometer pointed at the channel boundary.</p>
+
+  <div class="layer-block">
+    <div class="layer-tab-row">
+      <button class="layer-tab eng active" onclick="switchLayer(this,0,'q1')">🗣 Plain English</button>
+      <button class="layer-tab geo" onclick="switchLayer(this,1,'q1')">📐 Geometry</button>
+      <button class="layer-tab bio" onclick="switchLayer(this,2,'q1')">🌿 Biology</button>
+    </div>
+    <div class="layer-panel eng-panel active" data-block="q1">
+      <p>Think of driving toward a cliff in fog. The cliff is the channel boundary ($\mathcal{A}_g = \alpha$). Your position ($\mathcal{A}_g$) tells you how close you are. Your speed and direction ($r(t)$) tells you whether you are approaching or retreating — and whether to brake now, before the fog clears.</p>
+      <p>$r > 0$ means the channel is deepening. $r < 0$ means it is eroding. $r = 0$ means the regime is instantaneously stable. The sign flips <em>before</em> $\mathcal{A}_g$ reaches the threshold.</p>
+    </div>
+    <div class="layer-panel geo-panel" data-block="q1">
+      <p>$\mathcal{A}_g$ lives in $[0,1]$. Its rate of change $\dot{\mathcal{A}}_g$ is bounded and depends on both the current value and the rate of change of the underlying variance components. To decouple the rate from the current position, we apply a logit transform — mapping $[0,1]$ to $(-\infty,+\infty)$ — and differentiate in that unbounded space. The derivative in logit space, $r(t)$, is the clean diagnostic.</p>
+    </div>
+    <div class="layer-panel bio-panel" data-block="q1">
+      <p>In a breeding programme, $\mathcal{A}_g$ may remain above 0.70 for several cycles while $r(t)$ is already negative. Genomic prediction still works today — but the programme is already drifting toward a yield plateau. Measuring $r(t)$ gives a one-generation warning: the genetic architecture is shifting unfavourably before any drop in accuracy is visible in the raw prediction statistics.</p>
+    </div>
+  </div>
+</section>
+
+<section id="logit">
+  <div class="section-header"><span class="section-num">02</span><h2 class="section-title">The logit transform</h2></div>
+  <p>Define the logit of $\mathcal{A}_g$ as the log-ratio of the variance components:</p>
+
+  <div class="eq-box">
+    <div class="eq-label">LOGIT TRANSFORM · Paper Eq. 4</div>
+    $$\mathcal{L}(t) = \ln\!\left(\frac{V_{\rm lin}(t)}{V_{\rm quad}(t)}\right)$$
+    <div class="eq-note">Note: $\mathcal{L} = \text{logit}(\mathcal{A}_g) = \ln\mathcal{A}_g - \ln(1-\mathcal{A}_g)$, but the log-ratio form is more natural here because it decomposes additively into contributions from each variance component.</div>
+  </div>
+
+  <div class="layer-block">
+    <div class="layer-tab-row">
+      <button class="layer-tab eng active" onclick="switchLayer(this,0,'lt')">🗣 Plain English</button>
+      <button class="layer-tab geo" onclick="switchLayer(this,1,'lt')">📐 Geometry</button>
+      <button class="layer-tab math" onclick="switchLayer(this,2,'lt')">∑ Mathematics</button>
+    </div>
+    <div class="layer-panel eng-panel active" data-block="lt">
+      <p>The logit transform "uncompresses" the bounded $[0,1]$ scale into an unbounded $(-\infty,+\infty)$ scale. Near the boundaries (very high or very low $\mathcal{A}_g$), small absolute changes in $\mathcal{A}_g$ become large changes in $\mathcal{L}$. This makes small movements near the threshold visible that would otherwise be invisible in the raw $\mathcal{A}_g$ scale.</p>
+    </div>
+    <div class="layer-panel geo-panel" data-block="lt">
+      <p>$\mathcal{L} > 0$ means $V_{\rm lin} > V_{\rm quad}$: the population is inside an additive channel. $\mathcal{L} < 0$ means curvature variance dominates. $\mathcal{L} = 0$ is the boundary, corresponding to $\mathcal{A}_g = 0.5$. The threshold $\alpha = 0.70$ corresponds to $\mathcal{L}_\alpha = \ln(0.70/0.30) \approx 0.847$.</p>
+    </div>
+    <div class="layer-panel math-panel" data-block="lt">
+      <p>The logit form makes differentiation clean. Using the chain rule:</p>
+      $$\dot{\mathcal{L}} = \frac{d}{dt}\ln V_{\rm lin} - \frac{d}{dt}\ln V_{\rm quad} = \frac{\dot{V}_{\rm lin}}{V_{\rm lin}} - \frac{\dot{V}_{\rm quad}}{V_{\rm quad}}$$
+      <p>This is the <em>relative rate of change</em> of each variance component — how fast gradient variance is growing relative to curvature variance. It equals $r(t)$ by definition.</p>
+    </div>
+  </div>
+</section>
+
+<section id="identity">
+  <div class="section-header"><span class="section-num">03</span><h2 class="section-title">The exact identity</h2></div>
+  <p>The rate diagnostic $r(t) = \dot{\mathcal{L}}$ is linked to $\dot{\mathcal{A}}_g$ by an exact algebraic identity — one that holds for any differentiable $V_{\rm lin}(t)$ and $V_{\rm quad}(t)$, with no approximation.</p>
+
+  <div class="eq-box">
+    <div class="eq-label">LOGIT IDENTITY · Paper SI Appendix S2</div>
+    $$\dot{\mathcal{A}}_g = \mathcal{A}_g\,(1 - \mathcal{A}_g)\,r(t)$$
+    <div class="eq-note">This is the logistic equation. The factor $\mathcal{A}_g(1-\mathcal{A}_g)$ is maximal at $\mathcal{A}_g = 0.5$ and vanishes at $0$ and $1$. Near the boundary $\alpha = 0.70$, it equals approximately $0.21$, so $r(t)$ must be appreciably nonzero to move $\mathcal{A}_g$.</div>
+  </div>
+
+  <div class="layer-block">
+    <div class="layer-tab-row">
+      <button class="layer-tab eng active" onclick="switchLayer(this,0,'id')">🗣 Plain English</button>
+      <button class="layer-tab geo" onclick="switchLayer(this,1,'id')">📐 Geometry</button>
+      <button class="layer-tab bio" onclick="switchLayer(this,2,'id')">🌿 Biology</button>
+      <button class="layer-tab math" onclick="switchLayer(this,3,'id')">∑ Mathematics</button>
+    </div>
+    <div class="layer-panel eng-panel active" data-block="id">
+      <p>The identity says: the speed at which the additivity index changes is proportional to (1) how far from the extremes $\mathcal{A}_g$ currently sits, and (2) the underlying rate $r(t)$. When $\mathcal{A}_g$ is very high or very low, even a large $r$ produces little movement — the system is "sticky" at the extremes. The most sensitive region is $\mathcal{A}_g \approx 0.5$.</p>
+    </div>
+    <div class="layer-panel geo-panel" data-block="id">
+      <p>The equation $\dot{\mathcal{A}}_g = \mathcal{A}_g(1-\mathcal{A}_g)\,r$ is precisely the logistic ODE with a time-varying rate. Its solution has the logistic (S-curve) form: slow near the extremes, fastest near the midpoint. When $r(t)$ is constant, $\mathcal{A}_g(t) = \sigma(\mathcal{L}_0 + rt)$ where $\sigma$ is the sigmoid function.</p>
+    </div>
+    <div class="layer-panel bio-panel" data-block="id">
+      <p>This identity means that $r(t)$ is a <em>leading indicator</em>. A population with $\mathcal{A}_g = 0.85$ and $r = -0.3$ will reach $\mathcal{A}_g = 0.70$ in roughly $(\mathcal{L}_{0.85} - \mathcal{L}_{0.70}) / 0.3 \approx 5$ generations. Measuring $r(t)$ now gives a quantitative forecast of how many generations remain before the channel boundary is crossed.</p>
+    </div>
+    <div class="layer-panel math-panel" data-block="id">
+      <p>Proof by direct differentiation. Let $A = V_{\rm lin}/(V_{\rm lin}+V_{\rm quad})$. Then:</p>
+      $$\dot{A} = \frac{\dot{V}_{\rm lin}(V_{\rm lin}+V_{\rm quad}) - V_{\rm lin}(\dot{V}_{\rm lin}+\dot{V}_{\rm quad})}{(V_{\rm lin}+V_{\rm quad})^2} = \frac{V_{\rm lin}\,V_{\rm quad}}{(V_{\rm lin}+V_{\rm quad})^2}\left(\frac{\dot{V}_{\rm lin}}{V_{\rm lin}} - \frac{\dot{V}_{\rm quad}}{V_{\rm quad}}\right) = A(1-A)\,r$$
+      <p>The last step uses $V_{\rm lin}\,V_{\rm quad}/(V_{\rm lin}+V_{\rm quad})^2 = A(1-A)$ and $r = \dot{V}_{\rm lin}/V_{\rm lin} - \dot{V}_{\rm quad}/V_{\rm quad}$. No approximations. ∎</p>
+    </div>
+  </div>
+
+  <div class="key-result">
+    <span class="key-result-icon">🔑</span>
+    <div class="key-result-body">
+      <p>$r(t)$ is observable from changes in variance components alone — it does not require knowing $\dot{\mathcal{A}}_g$ directly.</p>
+      <span>In a breeding programme or experimental evolution system, $V_{\rm lin}$ and $V_{\rm quad}$ can be estimated from phenotypic and marker data each generation. Their relative rates of change give $r(t)$ without needing to observe the fitness surface directly.</span>
+    </div>
+  </div>
+</section>
+
+<section id="decomp">
+  <div class="section-header"><span class="section-num">04</span><h2 class="section-title">Three routes to $r(t)$</h2></div>
+  <p>Because $V_{\rm lin}$ and $V_{\rm quad}$ both depend on $\mathbf{b}$, $\mathbf{H}$, and $\mathbf{G}$ — each of which can change independently — $r(t)$ decomposes into three mechanistic contributions.</p>
+
+  <div class="eq-box">
+    <div class="eq-label">THREE-WAY DECOMPOSITION · Paper Results §3</div>
+    $$r(t) = \underbrace{r_{\rm motion}}_{\text{mean moves across landscape}} + \underbrace{r_{\rm env}}_{\text{environment reshapes landscape}} + \underbrace{r_{\rm cov}}_{\text{covariance structure changes}}$$
+    <div class="eq-note">The signs of $r_{\rm env}$ and $r_{\rm cov}$ distinguish failure mode Act II (gradient collapse, $r_{\rm cov} < 0$) from Act III (gradient rotation, $r_{\rm env} \ll 0$).</div>
+  </div>
+
+  <div class="layer-block">
+    <div class="layer-tab-row">
+      <button class="layer-tab eng active" onclick="switchLayer(this,0,'dc')">🗣 Plain English</button>
+      <button class="layer-tab bio" onclick="switchLayer(this,1,'dc')">🌿 Biology</button>
+      <button class="layer-tab math" onclick="switchLayer(this,2,'dc')">∑ Mathematics</button>
+    </div>
+    <div class="layer-panel eng-panel active" data-block="dc">
+      <p><strong>Motion route</strong> ($r_{\rm motion}$): as the population mean moves across a curved landscape, it slides into regions with a different gradient-to-curvature ratio. Gradient collapse near an optimum produces $r_{\rm motion} < 0$.</p>
+      <p><strong>Environmental route</strong> ($r_{\rm env}$): climate change, habitat shifts, or seasonal forcing can rotate or reshape the fitness landscape at the current location. This erodes $\mathcal{A}_g$ without any change in genetic variance.</p>
+      <p><strong>Covariance route</strong> ($r_{\rm cov}$): selection, recombination, mutation, introgression, and drift all reshape $\mathbf{G}$. Each contributes a signed term — directional selection typically makes $r_{\rm cov} > 0$ by compressing variance into gradient-aligned directions.</p>
+    </div>
+    <div class="layer-panel bio-panel" data-block="dc">
+      <p>The decomposition gives a mechanistic diagnosis of prediction failure:</p>
+      <p><strong>Act II (optimum approach):</strong> $r_{\rm env} \approx 0$, $r_{\rm cov} < 0$. The covariance cloud has compressed along the now-irrelevant directional axis. Intervention: introduce new selective targets or expand effective population size.</p>
+      <p><strong>Act III (gradient rotation):</strong> $r_{\rm env} \ll 0$, $r_{\rm cov} \geq 0$. The landscape has rotated but the genetic variance has not. Intervention: introduce variance aligned with the new gradient direction through recombination or introgression.</p>
+      <p>The same drop in $\mathcal{A}_g$ can come from opposite biological causes. Only $r(t)$'s decomposition distinguishes them.</p>
+    </div>
+    <div class="layer-panel math-panel" data-block="dc">
+      <p>From the transport laws $\dot{\mathbf{b}} = \mathbf{H}\mathbf{G}\mathbf{b} + \mathbf{b}_u\dot{u}$ and $\dot{\mathbf{G}} = \mathbf{G}\mathbf{H}\mathbf{G} - \lambda_{\rm rec}(\mathbf{G}-\mathbf{G}_*) + \mathbf{M} + \mathbf{J} - \mathbf{G}/(2N_e)$, differentiating $V_{\rm lin} = \mathbf{b}^\top\mathbf{G}\mathbf{b}$ gives:
+      $$\dot{V}_{\rm lin} = 2\mathbf{b}^\top\mathbf{G}\dot{\mathbf{b}} + \mathbf{b}^\top\dot{\mathbf{G}}\mathbf{b}$$
+      The first term generates $r_{\rm motion}$ and $r_{\rm env}$ (via $\dot{\mathbf{b}}$); the second generates $r_{\rm cov}$ (via $\dot{\mathbf{G}}$). An analogous computation for $\dot{V}_{\rm quad}$ produces the curvature contributions. The full derivation is in SI Appendix Section S5.</p>
+    </div>
+  </div>
+</section>
+
+<section id="explorer">
+  <div class="section-header"><span class="section-num">05</span><h2 class="section-title">Interactive explorer</h2></div>
+  <p>Set an initial $\mathcal{A}_g$ and a constant rate $r$. The app traces the logit trajectory $\mathcal{L}(t)$ and the implied $\mathcal{A}_g(t)$ over time, showing how quickly the channel boundary $\alpha = 0.70$ is reached.</p>
+
+  <div class="explorer">
+    <div class="explorer-title">Logistic trajectory under constant $r$: $\mathcal{A}_g(t) = \sigma(\mathcal{L}_0 + rt)$</div>
+    <div class="slider-row">
+      <span class="slider-label">$\mathcal{A}_g(0)$ <span>(initial)</span></span>
+      <input type="range" id="sl_ag0" min="0.05" max="0.98" step="0.01" value="0.85" oninput="updateApp2()">
+      <span class="slider-val" id="vag0">0.85</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-label">$r$ <span>(rate)</span></span>
+      <input type="range" id="sl_r" min="-1.5" max="1.5" step="0.05" value="-0.3" oninput="updateApp2()">
+      <span class="slider-val" id="vr">−0.30</span>
+    </div>
+
+    <div class="output-grid">
+      <div class="output-card">
+        <div class="oc-label">𝒜_g(0)</div>
+        <div class="oc-val" id="out_ag0">—</div>
+        <div class="oc-eq">initial value</div>
+      </div>
+      <div class="output-card blue">
+        <div class="oc-label">ℒ(0)</div>
+        <div class="oc-val" id="out_L0">—</div>
+        <div class="oc-eq">logit at t=0</div>
+      </div>
+      <div class="output-card orange">
+        <div class="oc-label">gens to α</div>
+        <div class="oc-val" id="out_gens">—</div>
+        <div class="oc-eq">at current r</div>
+      </div>
+      <div class="output-card">
+        <div class="oc-label">direction</div>
+        <div class="oc-val" id="out_dir">—</div>
+        <div class="oc-eq">r sign</div>
+      </div>
+    </div>
+
+    <div class="canvas-wrap" style="margin-top:1.2rem">
+      <svg id="traj_svg" viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <span style="font-size:1rem;flex-shrink:0">💡</span>
+    <p>Notice that $r(t)$ warns earlier when $\mathcal{A}_g$ is near 0.5 (most sensitive zone) than when it is near 1 (sticky zone). A population at $\mathcal{A}_g = 0.95$ with $r = -0.3$ has many generations before hitting $\alpha$. A population at $\mathcal{A}_g = 0.72$ with the same $r$ has very few.</p>
+  </div>
+</section>
+
+<section id="notebook">
+  <div class="section-header"><span class="section-num">06</span><h2 class="section-title">Go deeper in Mathematica</h2></div>
+  <div class="mma-box">
+    <span class="mma-icon">🔬</span>
+    <div class="mma-body">
+      <strong>Notebook: AdditiveChannels_Expanded_Annotated.nb · Section 4</strong>
+      <p><strong>Section 4</strong> verifies the exact identity $\dot{\mathcal{A}}_g = \mathcal{A}_g(1-\mathcal{A}_g)\,r(t)$ symbolically. The key cell defines <code>AgT</code> and <code>LlogitT</code> as functions of <code>t</code>, computes <code>rT = D[LlogitT, t]</code>, and checks <code>FullSimplify[D[AgT,t] - AgT(1-AgT)rT]</code> — which should return exactly 0.</p>
+      <p>This is a pure symbolic proof: no assumptions, no numerical approximation. Mathematica confirms the identity holds for any differentiable <code>VlinT[t]</code> and <code>VquadT[t]</code>.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="app-nav-footer">
+    <a href="app1_additivity_index.html">01 · Additivity Index</a>
+    <a href="#" class="current">02 · Logit &amp; r(t)</a>
+    <a href="app3_moving_optimum.html">03 · Moving Optimum</a>
+    <a href="app4_gradient_rotation.html">04 · Gradient Rotation</a>
+    <a href="app5_introgression.html">05 · Introgression</a>
+  </div>
+  <p>Part of the <strong>Additive Channels</strong> companion mathematics series</p>
+  <p>Ortiz-Barrientos &amp; Cooper · The University of Queensland</p>
+  <p style="margin-top:0.5rem"><a href="https://github.com/dortizbarrientos/additive-channels">github.com/dortizbarrientos/additive-channels</a></p>
+</footer>
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  const prog=document.getElementById('progress'),backTop=document.getElementById('backTop');
+  window.addEventListener('scroll',()=>{prog.style.width=(window.scrollY/(document.body.scrollHeight-window.innerHeight)*100)+'%';backTop.classList.toggle('show',window.scrollY>400);});
+  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:0.06});
+  document.querySelectorAll('section').forEach(s=>obs.observe(s));
+  const navLinks=document.querySelectorAll('.nav-links a'),secs=[...document.querySelectorAll('section[id]')];
+  window.addEventListener('scroll',()=>{let cur='';secs.forEach(s=>{if(window.scrollY>=s.offsetTop-80)cur=s.id;});navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));});
+
+  function switchLayer(btn,idx,block){
+    const row=btn.closest('.layer-tab-row');
+    row.querySelectorAll('.layer-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    const container=btn.closest('.layer-block');
+    const panels=[...container.querySelectorAll('.layer-panel')];
+    panels.forEach(p=>p.classList.remove('active'));
+    if(panels[idx]){panels[idx].classList.add('active');if(window.MathJax)MathJax.typesetPromise([panels[idx]]).catch(()=>{});}
+  }
+
+  function updateSliderStyle(input){
+    const min=parseFloat(input.min),max=parseFloat(input.max),val=parseFloat(input.value);
+    input.style.setProperty('--pct',((val-min)/(max-min)*100).toFixed(1)+'%');
+  }
+  document.querySelectorAll('input[type=range]').forEach(r=>{r.addEventListener('input',()=>updateSliderStyle(r));updateSliderStyle(r);});
+
+  function sigmoid(x){return 1/(1+Math.exp(-x));}
+  function logit(p){return Math.log(p/(1-p));}
+
+  function updateApp2(){
+    const ag0=parseFloat(document.getElementById('sl_ag0').value);
+    const r=parseFloat(document.getElementById('sl_r').value);
+    ['sl_ag0','sl_r'].forEach(id=>updateSliderStyle(document.getElementById(id)));
+
+    const L0=logit(ag0);
+    const Lalpha=logit(0.70);
+    let gensToAlpha='∞';
+    if(r<0 && ag0>0.70){gensToAlpha=((Lalpha-L0)/r).toFixed(1);}
+    else if(r>0 && ag0<0.70){gensToAlpha=((Lalpha-L0)/r).toFixed(1);}
+
+    document.getElementById('vag0').textContent=ag0.toFixed(2);
+    document.getElementById('vr').textContent=(r>=0?'+':'')+r.toFixed(2);
+    document.getElementById('out_ag0').textContent=ag0.toFixed(3);
+    document.getElementById('out_L0').textContent=L0.toFixed(3);
+    document.getElementById('out_gens').textContent=gensToAlpha;
+    document.getElementById('out_dir').textContent=r>0?'↑ deepening':r<0?'↓ eroding':'→ stable';
+
+    drawTrajectory(ag0, r, L0, Lalpha);
+  }
+
+  function drawTrajectory(ag0, r, L0, Lalpha){
+    const W=640,H=260;
+    const nT=60, padL=55, padR=20, padT=25, padB=40;
+    const plotW=W-padL-padR, plotH=H-padT-padB;
+
+    // Compute trajectories
+    const ts=[], agsT=[], LogitT=[];
+    for(let i=0;i<=nT;i++){
+      const t=i;
+      const L=L0+r*t;
+      ts.push(t);
+      LogitT.push(L);
+      agsT.push(sigmoid(L));
+    }
+
+    // Scales
+    const tScale=t=>padL+t/nT*plotW;
+    const agScale=a=>padT+plotH*(1-a);
+    const LMin=Math.min(...LogitT,-2.5), LMax=Math.max(...LogitT,2.5);
+    const LScale=L=>padT+plotH*(1-(L-LMin)/(LMax-LMin));
+
+    // Ag path
+    const agPath=ts.map((t,i)=>`${i===0?'M':'L'}${tScale(t).toFixed(1)},${agScale(agsT[i]).toFixed(1)}`).join(' ');
+    const LPath=ts.map((t,i)=>`${i===0?'M':'L'}${tScale(t).toFixed(1)},${LScale(LogitT[i]).toFixed(1)}`).join(' ');
+
+    // alpha line on Ag axis
+    const alphaY=agScale(0.70).toFixed(1);
+    const LalphaY=LScale(Lalpha).toFixed(1);
+
+    // Axis ticks
+    let yTicks='';
+    [0,0.2,0.4,0.6,0.7,0.8,1.0].forEach(v=>{
+      const y=agScale(v).toFixed(1);
+      yTicks+=`<line x1="${padL-5}" y1="${y}" x2="${padL}" y2="${y}" stroke="rgba(122,154,135,0.5)" stroke-width="1"/>`;
+      yTicks+=`<text x="${padL-8}" y="${parseFloat(y)+4}" font-size="9" fill="#7A9A87" text-anchor="end" font-family="sans-serif">${v.toFixed(1)}</text>`;
+    });
+    let xTicks='';
+    [0,10,20,30,40,50,60].forEach(t=>{
+      const x=tScale(t).toFixed(1);
+      xTicks+=`<line x1="${x}" y1="${padT+plotH}" x2="${x}" y2="${padT+plotH+5}" stroke="rgba(122,154,135,0.5)" stroke-width="1"/>`;
+      xTicks+=`<text x="${x}" y="${padT+plotH+16}" font-size="9" fill="#7A9A87" text-anchor="middle" font-family="sans-serif">${t}</text>`;
+    });
+
+    const svg=document.getElementById('traj_svg');
+    svg.innerHTML=`
+      <rect width="${W}" height="${H}" fill="rgba(255,255,255,0.0)"/>
+      <!-- channel region -->
+      <rect x="${padL}" y="${padT}" width="${plotW}" height="${agScale(0.70)-padT}" fill="rgba(214,240,228,0.35)"/>
+      <!-- alpha threshold -->
+      <line x1="${padL}" y1="${alphaY}" x2="${padL+plotW}" y2="${alphaY}" stroke="rgba(192,92,0,0.55)" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <text x="${padL+plotW+4}" y="${parseFloat(alphaY)+4}" font-size="9" fill="#C05C00" font-family="sans-serif">α</text>
+      <!-- axes -->
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+plotH}" stroke="rgba(122,154,135,0.6)" stroke-width="1.5"/>
+      <line x1="${padL}" y1="${padT+plotH}" x2="${padL+plotW}" y2="${padT+plotH}" stroke="rgba(122,154,135,0.6)" stroke-width="1.5"/>
+      ${yTicks}${xTicks}
+      <!-- axis labels -->
+      <text x="${padL-32}" y="${padT+plotH/2}" font-size="11" fill="#3D5A4A" text-anchor="middle" transform="rotate(-90,${padL-32},${padT+plotH/2})" font-family="serif" font-style="italic">𝒜_g(t)</text>
+      <text x="${padL+plotW/2}" y="${H-6}" font-size="11" fill="#3D5A4A" text-anchor="middle" font-family="sans-serif">generations</text>
+      <!-- Ag curve -->
+      <path d="${agPath}" fill="none" stroke="#1A6B4A" stroke-width="2.4" stroke-linejoin="round"/>
+      <!-- initial point -->
+      <circle cx="${tScale(0).toFixed(1)}" cy="${agScale(ag0).toFixed(1)}" r="5" fill="#1A6B4A" stroke="${'#FFFFFF'}" stroke-width="1.5"/>
+      <!-- channel label -->
+      <text x="${padL+8}" y="${padT+16}" font-size="10" fill="#2E9B6A" font-family="sans-serif" font-style="italic">additive channel</text>
+      <!-- r annotation -->
+      <text x="${padL+plotW/2}" y="${padT+12}" font-size="10" fill="${r>=0?'#1A6B4A':'#C05C00'}" text-anchor="middle" font-family="sans-serif">r = ${r>=0?'+':''}${r.toFixed(2)} → ${r>0?'deepening':'eroding'}</text>
+    `;
+  }
+
+  updateApp2();
+</script>
+</body>
+</html>

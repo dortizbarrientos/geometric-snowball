@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>App 10 — Separating Linear from Quadratic GEI</title>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+
+window.addEventListener('resize', () => requestAnimationFrame(() => redrawAllCanvases()));
+</script>
+
+<script>
+window.MathJax = window.MathJax || {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+function safeTypeset(root) {
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+    return MathJax.typesetPromise(root ? [root] : undefined).catch(() => {});
+  }
+  return Promise.resolve();
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito+Sans:wght@300;400;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg:            #eef0f4;
+  --surface:       #ffffff;
+  --surface2:      #e3e6ed;
+  --border:        #cdd1db;
+  --text:          #141820;
+  --text2:         #3e4558;
+  --text3:         #7e8499;
+
+  --rust-light:    #fce9e0;
+  --rust-mid:      #b84820;
+  --rust-dark:     #6e2410;
+
+  --blue-light:    #dceeff;
+  --blue-mid:      #1460c8;
+  --blue-dark:     #082870;
+
+  --mint-light:    #d4f0e8;
+  --mint-mid:      #0c9060;
+  --mint-dark:     #054830;
+
+  --gold-light:    #fef0cc;
+  --gold-mid:      #c08008;
+  --gold-dark:     #704800;
+
+  --violet-light:  #eee4f8;
+  --violet-mid:    #7030b8;
+  --violet-dark:   #360870;
+
+  --serif: 'Spectral', Georgia, serif;
+  --sans:  'Nunito Sans', system-ui, sans-serif;
+  --mono:  'Roboto Mono', monospace;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 2px 18px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.65; font-size: 16px; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(238,240,244,0.92); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border); padding: 0 2rem;
+}
+.nav-inner { max-width: 940px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.nav-series { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); font-weight: 600; }
+.nav-title { font-family: var(--serif); font-size: 15px; color: var(--text); font-weight: 300; font-style: italic; }
+.nav-links { display: flex; gap: 5px; }
+.nav-pill { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--surface2); color: var(--text2); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.nav-pill:hover { background: var(--rust-light); color: var(--rust-dark); border-color: var(--rust-mid); text-decoration: none; }
+.nav-pill.active { background: var(--rust-mid); color: #fff; border-color: var(--rust-mid); }
+.nav-pill.done { opacity: 0.5; }
+
+/* HERO */
+.hero {
+  background: linear-gradient(130deg, #082870 0%, #6e2410 55%, #360870 100%);
+  color: #fff; padding: 3.5rem 2rem 3rem; position: relative; overflow: hidden;
+}
+.hero-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;
+  max-width: 860px; margin: 0 auto;
+}
+@media (max-width:640px) { .hero-grid { grid-template-columns: 1fr; } }
+.hero-left {}
+.hero-tag { display: inline-block; background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.24); border-radius: 20px; padding: 3px 14px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; margin-bottom: 1.2rem; }
+.hero h1 { font-family: var(--serif); font-size: clamp(1.7rem,3.5vw,2.5rem); font-weight: 300; line-height: 1.2; margin-bottom: 1rem; }
+.hero h1 em { font-style: italic; color: #ffd4b8; }
+.hero-sub { font-size: 0.95rem; color: rgba(255,255,255,0.68); line-height: 1.65; }
+.hero-right { display: flex; flex-direction: column; gap: 10px; }
+.split-card {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px; padding: 1rem 1.2rem;
+}
+.split-card-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+.split-card-eq { font-family: var(--mono); font-size: 0.95rem; color: #ffd4b8; }
+.split-card-desc { font-size: 12px; color: rgba(255,255,255,0.62); margin-top: 4px; line-height: 1.4; }
+
+/* LAYOUT */
+.main { max-width: 940px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+.section { margin-bottom: 3.5rem; opacity: 0; }
+.section.visible { animation: fadeUp 0.42s ease forwards; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+.section-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+.n-rust   { background: var(--rust-light);   color: var(--rust-dark); }
+.n-blue   { background: var(--blue-light);   color: var(--blue-dark); }
+.n-mint   { background: var(--mint-light);   color: var(--mint-dark); }
+.n-violet { background: var(--violet-light); color: var(--violet-dark); }
+.section-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; font-style: italic; }
+
+/* TABS */
+.tab-bar { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab-btn { padding: 7px 16px; font-size: 13px; font-weight: 600; border: none; background: none; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; font-family: var(--sans); }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--rust-mid); border-bottom-color: var(--rust-mid); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* PROSE */
+.prose p { margin-bottom: 1rem; line-height: 1.78; }
+.prose h3 { font-family: var(--serif); font-weight: 400; font-size: 1.05rem; margin: 1.5rem 0 0.5rem; font-style: italic; }
+.prose ul { padding-left: 1.4rem; margin-bottom: 1rem; }
+.prose ul li { margin-bottom: 0.45rem; }
+.prose strong { font-weight: 600; }
+
+/* CALLOUT */
+.callout { border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1.2rem 0; border-left: 3px solid; }
+.c-rust   { background: var(--rust-light);   border-color: var(--rust-mid); }
+.c-blue   { background: var(--blue-light);   border-color: var(--blue-mid); }
+.c-mint   { background: var(--mint-light);   border-color: var(--mint-mid); }
+.c-gold   { background: var(--gold-light);   border-color: var(--gold-mid); }
+.c-violet { background: var(--violet-light); border-color: var(--violet-mid); }
+.callout-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.4rem; color: var(--text2); }
+.callout p { margin-bottom: 0; font-size: 15px; }
+
+/* EQ BLOCK */
+.eq-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; margin: 1.2rem 0; overflow-x: auto; }
+.eq-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+
+/* INTERACTIVE */
+.interactive-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow); margin: 1.5rem 0; }
+.interactive-title { font-family: var(--serif); font-size: 1.05rem; font-weight: 300; color: var(--text2); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); font-style: italic; }
+.controls-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0.7rem 0; }
+.ctrl-label { font-size: 13px; color: var(--text2); font-weight: 600; min-width: 155px; }
+.ctrl-slider { flex: 1; min-width: 120px; accent-color: var(--rust-mid); }
+.ctrl-value { font-family: var(--mono); font-size: 13px; color: var(--rust-dark); min-width: 52px; text-align: right; }
+canvas { display: block; width: 100%; border-radius: 8px; background: var(--bg); }
+
+/* SPLIT DECOMP */
+.decomp-visual { margin: 1.2rem 0; }
+.decomp-total { background: var(--surface2); border-radius: 8px; height: 40px; position: relative; overflow: hidden; margin-bottom: 6px; }
+.decomp-fill-lin { position: absolute; left: 0; top: 0; height: 100%; background: var(--mint-mid); border-radius: 8px 0 0 8px; transition: width 0.35s ease; display: flex; align-items: center; padding-left: 10px; font-size: 12px; color: #fff; font-family: var(--mono); font-weight: 500; }
+.decomp-fill-quad { position: absolute; top: 0; height: 100%; background: var(--rust-mid); transition: left 0.35s ease, width 0.35s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; font-size: 12px; color: #fff; font-family: var(--mono); font-weight: 500; }
+.decomp-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
+.decomp-threshold { position: absolute; top: 0; height: 100%; width: 2px; background: var(--violet-mid); transition: left 0.35s ease; }
+
+/* CHECK ROW */
+.check-row { display: flex; gap: 12px; margin: 1rem 0; flex-wrap: wrap; }
+.check-card { flex: 1; min-width: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1rem; text-align: center; }
+.check-sym { font-family: var(--mono); font-size: 1.1rem; font-weight: 500; margin-bottom: 4px; }
+.check-val { font-family: var(--mono); font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
+.check-label { font-size: 11px; color: var(--text3); line-height: 1.4; }
+
+/* TWO-COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+/* PROOF STEPS */
+.proof-steps { counter-reset: step; margin: 1rem 0; }
+.proof-step { display: flex; gap: 14px; margin-bottom: 1.2rem; }
+.proof-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--rust-light); color: var(--rust-dark); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+.proof-step-body { flex: 1; }
+.proof-step-title { font-weight: 600; font-size: 14px; margin-bottom: 0.3rem; color: var(--text); }
+.proof-step-text { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+/* SERIES NAV */
+.series-nav { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-top: 3rem; }
+.series-nav-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+.series-list { display: flex; flex-direction: column; gap: 5px; }
+.series-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; font-size: 14px; transition: background 0.12s; text-decoration: none; color: inherit; }
+.series-item.done { color: var(--text3); }
+.series-item.done:hover { background: var(--surface2); color: var(--text); }
+.series-item.current { background: var(--rust-light); color: var(--rust-dark); font-weight: 600; }
+.series-item.upcoming { color: var(--text3); }
+.series-item.upcoming:hover { background: var(--surface2); color: var(--text); }
+.series-badge { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+.series-item.done    .series-badge { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.series-item.current .series-badge { background: var(--rust-mid); color: #fff; }
+.series-item.upcoming .series-badge { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+.small { font-size: 13px; color: var(--text2); }
+.mt1 { margin-top: 1rem; }
+.code { font-family: var(--mono); background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-size: 0.87em; }
+</style>
+<script>window.addEventListener('load',()=>{ safeTypeset(document.body); });</script>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div><div class="nav-series">From Field to Formula · App 4 of 4</div></div>
+    <div class="nav-title">Separating Linear from Quadratic GEI</div>
+    <div class="nav-links">
+      <a href="app0_what_is_a_MET.html"  class="nav-pill done">0</a>
+      <a href="app1_genetic_building_blocks_MET.html" class="nav-pill done">1</a>
+      <a href="app2_reaction_norm_model_MET.html" class="nav-pill done">2</a>
+      <a href="app3_cross_env_covariance.html" class="nav-pill done">3</a>
+      <span class="nav-pill active">4</span>
+      
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="hero-tag">App 10 · The Identification Theorem</div>
+      <h1>Separating <em>Linear</em> from <em>Quadratic</em> GEI</h1>
+      <p class="hero-sub">App 9 showed that $\hat{c}_{11}$ carries the total GEI variance. This app derives the split — how $c_{11}$ decomposes into $V_{\text{lin,GEI}}$ and $V_{\text{quad,GEI}}$ — and computes the GEI additivity index that tells a breeder whether G×E is predictable or chaotic.</p>
+    </div>
+    <div class="hero-right">
+      <div class="split-card">
+        <div class="split-card-label">What App 9 gave us</div>
+        <div class="split-card-eq">ĉ₁₁ = V̂ₗᵢₙ,GEI + V̂qᵤₐd,GEI</div>
+        <div class="split-card-desc">Total GEI variance — but the two parts are not yet separated</div>
+      </div>
+      <div class="split-card">
+        <div class="split-card-label">What this app adds</div>
+        <div class="split-card-eq">V̂ₗᵢₙ,GEI = Var̂[βᵢ] = φ̂ββ</div>
+        <div class="split-card-eq">V̂qᵤₐd,GEI = Var̂[γᵢ] = φ̂γγ</div>
+        <div class="split-card-desc">Reaction norm variance components from App 8 perform the split</div>
+      </div>
+      <div class="split-card">
+        <div class="split-card-label">The payoff</div>
+        <div class="split-card-eq">𝒜g(GEI) = φ̂ββ / (φ̂ββ + φ̂γγ)</div>
+        <div class="split-card-desc">The GEI additivity index — is this G×E predictable?</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 1: THE IDENTIFICATION THEOREM -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num n-rust">1</div>
+    <h2 class="section-title">The identification theorem</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs1">
+    <button class="tab-btn active" data-tab="t1-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t1-biology">Biology</button>
+    <button class="tab-btn" data-tab="t1-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t1-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t1-plain">
+    <div class="prose">
+      <p>After App 9, we have $\hat{c}_{11}$ — the total GEI variance. It lumps two biologically distinct things together: the variance of reaction norm <em>slopes</em> ($\hat{\phi}_{\beta\beta}$) and the variance of reaction norm <em>curvatures</em> ($\hat{\phi}_{\gamma\gamma}$). These are not interchangeable. Slope variance is linear GEI — predictable from genomic data across environments. Curvature variance is nonlinear GEI — the part that breaks genomic prediction when environments shift beyond the training range.</p>
+      <p>The identification theorem says the split is exact and uses information already in hand from App 8:</p>
+    </div>
+    <div class="check-row">
+      <div class="check-card">
+        <div class="check-sym" style="color:var(--mint-mid);">φ̂ββ</div>
+        <div class="check-val" style="color:var(--mint-dark);">= V̂ₗᵢₙ,GEI</div>
+        <div class="check-label">Variance of reaction norm slopes<br/>from App 8 mixed model</div>
+      </div>
+      <div class="check-card">
+        <div class="check-sym" style="color:var(--rust-mid);">φ̂γγ</div>
+        <div class="check-val" style="color:var(--rust-dark);">= V̂qᵤₐd,GEI</div>
+        <div class="check-label">Variance of reaction norm curvatures<br/>from App 8 mixed model</div>
+      </div>
+      <div class="check-card">
+        <div class="check-sym" style="color:var(--violet-mid);">φ̂ββ + φ̂γγ</div>
+        <div class="check-val" style="color:var(--violet-dark);">= ĉ₁₁</div>
+        <div class="check-label">Internal consistency check<br/>must hold exactly</div>
+      </div>
+    </div>
+    <div class="callout c-rust">
+      <div class="callout-title">No new data needed</div>
+      <p>The split uses only the variance components $\hat{\phi}_{\beta\beta}$ and $\hat{\phi}_{\gamma\gamma}$ from the quadratic reaction norm model already fitted in App 8. The OLS regression from App 9 gives $\hat{c}_{11}$ independently. Their equality — $\hat{\phi}_{\beta\beta} + \hat{\phi}_{\gamma\gamma} = \hat{c}_{11}$ — is the internal consistency check that validates the entire identification.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t1-biology">
+    <div class="prose">
+      <p>The biological stakes of the split are high. $V_{\text{lin,GEI}}$ and $V_{\text{quad,GEI}}$ represent two fundamentally different mechanisms of G×E:</p>
+      <ul>
+        <li><strong>$V_{\text{lin,GEI}} = \hat{\phi}_{\beta\beta} = b_u^\top G b_u$</strong> measures genetic diversity in <em>how strongly genotypes respond to the environmental gradient</em>. High values mean some lines are highly plastic (steep positive or negative slopes) while others are stable. This component is driven by additive alleles that regulate plastic responses — the same alleles that genomic prediction captures well, because their effects are consistent across the environmental range.</li>
+        <li><strong>$V_{\text{quad,GEI}} = \hat{\phi}_{\gamma\gamma} = \frac{1}{2}\text{tr}[(H_u G)^2]$</strong> measures genetic diversity in <em>how the curvature of the response varies</em>. High values mean some genotypes are optimal at intermediate environments while others peak at extremes — a genuine niche specialisation. This component is driven by alleles that create non-monotonic fitness responses, and these are precisely the alleles that break genomic prediction when the target environment falls outside the training range.</li>
+      </ul>
+      <div class="callout c-mint">
+        <div class="callout-title">The breeder's decision rule</div>
+        <p>When $V_{\text{quad,GEI}}$ is negligible relative to $V_{\text{lin,GEI}}$, Finlay-Wilkinson models suffice and multi-environment genomic prediction is reliable. When $V_{\text{quad,GEI}}$ is substantial, the breeder faces a choice: either restrict predictions to environments within the training range, or explicitly model the curvature using the quadratic reaction norm and accept wider uncertainty in novel environments.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t1-geometry">
+    <div class="prose">
+      <p>The identification splits the GEI variance bar ($c_{11}$) into two coloured segments. Drag the sliders to set $\hat{\phi}_{\beta\beta}$ and $\hat{\phi}_{\gamma\gamma}$ directly, and watch the GEI additivity index update. The threshold $\alpha = 0.70$ is marked — above it, linear GEI dominates and prediction transfers across environments; below it, curvature dominates and prediction degrades.</p>
+    </div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — GEI variance decomposition and additivity index</div>
+      <div class="controls-row">
+        <span class="ctrl-label">$\hat{\phi}_{\beta\beta}$ (slope var, $V_{\text{lin,GEI}}$)</span>
+        <input class="ctrl-slider" id="phibb" type="range" min="0.0" max="2.0" step="0.025" value="0.9"/>
+        <span class="ctrl-value" id="phibbVal">0.90</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">$\hat{\phi}_{\gamma\gamma}$ (curvature var, $V_{\text{quad,GEI}}$)</span>
+        <input class="ctrl-slider" id="phigg" type="range" min="0.0" max="1.5" step="0.025" value="0.30"/>
+        <span class="ctrl-value" id="phiggVal">0.30</span>
+      </div>
+      <div class="decomp-visual" id="decompVis"></div>
+      <canvas id="splitCanvas" height="220"></canvas>
+      <div id="splitMsg" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t1-math">
+    <div class="prose"><p>The theorem states that under Gaussian closure and environmental linearity (as derived in the companion paper, §5), the identification is exact:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Identification theorem (companion paper §5, eqs. 11–12)</div>
+      $$\phi_{\beta\beta} = \operatorname{Var}_z[\beta_i] = \operatorname{Var}_z[b_u^\top \Delta z_i] = b_u^\top G b_u = V_{\text{lin,GEI}}$$
+      $$\phi_{\gamma\gamma} = \operatorname{Var}_z[\gamma_i] = \operatorname{Var}_z\!\left[\tfrac{1}{2}\Delta z_i^\top H_u \Delta z_i\right] = \tfrac{1}{2}\operatorname{tr}[(H_u G)^2] = V_{\text{quad,GEI}}$$
+    </div>
+    <div class="prose"><p>The second line uses the Isserlis/Wick theorem (established in Paper 1, Section S1.3):</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Key lemma — Isserlis theorem applied to quadratic forms</div>
+      $$\operatorname{Var}\!\left[\tfrac{1}{2}\Delta z^\top A \Delta z\right] = \tfrac{1}{2}\operatorname{tr}[(AG)^2], \quad \Delta z \sim \mathcal{N}(\mathbf{0}, G)$$
+    </div>
+    <div class="prose"><p>Setting $A = H_u$ gives $\phi_{\gamma\gamma} = \frac{1}{2}\text{tr}[(H_u G)^2]$. The internal consistency relation then follows immediately from the structural model:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Internal consistency check</div>
+      $$c_{11} = \phi_{\beta\beta} + \phi_{\gamma\gamma} = V_{\text{lin,GEI}} + V_{\text{quad,GEI}}$$
+    </div>
+    <div class="callout c-blue">
+      <div class="callout-title">Why parity is the key</div>
+      <p>The cleanness of the split — no cross term between $\phi_{\beta\beta}$ and $\phi_{\gamma\gamma}$ — follows from the same Gaussian parity argument that separates $V_\text{lin}$ from $V_\text{quad}$ in Paper 1. The function $\beta_i = b_u^\top \Delta z_i$ is linear (odd) in $\Delta z_i$, while $\gamma_i = \frac{1}{2}\Delta z_i^\top H_u \Delta z_i$ is quadratic (even). Their product has zero expectation under any symmetric distribution. Parity kills the cross-term, leaving an exact additive decomposition.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 2: THE GEI ADDITIVITY INDEX -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num n-blue">2</div>
+    <h2 class="section-title">The GEI additivity index $\mathcal{A}_g^{(\text{GEI})}$</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs2">
+    <button class="tab-btn active" data-tab="t2-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t2-biology">Biology</button>
+    <button class="tab-btn" data-tab="t2-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t2-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t2-plain">
+    <div class="prose">
+      <p>Just as the additivity index $\mathcal{A}_g$ measures the fraction of heritable fitness variance at the reference environment that is captured by the linear (gradient) approximation, the GEI additivity index $\mathcal{A}_g^{(\text{GEI})}$ measures the fraction of total GEI variance that is linear — and therefore predictable from reaction norm slopes alone.</p>
+      <p>It is computed directly from the $\hat{\Phi}$ matrix of App 8:</p>
+    </div>
+    <div class="eq-block">
+      <div class="eq-label">GEI additivity index</div>
+      $$\hat{\mathcal{A}}_g^{(\text{GEI})} = \frac{\hat{\phi}_{\beta\beta}}{\hat{\phi}_{\beta\beta} + \hat{\phi}_{\gamma\gamma}}$$
+    </div>
+    <div class="prose">
+      <p>The interpretation is direct. When $\hat{\mathcal{A}}_g^{(\text{GEI})} > 0.70$ (a reasonable default threshold), Finlay-Wilkinson's linear regression model captures most of the G×E signal, and genomic predictions trained in one environment transfer well to others along the same gradient. When it falls below 0.50, the nonlinear curvature term is doing most of the work, and transferability breaks down.</p>
+      <p>This number is not the same as the primary additivity index $\hat{\mathcal{A}}_g$ from App 7 — they answer different questions. $\hat{\mathcal{A}}_g$ asks: how much of the total heritable fitness variance at the reference environment is gradient-aligned? $\hat{\mathcal{A}}_g^{(\text{GEI})}$ asks: of the variance that <em>changes with the environment</em>, how much is predictable from linear responsiveness?</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t2-biology">
+    <div class="prose">
+      <p>Three contrasting scenarios illustrate what $\mathcal{A}_g^{(\text{GEI})}$ reveals that standard heritability and G×E statistics cannot:</p>
+      <ul>
+        <li><strong>High $\mathcal{A}_g^{(\text{GEI})}$, high $c_{11}/c_{00}$ (large linear GEI)</strong>: Strong, predictable G×E. Genotypes differ markedly in responsiveness, but the ranking by response slope is stable. Multi-environment GBLUP with reaction norm slopes works well. This is the scenario in which mega-environment analysis succeeds — the environmental gradient cleanly separates responsive from stable genotypes, and genomic models trained in one environment predict well in others along the gradient.</li>
+        <li><strong>Low $\mathcal{A}_g^{(\text{GEI})}$, high $c_{11}/c_{00}$ (large nonlinear GEI)</strong>: Strong, <em>unpredictable</em> G×E. Genotype rankings reverse non-monotonically across environments. No amount of extra genomic markers helps if the model is linear. The fitness surface is genuinely curved along the environmental axis. This scenario calls for explicit modelling of $\gamma_i$ and environment-specific predictions rather than cross-environment transfer.</li>
+        <li><strong>Low $\mathcal{A}_g^{(\text{GEI})}$, low $c_{11}/c_{00}$ (small total GEI)</strong>: G×E is negligible. The same genomic model works everywhere. This is the ideal breeding scenario but rare in practice — most crops show substantial G×E when environments span realistic drought/wet or temperature gradients.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t2-geometry">
+    <div class="prose"><p>Explore how $\mathcal{A}_g^{(\text{GEI})}$ varies across the space of $(\hat{\phi}_{\beta\beta}, \hat{\phi}_{\gamma\gamma})$ values. The contour plot below shows the index as a function of both components, with the $\mathcal{A}_g^{(\text{GEI})} = 0.70$ decision boundary highlighted.</p></div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — $\mathcal{A}_g^{(\text{GEI})}$ contour map</div>
+      <canvas id="contourCanvas" height="280"></canvas>
+      <div id="contourMsg" class="small mt1">The red dashed boundary marks 𝒜g(GEI) = 0.70. Points above-left are in the predictable zone; points below-right are in the nonlinear zone.</div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t2-math">
+    <div class="prose"><p>$\mathcal{A}_g^{(\text{GEI})}$ is a proportion with Var components estimated by REML. Its sampling distribution follows a ratio-of-variance-components distribution. A delta-method approximation for the standard error is:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Delta-method standard error of $\hat{\mathcal{A}}_g^{(\text{GEI})}$</div>
+      $$\operatorname{SE}\!\left[\hat{\mathcal{A}}_g^{(\text{GEI})}\right] \approx
+        \hat{\mathcal{A}}_g^{(\text{GEI})}\left(1 - \hat{\mathcal{A}}_g^{(\text{GEI})}\right)
+        \sqrt{\frac{\operatorname{Var}(\hat{\phi}_{\beta\beta})}{\hat{\phi}_{\beta\beta}^2}
+        + \frac{\operatorname{Var}(\hat{\phi}_{\gamma\gamma})}{\hat{\phi}_{\gamma\gamma}^2}}$$
+    </div>
+    <div class="prose"><p>The standard errors $\operatorname{Var}(\hat{\phi}_{\beta\beta})$ and $\operatorname{Var}(\hat{\phi}_{\gamma\gamma})$ are available from the REML output of the App 8 mixed model (the diagonal of the asymptotic variance-covariance matrix of variance parameters). In practice, parametric bootstrapping — simulating datasets from the fitted model and re-estimating $\hat{\mathcal{A}}_g^{(\text{GEI})}$ — gives more reliable intervals than the delta method, especially when $\hat{\phi}_{\gamma\gamma}$ is small.</p></div>
+    <div class="callout c-violet">
+      <div class="callout-title">Connection to the logit scale</div>
+      <p>On the logit scale, $\mathcal{L}^{(\text{GEI})} = \ln(\hat{\phi}_{\beta\beta}/\hat{\phi}_{\gamma\gamma})$, standard errors are more symmetric and confidence intervals are automatically bounded. This mirrors the use of the logit in the main channel diagnostic $\mathcal{L}(t) = \ln(V_\text{lin}/V_\text{quad})$ from Paper 2. App 11 tracks both $\mathcal{L}$ and $\mathcal{L}^{(\text{GEI})}$ in the full decision framework.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 3: THE INTERNAL CONSISTENCY CHECK -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num n-mint">3</div>
+    <h2 class="section-title">The internal consistency check — closing the loop</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs3">
+    <button class="tab-btn active" data-tab="t3-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t3-biology">Biology</button>
+    <button class="tab-btn" data-tab="t3-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t3-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t3-plain">
+    <div class="prose">
+      <p>The framework produces two independent estimates of the total GEI variance: one from the OLS regression of the cross-environment covariance matrix ($\hat{c}_{11}$ from App 9), and one from the reaction norm variance components ($\hat{\phi}_{\beta\beta} + \hat{\phi}_{\gamma\gamma}$ from App 8). Under the model, these must agree.</p>
+      <p>The discrepancy $\hat{c}_{11} - (\hat{\phi}_{\beta\beta} + \hat{\phi}_{\gamma\gamma})$ is an internal diagnostic under the model assumptions. A small discrepancy (less than 10% of $\hat{c}_{11}$) validates the quadratic reaction norm model and the environmental linearity assumption. A large discrepancy suggests one of:</p>
+      <ul>
+        <li>The environmental covariate $u_j$ captures only part of the G×E structure — other environmental axes are important.</li>
+        <li>The Legendre polynomial back-transformation (flagged in App 8) was applied incorrectly.</li>
+        <li>Higher-order GEI (cubic or higher) is present and the quadratic model is insufficient.</li>
+        <li>Sampling noise in one of the two estimators is large relative to the true $c_{11}$.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-biology">
+    <div class="prose">
+      <p>The consistency check is a model diagnostic for the environmental linearity assumption — the claim that the fitness surface varies linearly with $u$ over the MET range. In biological terms, this assumption says that the direction and magnitude of selection pressure change approximately linearly as the drought index, temperature, or other gradient variable shifts.</p>
+      <p>This is a reasonable approximation when:</p>
+      <ul>
+        <li>The environmental range is moderate (roughly within ±2 standard deviations of the mean environment).</li>
+        <li>There are no major threshold effects — physiological optima, chilling damage thresholds, photoperiod switches — within the trial range.</li>
+        <li>The crop has not been selected exclusively under a narrow set of conditions that made the reference environment unrepresentative of the target population of environments.</li>
+      </ul>
+      <p>When the check fails, the remedy is to add a second environmental covariate ($u_2$, e.g. temperature in addition to water availability), which extends the structural model to a two-gradient version. That extension increases the number of structural coefficients from 3 to 6 and requires $E \geq 6$ environments for identification.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-geometry">
+    <div class="prose"><p>Simulate both estimation routes simultaneously and watch whether they agree. Noise in the covariance matrix (App 9 route) and noise in the variance components (App 8 route) create independent estimation errors. Increase $n$ and $E$ to reduce both.</p></div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — Internal consistency: two routes to $c_{11}$</div>
+      <div class="controls-row">
+        <span class="ctrl-label">True $\hat{\phi}_{\beta\beta}$</span>
+        <input class="ctrl-slider" id="truePhiBB" type="range" min="0.1" max="1.5" step="0.05" value="0.7"/>
+        <span class="ctrl-value" id="truePhiBBVal">0.70</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">True $\hat{\phi}_{\gamma\gamma}$</span>
+        <input class="ctrl-slider" id="truePhiGG" type="range" min="0.0" max="0.8" step="0.025" value="0.25"/>
+        <span class="ctrl-value" id="truePhiGGVal">0.25</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">Environments $E$</span>
+        <input class="ctrl-slider" id="ccE" type="range" min="3" max="14" step="1" value="8"/>
+        <span class="ctrl-value" id="ccEVal">8</span>
+      </div>
+      <div class="controls-row">
+        <span class="ctrl-label">Lines $n$</span>
+        <input class="ctrl-slider" id="ccN" type="range" min="50" max="500" step="25" value="200"/>
+        <span class="ctrl-value" id="ccNVal">200</span>
+      </div>
+      <button onclick="runConsistency()" style="margin:0.5rem 0 1rem;padding:7px 18px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:13px;font-family:var(--sans);font-weight:600;">↺ New sample</button>
+      <canvas id="consistCanvas" height="220"></canvas>
+      <div id="consistMsg" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t3-math">
+    <div class="prose"><p>Let $\hat{c}_{11}^{(\text{OLS})}$ denote the App 9 estimate and $\hat{c}_{11}^{(\text{RN})} = \hat{\phi}_{\beta\beta} + \hat{\phi}_{\gamma\gamma}$ the App 8 estimate. The discrepancy statistic is:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Consistency discrepancy statistic</div>
+      $$\delta = \hat{c}_{11}^{(\text{OLS})} - \hat{c}_{11}^{(\text{RN})}, \qquad
+        \operatorname{SE}(\delta)^2 \approx \operatorname{Var}(\hat{c}_{11}^{(\text{OLS})}) + \operatorname{Var}(\hat{\phi}_{\beta\beta}) + \operatorname{Var}(\hat{\phi}_{\gamma\gamma})$$
+    </div>
+    <div class="prose"><p>A standardised discrepancy $|\delta| / \operatorname{SE}(\delta) > 2$ warrants investigation. This is a model specification test — it checks whether the quadratic reaction norm model is a consistent parametrisation of the cross-environment covariance structure. Under the null hypothesis that the model is correctly specified, $\delta / \operatorname{SE}(\delta) \xrightarrow{d} \mathcal{N}(0,1)$ as $n \to \infty$.</p></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 4: THE COMPLETE IDENTIFICATION PICTURE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num n-violet">4</div>
+    <h2 class="section-title">The complete identification picture</h2>
+  </div>
+
+  <div class="tab-bar" id="tabs4">
+    <button class="tab-btn active" data-tab="t4-plain">Plain English</button>
+    <button class="tab-btn" data-tab="t4-biology">Biology</button>
+    <button class="tab-btn" data-tab="t4-geometry">Geometry</button>
+    <button class="tab-btn" data-tab="t4-math">Mathematics</button>
+  </div>
+
+  <div class="tab-panel active" id="t4-plain">
+    <div class="prose">
+      <p>At this point in the series, all the pieces are in hand. The table below maps every theoretical object from the companion paper to its estimator, the app where it was derived, and the software command that produces it.</p>
+    </div>
+
+    <div style="overflow-x:auto;margin:1.2rem 0;">
+    <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+      <thead>
+        <tr style="background:var(--surface2);">
+          <th style="padding:8px 12px;border:1px solid var(--border);text-align:left;font-weight:600;color:var(--text2);">Theory object</th>
+          <th style="padding:8px 12px;border:1px solid var(--border);text-align:left;font-weight:600;color:var(--text2);">Estimator</th>
+          <th style="padding:8px 12px;border:1px solid var(--border);text-align:left;font-weight:600;color:var(--text2);">Source app</th>
+          <th style="padding:8px 12px;border:1px solid var(--border);text-align:left;font-weight:600;color:var(--text2);">Software</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">Ĝ</td><td style="padding:7px 12px;border:1px solid var(--border);">VanRaden genomic relationship matrix</td><td style="padding:7px 12px;border:1px solid var(--border);">App 7</td><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">rrBLUP::A.mat()</td></tr>
+        <tr style="background:var(--surface2)"><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">b̂₀, Ĥ₀</td><td style="padding:7px 12px;border:1px solid var(--border);">Lande-Arnold quadratic regression</td><td style="padding:7px 12px;border:1px solid var(--border);">App 7</td><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">lm(w ~ z + I(z²))</td></tr>
+        <tr><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">φ̂ₐₐ, φ̂ββ, φ̂γγ, φ̂ₐβ</td><td style="padding:7px 12px;border:1px solid var(--border);">Quadratic random regression REML</td><td style="padding:7px 12px;border:1px solid var(--border);">App 8</td><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">asreml rr(du,2)</td></tr>
+        <tr style="background:var(--surface2)"><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">ĉ₀₀, ĉ₁₀, ĉ₁₁</td><td style="padding:7px 12px;border:1px solid var(--border);">OLS on vech(Ĉ⁽ᴳ⁾)</td><td style="padding:7px 12px;border:1px solid var(--border);">App 9</td><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">lm(cjk ~ 1 + sum_u + prod_u)</td></tr>
+        <tr><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">V̂ₗᵢₙ,GEI</td><td style="padding:7px 12px;border:1px solid var(--border);">φ̂ββ from App 8</td><td style="padding:7px 12px;border:1px solid var(--border);">App 10</td><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">model$varcomp["du:line"]</td></tr>
+        <tr style="background:var(--surface2)"><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">V̂qᵤₐd,GEI</td><td style="padding:7px 12px;border:1px solid var(--border);">φ̂γγ from App 8</td><td style="padding:7px 12px;border:1px solid var(--border);">App 10</td><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;">model$varcomp["du²:line"]</td></tr>
+        <tr><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;background:var(--mint-light);color:var(--mint-dark);">𝒜g(GEI)</td><td style="padding:7px 12px;border:1px solid var(--border);background:var(--mint-light);color:var(--mint-dark);">φ̂ββ / (φ̂ββ + φ̂γγ)</td><td style="padding:7px 12px;border:1px solid var(--border);background:var(--mint-light);color:var(--mint-dark);">App 10</td><td style="padding:7px 12px;border:1px solid var(--border);background:var(--mint-light);color:var(--mint-dark);font-family:var(--mono);font-size:12px;">direct computation</td></tr>
+        <tr style="background:var(--violet-light)"><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;color:var(--violet-dark);">Âg, r̂env</td><td style="padding:7px 12px;border:1px solid var(--border);color:var(--violet-dark);">Full channel diagnostics</td><td style="padding:7px 12px;border:1px solid var(--border);color:var(--violet-dark);">App 11 →</td><td style="padding:7px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;color:var(--violet-dark);">channel_diagnostics()</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-biology">
+    <div class="prose">
+      <p>The full identification picture links the abstract objects of the channel framework to observable data through a chain of four biological interpretations:</p>
+    </div>
+    <div class="proof-steps">
+      <div class="proof-step">
+        <div class="proof-step-num">1</div>
+        <div class="proof-step-body">
+          <div class="proof-step-title">Fitness landscape geometry</div>
+          <div class="proof-step-text">The fitness surface $\ell(z, u)$ has gradient $b_0$ and Hessian $H_0$ at the reference environment, and these shift with the environment at rates $b_u$ and $H_u$. This is the abstract theoretical layer — the objects that Papers 1 and 2 are written in.</div>
+        </div>
+      </div>
+      <div class="proof-step">
+        <div class="proof-step-num">2</div>
+        <div class="proof-step-body">
+          <div class="proof-step-title">Population-level variances</div>
+          <div class="proof-step-text">Under Gaussian closure, the fitness landscape geometry projects onto observable population-level variances: $V_\text{lin} = b_0^\top G b_0$, $V_\text{quad} = \frac{1}{2}\text{tr}[(H_0 G)^2]$, $V_{\text{lin,GEI}} = b_u^\top G b_u$, $V_{\text{quad,GEI}} = \frac{1}{2}\text{tr}[(H_u G)^2]$. This is the statistical layer where estimation becomes possible.</div>
+        </div>
+      </div>
+      <div class="proof-step">
+        <div class="proof-step-num">3</div>
+        <div class="proof-step-body">
+          <div class="proof-step-title">Reaction norm coefficients</div>
+          <div class="proof-step-text">The population-level variances equal the variance components of individual genotype reaction norm parameters: $V_{\text{lin,GEI}} = \text{Var}[\beta_i]$, $V_{\text{quad,GEI}} = \text{Var}[\gamma_i]$. This is the estimation layer — REML provides these directly from a genomic mixed model.</div>
+        </div>
+      </div>
+      <div class="proof-step">
+        <div class="proof-step-num">4</div>
+        <div class="proof-step-body">
+          <div class="proof-step-title">MET phenotypes and genomic data</div>
+          <div class="proof-step-text">The reaction norm variance components come from fitting the quadratic mixed model to observed $y_{ij}$ using the genomic relationship matrix $\hat{G}$. This is the data layer — standard breeding program outputs with no new experiments required.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-geometry">
+    <div class="prose"><p>The complete live pipeline — from all estimated components to both channel diagnostics — combined in one explorer. All values from Apps 7–10 feed into $\hat{\mathcal{A}}_g$ and the partial $\hat{r}_\text{env}$.</p></div>
+
+    <div class="interactive-wrap">
+      <div class="interactive-title">Interactive — Complete identification pipeline explorer</div>
+      <div class="two-col">
+        <div>
+          <p class="small" style="margin-bottom:8px;font-weight:600;">Reference environment (Apps 7–8)</p>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:110px;">$\hat{c}_{00}$ (total genotypic var)</span>
+            <input class="ctrl-slider" id="fc00" type="range" min="0.5" max="5.0" step="0.1" value="2.5"/>
+            <span class="ctrl-value" id="fc00Val">2.50</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:110px;">$\hat{V}_\text{lin}^{(0)}$ (gradient var)</span>
+            <input class="ctrl-slider" id="fvlin0" type="range" min="0.1" max="4.5" step="0.05" value="1.8"/>
+            <span class="ctrl-value" id="fvlin0Val">1.80</span>
+          </div>
+        </div>
+        <div>
+          <p class="small" style="margin-bottom:8px;font-weight:600;">Environmental sensitivity (Apps 8–10)</p>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:110px;">$\hat{\phi}_{\beta\beta}$ (slope var)</span>
+            <input class="ctrl-slider" id="fphiBB" type="range" min="0.0" max="2.0" step="0.05" value="0.7"/>
+            <span class="ctrl-value" id="fphiBBVal">0.70</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:110px;">$\hat{\phi}_{\gamma\gamma}$ (curvature var)</span>
+            <input class="ctrl-slider" id="fphiGG" type="range" min="0.0" max="1.0" step="0.025" value="0.20"/>
+            <span class="ctrl-value" id="fphiGGVal">0.20</span>
+          </div>
+          <div class="controls-row">
+            <span class="ctrl-label" style="min-width:110px;">$\hat{\phi}_{\alpha\beta}$ (cov α,β)</span>
+            <input class="ctrl-slider" id="fphiAB" type="range" min="-0.8" max="0.8" step="0.05" value="0.25"/>
+            <span class="ctrl-value" id="fphiABVal">0.25</span>
+          </div>
+        </div>
+      </div>
+      <canvas id="fullPipeCanvas" height="200"></canvas>
+      <div id="fullPipeStats" class="small mt1"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4-math">
+    <div class="prose"><p>The complete set of identifications, collected for reference:</p></div>
+    <div class="eq-block">
+      <div class="eq-label">Complete identification dictionary</div>
+      $$\underbrace{\hat{\mathcal{A}}_g}_{\text{App 7}} = \frac{\hat{V}_\text{lin}^{(0)}}{\hat{c}_{00}}, \qquad
+        \underbrace{\hat{\mathcal{A}}_g^{(\text{GEI})}}_{\text{App 10}} = \frac{\hat{\phi}_{\beta\beta}}{\hat{\phi}_{\beta\beta} + \hat{\phi}_{\gamma\gamma}}$$
+      $$\underbrace{\hat{r}_\text{env}}_{\text{App 11}} \approx \frac{2\hat{\phi}_{\alpha\beta}}{\hat{c}_{00}\,\hat{\mathcal{A}}_g}\cdot\dot{u}
+        \;-\; \frac{2(\hat{c}_{10} - \hat{\phi}_{\alpha\beta})}{\hat{c}_{00}(1-\hat{\mathcal{A}}_g)}\cdot\dot{u}$$
+    </div>
+    <div class="prose"><p>These three expressions are the practical output of the entire Apps 6–10 series. App 11 assembles them into the full decision framework for a breeding program facing environmental change.</p></div>
+  </div>
+</div>
+
+<!-- SERIES NAV -->
+<div class="series-nav">
+  <div class="series-nav-title">From Field to Formula — Apps 0–4</div>
+  <div class="series-list">
+    <a href="app0_what_is_a_MET.html" class="series-item done"><div class="series-badge">0</div><div>What is a Multi-Environment Trial?</div></a>
+    <a href="app1_genetic_building_blocks_MET.html" class="series-item done"><div class="series-badge">1</div><div>The Genetic Building Blocks — Ĝ, b̂₀, Ĥ₀</div></a>
+    <a href="app2_reaction_norm_model_MET.html" class="series-item done"><div class="series-badge">2</div><div>The Reaction Norm Model — αᵢ, βᵢ, γᵢ and Φ̂</div></a>
+    <a href="app3_cross_env_covariance.html" class="series-item done"><div class="series-badge">3</div><div>Cross-Environment Covariance — structural model and FA connection</div></a>
+    <div class="series-item current"><div class="series-badge">4</div><div><strong>Separating Linear from Quadratic GEI — the identification theorem</strong> — You are here</div></div>
+    <div class="series-item upcoming"><div class="series-badge">11</div><div>Reading the Diagnostics — Âg, r̂_env, and the decision framework</div></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+
+/* ── CANVAS RESIZE HELPERS ── */
+function setupHiDPICanvas(canvas, cssHeight) {
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.max(320, canvas.clientWidth || canvas.parentElement?.clientWidth || 320);
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(cssHeight * dpr);
+  canvas.style.height = cssHeight + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, width, height: cssHeight };
+}
+function redrawAllCanvases() {
+  if (typeof drawDecomp === 'function') drawDecomp();
+  if (typeof drawFullPipe === 'function') drawFullPipe();
+  if (typeof runConsistency === 'function') runConsistency();
+}
+
+/* ── TABS ── */
+document.querySelectorAll('.tab-bar').forEach(bar => {
+  bar.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.tab;
+      bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      bar.closest('.section').querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === t));
+      safeTypeset(bar.closest('.section').querySelector('.tab-panel.active') || bar.closest('.section'));
+      requestAnimationFrame(() => redrawAllCanvases());
+    });
+  });
+});
+
+/* ── REVEAL ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.06 });
+document.querySelectorAll('.section').forEach(s => obs.observe(s));
+
+function randn() { return Math.sqrt(-2*Math.log(Math.random()+1e-12))*Math.cos(2*Math.PI*Math.random()); }
+
+function rr(ctx, x, y, w, h, r) {
+  if (w <= 0) return;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+/* ══ SECTION 1 — DECOMP VISUAL + SPLIT CANVAS ══════════ */
+const SPC = document.getElementById('splitCanvas');
+let SPX, SPW, SPH;
+
+function drawDecomp() {
+  const pbb = +document.getElementById('phibb').value;
+  const pgg = +document.getElementById('phigg').value;
+  document.getElementById('phibbVal').textContent = pbb.toFixed(3);
+  document.getElementById('phiggVal').textContent = pgg.toFixed(3);
+
+  const total = pbb + pgg;
+  const AgGEI = total > 0 ? pbb / total : 0;
+  const alpha = 0.70;
+
+  // decomp visual HTML
+  const linPct = total > 0 ? (pbb/total)*100 : 50;
+  const quadPct = 100 - linPct;
+  const threshPct = alpha * 100;
+  document.getElementById('decompVis').innerHTML = `
+    <div style="position:relative;height:44px;background:var(--surface2);border-radius:8px;overflow:hidden;margin-bottom:6px;">
+      <div style="position:absolute;left:0;top:0;height:100%;width:${linPct}%;background:var(--mint-mid);border-radius:8px 0 0 8px;display:flex;align-items:center;padding-left:12px;font-size:12px;color:#fff;font-family:var(--mono);font-weight:500;transition:width 0.35s;">${linPct>18?'V̂ₗᵢₙ,GEI = '+pbb.toFixed(3):''}</div>
+      <div style="position:absolute;top:0;height:100%;left:${linPct}%;width:${quadPct}%;background:var(--rust-mid);border-radius:0 8px 8px 0;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;font-size:12px;color:#fff;font-family:var(--mono);font-weight:500;transition:all 0.35s;">${quadPct>18?'V̂qᵤₐd,GEI = '+pgg.toFixed(3):''}</div>
+      <div style="position:absolute;top:0;height:100%;left:${threshPct}%;width:2px;background:var(--violet-mid);"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);">
+      <span style="color:var(--mint-dark);font-weight:600;">Linear GEI ${linPct.toFixed(0)}%</span>
+      <span style="color:var(--violet-mid);">α=0.70 threshold</span>
+      <span style="color:var(--rust-dark);font-weight:600;">Nonlinear GEI ${quadPct.toFixed(0)}%</span>
+    </div>`;
+
+  // canvas: scatter of simulated genotype (β, γ) pairs coloured by contribution
+  ({ ctx: SPX, width: SPW, height: SPH } = setupHiDPICanvas(SPC, 220));
+  SPX.clearRect(0,0,SPW,SPH);
+  const nSim = 80;
+  const sigB = Math.sqrt(pbb), sigG = Math.sqrt(pgg);
+  const pts = Array.from({length:nSim}, () => ({b: randn()*sigB, g: randn()*sigG}));
+
+  const pad = {l:50,r:20,t:20,b:36};
+  const pw = SPW-pad.l-pad.r, ph = SPH-pad.t-pad.b;
+  const bExt = Math.max(0.5, sigB*3.2), gExt = Math.max(0.3, sigG*3.2);
+  function toX(b){return pad.l+(b+bExt)/(2*bExt)*pw;}
+  function toY(g){return pad.t+ph-(g+gExt)/(2*gExt)*ph;}
+
+  // axes
+  SPX.strokeStyle='#cdd1db'; SPX.lineWidth=0.8;
+  SPX.beginPath(); SPX.moveTo(pad.l,pad.t); SPX.lineTo(pad.l,pad.t+ph); SPX.lineTo(pad.l+pw,pad.t+ph); SPX.stroke();
+  // zero lines
+  const x0=toX(0),y0=toY(0);
+  SPX.strokeStyle='rgba(0,0,0,0.1)'; SPX.setLineDash([4,3]);
+  SPX.beginPath(); SPX.moveTo(x0,pad.t); SPX.lineTo(x0,pad.t+ph); SPX.stroke();
+  SPX.beginPath(); SPX.moveTo(pad.l,y0); SPX.lineTo(pad.l+pw,y0); SPX.stroke();
+  SPX.setLineDash([]);
+
+  pts.forEach(p => {
+    const r_abs = Math.sqrt(p.b*p.b/pbb + p.g*p.g/(pgg+0.001));
+    const col = p.g > 0 ? `rgba(176,64,32,0.6)` : `rgba(12,144,96,0.6)`;
+    SPX.fillStyle = col;
+    SPX.beginPath(); SPX.arc(toX(p.b),toY(p.g),3,0,Math.PI*2); SPX.fill();
+  });
+
+  // axis labels
+  SPX.fillStyle='#7e8499'; SPX.font='11px Nunito Sans,sans-serif'; SPX.textAlign='center';
+  SPX.fillText('β̂ᵢ (reaction norm slope)', pad.l+pw/2, pad.t+ph+26);
+  SPX.save(); SPX.translate(16,pad.t+ph/2); SPX.rotate(-Math.PI/2);
+  SPX.textAlign='center'; SPX.fillText('γ̂ᵢ (curvature)', 0, 0); SPX.restore();
+
+  document.getElementById('splitMsg').textContent =
+    `c̃₁₁ = φ̂ββ + φ̂γγ = ${pbb.toFixed(3)} + ${pgg.toFixed(3)} = ${total.toFixed(3)} | ` +
+    `𝒜g(GEI) = ${AgGEI.toFixed(3)} | ` +
+    (AgGEI>0.7?'✓ Linear GEI dominates — Finlay–Wilkinson adequate':AgGEI>0.45?'⚠ Mixed — quadratic term contributes':'✗ Nonlinear GEI dominant — curvature model required');
+}
+['phibb','phigg'].forEach(id=>document.getElementById(id).addEventListener('input',drawDecomp));
+drawDecomp();
+
+/* ══ SECTION 2 — CONTOUR MAP ════════════════════════════ */
+const CC = document.getElementById('contourCanvas');
+const CX = CC.getContext('2d');
+CC.width = CC.offsetWidth*devicePixelRatio; CC.height = 280*devicePixelRatio;
+CX.scale(devicePixelRatio,devicePixelRatio);
+const CW=CC.offsetWidth, CH=280;
+const CP={l:48,r:20,t:20,b:40};
+
+function drawContour() {
+  ({ ctx: CX, width: CW, height: CH } = setupHiDPICanvas(CC, 280));
+  CX.clearRect(0,0,CW,CH);
+  const pw=CW-CP.l-CP.r, ph=CH-CP.t-CP.b;
+  const bbMax=2.0, ggMax=1.5;
+  const alpha=0.70;
+
+  // raster fill
+  const iw=Math.floor(pw), ih=Math.floor(ph);
+  const imgData=CX.createImageData(iw,ih);
+  for(let px=0;px<iw;px++) for(let py=0;py<ih;py++) {
+    const bb=bbMax*(px/iw), gg=ggMax*(py/ih);
+    const Ag=bb/(bb+gg+0.001);
+    const idx=4*(py*iw+px);
+    const t=Ag;
+    // mint→rust colour ramp
+    imgData.data[idx]   = Math.round(12+t*(196-12));
+    imgData.data[idx+1] = Math.round(144+t*(64-144));
+    imgData.data[idx+2] = Math.round(96+t*(32-96));
+    imgData.data[idx+3] = Math.round(180);
+  }
+  CX.putImageData(imgData,CP.l,CP.t);
+
+  // boundary contour at Ag=0.70: bb = alpha/(1-alpha)*gg
+  const slope=alpha/(1-alpha);
+  CX.strokeStyle='rgba(112,48,184,0.9)'; CX.lineWidth=2; CX.setLineDash([6,4]);
+  CX.beginPath();
+  for(let py=0;py<ih;py++){
+    const gg=ggMax*(py/ih);
+    const bb_thresh=slope*gg;
+    if(bb_thresh>bbMax) { CX.stroke(); break; }
+    const px=bb_thresh/bbMax*pw;
+    if(py===0) CX.moveTo(CP.l+px,CP.t+py); else CX.lineTo(CP.l+px,CP.t+py);
+  }
+  CX.stroke(); CX.setLineDash([]);
+
+  // axes
+  CX.strokeStyle='#cdd1db'; CX.lineWidth=1;
+  CX.beginPath(); CX.moveTo(CP.l,CP.t); CX.lineTo(CP.l,CP.t+ph); CX.lineTo(CP.l+pw,CP.t+ph); CX.stroke();
+
+  // axis labels
+  CX.fillStyle='#7e8499'; CX.font='11px Nunito Sans'; CX.textAlign='center';
+  CX.fillText('φ̂ββ (V̂ₗᵢₙ,GEI) →', CP.l+pw/2, CP.t+ph+26);
+  CX.save(); CX.translate(16,CP.t+ph/2); CX.rotate(-Math.PI/2); CX.textAlign='center';
+  CX.fillText('φ̂γγ (V̂qᵤₐd,GEI) ↑',0,0); CX.restore();
+
+  // annotations
+  CX.fillStyle='#054830'; CX.font='500 11px Nunito Sans'; CX.textAlign='left';
+  CX.fillText('𝒜g(GEI) > 0.70', CP.l+8, CP.t+ph-12);
+  CX.fillText('linear GEI zone', CP.l+8, CP.t+ph-0);
+  CX.fillStyle='#6e2410'; CX.textAlign='right';
+  CX.fillText('𝒜g(GEI) < 0.70', CP.l+pw-8, CP.t+16);
+  CX.fillText('nonlinear GEI zone', CP.l+pw-8, CP.t+28);
+  CX.fillStyle='#360870'; CX.textAlign='left';
+  CX.fillText('boundary 𝒜g(GEI)=0.70', CP.l+pw*0.45, CP.t+ph*0.3);
+}
+drawContour();
+
+/* ══ SECTION 3 — CONSISTENCY CHECK ═════════════════════ */
+const CSC = document.getElementById('consistCanvas');
+let CSX, CSW, CSH;
+
+function runConsistency() {
+  const tBB=+document.getElementById('truePhiBB').value;
+  const tGG=+document.getElementById('truePhiGG').value;
+  const E=+document.getElementById('ccE').value;
+  const N=+document.getElementById('ccN').value;
+  document.getElementById('truePhiBBVal').textContent=tBB.toFixed(2);
+  document.getElementById('truePhiGGVal').textContent=tGG.toFixed(3);
+  document.getElementById('ccEVal').textContent=E;
+  document.getElementById('ccNVal').textContent=N;
+
+  const trueC11=tBB+tGG;
+  // Route 1: OLS from cross-env covariance (App 9)
+  const envs=Array.from({length:E},(_,k)=>-2.5+5*k/(E-1));
+  const seC11=trueC11/Math.sqrt(N*(E*(E-1)/2))*1.5;
+  const estC11_OLS=trueC11+randn()*seC11;
+  // Route 2: reaction norm variance components (App 8)
+  const seRN=trueC11/Math.sqrt(N)*0.8;
+  const estBB=tBB+randn()*seRN*0.6;
+  const estGG=tGG+randn()*seRN*0.5;
+  const estC11_RN=estBB+estGG;
+  const delta=estC11_OLS-estC11_RN;
+
+  // draw comparison
+  ({ ctx: CSX, width: CSW, height: CSH } = setupHiDPICanvas(CSC, 220));
+  CSX.clearRect(0,0,CSW,CSH);
+  const bx=40,bw=CSW-80;
+
+  // draw two bars side by side
+  const maxV=trueC11*1.6+0.1;
+  const bars=[
+    {label:'Route 1 (OLS, App 9)', val:estC11_OLS, col:'#3c5280', sub:`ĉ₁₁ = ${estC11_OLS.toFixed(3)}`},
+    {label:'Route 2 (RN, App 8)', val:estC11_RN, col:'#0c9060', sub:`φ̂ββ+φ̂γγ = ${estBB.toFixed(3)}+${estGG.toFixed(3)}`},
+    {label:'True value', val:trueC11, col:'#b84820', sub:`c₁₁ = ${trueC11.toFixed(3)}`},
+  ];
+  const bh=28, gap=12, topY=30;
+  bars.forEach((b,i)=>{
+    const y=topY+i*(bh+gap);
+    const w=bw*Math.min(1,b.val/maxV);
+    CSX.fillStyle='#e3e6ed'; rr(CSX,bx,y,bw,bh,5); CSX.fill();
+    CSX.fillStyle=b.col+'cc'; rr(CSX,bx,y,w,bh,5); CSX.fill();
+    CSX.fillStyle='#141820'; CSX.font='500 12px Roboto Mono,monospace';
+    CSX.textAlign='left'; CSX.fillText(b.label,bx,y-4);
+    CSX.textAlign='right'; CSX.font='12px Roboto Mono'; CSX.fillStyle='#3e4558';
+    CSX.fillText(b.sub,bx+bw-4,y+bh/2+4);
+  });
+  // delta annotation
+  const discColor=Math.abs(delta)/trueC11>0.1?'#b84820':'#0c9060';
+  CSX.fillStyle=discColor; CSX.font='500 12px Nunito Sans'; CSX.textAlign='center';
+  CSX.fillText(`Discrepancy δ = ${delta.toFixed(4)} (${(Math.abs(delta)/trueC11*100).toFixed(1)}% of c₁₁)`,CSW/2,topY+3*(bh+gap)+8);
+
+  document.getElementById('consistMsg').textContent =
+    Math.abs(delta)/trueC11 < 0.05 ? '✓ Excellent consistency — structural model validated'
+    : Math.abs(delta)/trueC11 < 0.12 ? '⚠ Moderate discrepancy — within expected sampling noise'
+    : '✗ Large discrepancy — check Legendre back-transformation or consider higher-order GEI';
+}
+['truePhiBB','truePhiGG','ccE','ccN'].forEach(id=>document.getElementById(id).addEventListener('input',runConsistency));
+runConsistency();
+
+/* ══ SECTION 4 — FULL PIPELINE CANVAS ══════════════════ */
+const FPC = document.getElementById('fullPipeCanvas');
+let FPX, FPW, FPH;
+
+function drawFullPipe() {
+  const c00=+document.getElementById('fc00').value;
+  const vlin0=Math.min(+document.getElementById('fvlin0').value, c00);
+  const pBB=+document.getElementById('fphiBB').value;
+  const pGG=+document.getElementById('fphiGG').value;
+  const pAB=+document.getElementById('fphiAB').value;
+  document.getElementById('fc00Val').textContent=c00.toFixed(2);
+  document.getElementById('fvlin0Val').textContent=vlin0.toFixed(2);
+  document.getElementById('fphiBBVal').textContent=pBB.toFixed(2);
+  document.getElementById('fphiGGVal').textContent=pGG.toFixed(3);
+  document.getElementById('fphiABVal').textContent=pAB.toFixed(2);
+
+  const Ag=vlin0/c00;
+  const AgGEI=pBB/(pBB+pGG+0.0001);
+  const c11=pBB+pGG;
+
+  ({ ctx: FPX, width: FPW, height: FPH } = setupHiDPICanvas(FPC, 200));
+  FPX.clearRect(0,0,FPW,FPH);
+  const bx=20,bw=FPW-40,bh=24,gap=10;
+
+  const rows=[
+    {label:'Âg (ref env)',      val:Ag,    maxV:1, c1:'#0c9060',c2:'#b84820', thresh:0.70, thLabel:'α=0.70'},
+    {label:'𝒜g(GEI)',           val:AgGEI, maxV:1, c1:'#0c9060',c2:'#b84820', thresh:0.70, thLabel:'α=0.70'},
+    {label:'ĉ₁₁ = φ̂ββ+φ̂γγ',  val:c11,   maxV:3.0, c1:'#1460c8',c2:null,  thresh:null,  thLabel:null},
+    {label:'φ̂αβ (intercept–slope cov)', val:(pAB+1)/2, maxV:1, c1:'#7030b8',c2:null, thresh:0.5, thLabel:'0'},
+  ];
+
+  rows.forEach((r,i)=>{
+    const y=16+i*(bh+gap);
+    const pct=Math.max(0,Math.min(1,r.val/r.maxV));
+    FPX.fillStyle='#e3e6ed'; rr(FPX,bx,y,bw,bh,5); FPX.fill();
+    const fillCol = r.c2 ? (pct>0.7?r.c1:r.c2) : r.c1;
+    FPX.fillStyle=fillCol+'cc'; rr(FPX,bx,y,bw*pct,bh,5); FPX.fill();
+    if(r.thresh){
+      const tx=bx+r.thresh/r.maxV*bw;
+      FPX.strokeStyle='rgba(112,48,184,0.8)'; FPX.lineWidth=1.5; FPX.setLineDash([3,3]);
+      FPX.beginPath(); FPX.moveTo(tx,y-3); FPX.lineTo(tx,y+bh+3); FPX.stroke(); FPX.setLineDash([]);
+    }
+    FPX.fillStyle='#141820'; FPX.font='500 12px Roboto Mono'; FPX.textAlign='left';
+    FPX.fillText(r.label,bx,y-4);
+    FPX.textAlign='right'; FPX.font='12px Roboto Mono'; FPX.fillStyle='#3e4558';
+    FPX.fillText(r.val.toFixed(3),bx+bw-4,y+bh/2+4);
+  });
+
+  const status =
+    (Ag>0.7?'Ag ✓':'Ag ✗') + ' | ' +
+    (AgGEI>0.7?'𝒜g(GEI) ✓':'𝒜g(GEI) ✗') + ' | ' +
+    (pAB>0?'φαβ>0 (responsive=good)':'φαβ≤0 (stability tradeoff)');
+  document.getElementById('fullPipeStats').textContent=status+` | φ̂ββ+φ̂γγ=${c11.toFixed(3)}, should ≈ ĉ₁₁ from App 9`;
+}
+['fc00','fvlin0','fphiBB','fphiGG','fphiAB'].forEach(id=>document.getElementById(id).addEventListener('input',drawFullPipe));
+drawFullPipe();
+</script>
+</body>
+</html>
