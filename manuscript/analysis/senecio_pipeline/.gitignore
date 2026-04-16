@@ -1,0 +1,33 @@
+# Processed data — regenerable by running the pipeline
+data/processed/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+.Rapp.history
+*.Rout
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Pipeline backups (created transiently by --quick-test)
+*.R.bak
+*.R.tmp
