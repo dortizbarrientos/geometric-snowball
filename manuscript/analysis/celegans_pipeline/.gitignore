@@ -1,0 +1,56 @@
+# ============================================================================
+# Gitignore for the C. elegans channel-operator pipeline
+# ============================================================================
+
+# --- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# --- R ---------------------------------------------------------------------
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+# NOTE: the *.RData files in data/raw/ ARE committed because they are the
+# primary data. The line above is overridden for those files below.
+!data/raw/*.RData
+
+# --- Intermediate (regenerable) data ---------------------------------------
+# These are produced by running run_pipeline.sh. Users regenerate them
+# from the raw data; they do not belong in the repo.
+data/processed/G_chains_high_salt_long.csv
+data/processed/G_chains_low_salt_long.csv
+data/processed/celegans_posterior_perdraw.csv
+
+# Smaller processed CSVs can be committed so that users can inspect them
+# without running R. Uncomment the next lines to exclude all processed
+# files instead:
+# data/processed/*.csv
+# data/processed/*
+
+# --- OS detritus -----------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# --- Editor / IDE ----------------------------------------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# --- LaTeX build artefacts (if any) ----------------------------------------
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz

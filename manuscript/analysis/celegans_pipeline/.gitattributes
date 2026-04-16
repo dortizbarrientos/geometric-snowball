@@ -1,0 +1,2 @@
+data/raw/G_matrices_high_salt.RData filter=lfs diff=lfs merge=lfs -text
+data/raw/G_matrices_low_salt.RData filter=lfs diff=lfs merge=lfs -text

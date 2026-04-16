@@ -1,0 +1,2 @@
+manuscript/analysis/celegans_pipeline/data/raw/*.RData filter=lfs diff=lfs merge=lfs -text
+data/elifeCelegans/Mallard_Robertson-main/output_files/RData/*.RData filter=lfs diff=lfs merge=lfs -text
