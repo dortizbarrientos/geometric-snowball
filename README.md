@@ -19,43 +19,56 @@ When two populations adapt to different environments, their preferred directions
 ```
 geometric-snowball-main/
 │
-├── manuscript/                         Paper and analysis
-│   ├── word/
-│   │   └── snowball_ms_v9.docx             Current manuscript draft
+├── manuscript/
+│   ├── word/                               Manuscript drafts (current: snowball_ms_v9.docx)
 │   ├── analysis/
-│   │   ├── celegans_pipeline/              C. elegans channel-operator pipeline
-│   │   ├── senecio_pipeline/               Senecio channel-operator pipeline
-│   │   ├── GeometricSnowballSupplement.nb  Mathematica supplement (derivations)
-│   │   └── GeometricSnowballTools.wl       Mathematica function library
-│   ├── figures/                            Publication figures (Keynote composites)
-│   ├── tables/                             Formatted tables
-│   └── supporting/                         Supplementary methods PDF
+│   │   ├── celegans_pipeline/              C. elegans reproducible pipeline
+│   │   ├── senecio_pipeline/               Senecio reproducible pipeline
+│   │   ├── otherScripts/                   Exploratory analysis scripts
+│   │   └── README.md                       Analysis-level documentation
+│   ├── figures/
+│   │   ├── forKeynote/                     Individual PDF panels for compositing
+│   │   ├── legends/                        Figure legend drafts
+│   │   └── retired/                        Previous figure versions
+│   ├── tables/
+│   │   └── all_tables.docx                 Formatted manuscript tables
+│   ├── abstracts/
+│   │   └── abstract_options.docx           Abstract drafts
+│   ├── supporting/
+│   │   ├── supportingMethods.pdf           Supplementary methods
+│   │   ├── Math_Boot_Camp.pdf              Mathematical appendix (61 pages)
+│   │   └── channel_nonlinearity_tutorial.html   Interactive tutorial (open in browser)
+│   └── playground/
+│       ├── coupled_ratchet_sweep.py        Coupled-ratchet simulations
+│       └── README_coupled_ratchet_sweep.md
 │
-├── data/                               Published datasets (by source paper)
-│   ├── amNat/                              Walter et al. 2018 Am Nat (G-matrices)
-│   ├── evolLetters/                        Walter et al. 2020 Evol Letters (transplant)
-│   ├── evol/                               Walter et al. 2016 Evolution (seed set)
-│   ├── evol2/                              Richards et al. (transplant, multi-generation)
+├── data/                               Published datasets organised by source paper
+│   ├── amNat/                              Walter et al. 2018 Am Nat (G-matrices, D)
+│   ├── evolLetters/                        Walter et al. 2020 Evol Letters (field transplant)
+│   ├── evol/                               Walter et al. 2016 Evolution (seed set, F4)
+│   ├── evol2/                              Richards et al. (multi-generation transplant)
 │   ├── elifeCelegans/                      Mallard et al. 2023 eLife (C. elegans G + β)
 │   ├── ecol/                               Walter et al. 2018 Ecology
 │   ├── newPhyt/                            Melo et al. 2014 New Phytologist (extrinsic RI)
-│   ├── phyloandGenomics/                   James et al. 2021 Evolution, 2021 MBE, 2025 Mol Ecol
+│   ├── phyloandGenomics/                   James et al. 2021, 2025 (RI crosses, genomics)
 │   ├── evolLetters-Ken/                    Thompson et al. (stickleback)
 │   ├── sticklebacks/                       Schluter lab supplementary data
-│   └── refsDatasets/                       Reference datasets (Silene, rotation)
+│   ├── refsDatasets/                       Reference datasets (Silene, rotation)
+│   ├── All S. lautus soil data.xlsx        Soil chemistry at population sites
+│   └── data_AL_Arch&Leaf_ARVersion.xlsx    Architecture and leaf data
 │
-├── scripts/                            Standalone analysis scripts
-│   ├── figure_geometric_snowball_concept.py   Conceptual figure (Fig. 1)
-│   ├── geometric_snowball_sims_checked.py     Simulation sweeps (Fig. 2)
-│   └── gmatricesDH/                           Original validated G-matrix R scripts
-│       ├── population_G_D_snowball_analysis.R
-│       ├── senecio_channel_operator_analysis.R
-│       └── population_G_D_results/            Pre-computed outputs
+├── extension/                          Extended theoretical materials
+│   ├── math_bootcamp_appendix.tex/pdf      Full mathematical appendix (source + PDF)
+│   ├── gph_tutorial_for_biologists.tex/pdf         Geometric tutorial (short version)
+│   ├── gph_tutorial_for_biologists_detailed.tex/pdf  Geometric tutorial (long version)
+│   ├── gph_landscape_manuscript_draft.tex/pdf      Extended landscape theory
+│   ├── gph_math_figures.py                 Python code for math figures
+│   ├── gph_math_figure_pack.pdf            Compiled math figures
+│   └── gph_math_figure_notes.md            Notes on figure construction
 │
-├── extension/                          Extended materials
-│   ├── math_bootcamp_appendix.tex/pdf      Mathematical appendix (61 pages)
-│   ├── gph_tutorial_for_biologists.tex/pdf Geometric tutorial for biologists
-│   └── gph_landscape_manuscript_draft.tex  Extended landscape theory
+├── playground/                         Exploratory work (not part of submission)
+│   ├── sympatric_coupled_ratchet_sweep.py
+│   └── section_revision_hybrid_cost.docx
 │
 ├── LICENSE
 └── README.md                           You are here
@@ -65,7 +78,7 @@ geometric-snowball-main/
 
 ## Reproducing the analyses
 
-The paper's empirical results come from two reproducible pipelines, one per study system. Each pipeline is self-contained: it includes all raw data, all scripts, and a single shell command that runs everything end-to-end.
+The paper's empirical results come from two reproducible pipelines, one per study system. Each pipeline is self-contained: raw data, scripts, a shell orchestrator, and documentation. A single command runs everything end-to-end.
 
 ### Requirements
 
@@ -81,16 +94,16 @@ Rscript -e 'install.packages(c("MCMCglmm", "coda", "readxl", "dplyr", "tidyr", "
 pip install numpy pandas matplotlib xlrd openpyxl
 ```
 
-**Git LFS** (for large RData files in the C. elegans pipeline):
+**Git LFS** (for large RData files in the C. elegans pipeline only):
 
 ```bash
-brew install git-lfs    # macOS
+brew install git-lfs    # macOS; see https://git-lfs.com for other platforms
 git lfs install
 ```
 
 ### Senecio pipeline
 
-The Senecio pipeline estimates population-specific G-matrices for eight *S. lautus* populations, constructs the channel operator **S** = **G**^{1/2} **H** **G**^{1/2}, computes pairwise channel angles, and analyses the multigenerational transplant data that tests the framework's predictions about F1 vigour, F2 breakdown, and backcross recovery.
+Located at `manuscript/analysis/senecio_pipeline/`. Estimates population-specific **G**-matrices for eight *S. lautus* populations, constructs the channel operator **S** = **G**^{1/2} **H** **G**^{1/2}, computes pairwise channel angles, and analyses the multigenerational transplant data.
 
 ```bash
 cd manuscript/analysis/senecio_pipeline/
@@ -98,47 +111,41 @@ cd manuscript/analysis/senecio_pipeline/
 # Install R packages (one-time)
 Rscript requirements.R
 
-# Quick test — short MCMC chains, ~5 minutes total
+# Quick test — short MCMC chains, validates everything works (~5 minutes)
 bash run_pipeline.sh --quick-test
 
-# Full run — production MCMC chains, several hours
+# Full run — production MCMC chains (several hours for Stage 1)
 bash run_pipeline.sh
 ```
 
-The pipeline runs in four stages:
+Four stages, runnable individually with `--stage N`:
 
-| Stage | Script | What it does | Runtime |
-|-------|--------|--------------|---------|
-| 1 | `scripts/01_fit_G/population_G_D_snowball_analysis.R` | Fits population-specific **G** via MCMCglmm (8 pops × 2 trait blocks). Computes pairwise D and G geometry. | Hours (full) / ~5 min (quick) |
-| 2 | `scripts/02_channel_operator/senecio_channel_operator_analysis.R` | Fits Lande–Arnold selection gradients per pop × env. Constructs **H**, computes **S**, extracts channel angles. Cross-validates with soil-based **H** proxy. | ~2 min |
-| 3 | `scripts/03_figures/make_figures.py` | Summary figure: G anisotropy, pairwise g_max angles, S channel angles. | Seconds |
-| 4 | `scripts/04_transplant/transplant_analysis.py` | Multigenerational fitness trajectory (F1 vigour → F2 breakdown → BC recovery). Extrinsic RI per generation. Seed-set trajectory. | Seconds |
+| Stage | What it does | Runtime |
+|-------|--------------|---------|
+| **1** | Fits population-specific **G** via MCMCglmm (8 populations × 2 trait blocks: 4×4 vegetative + 2×2 leaf PCs). Computes pairwise **D** from common-garden means and pairwise **G** geometry. | Hours (full) / ~5 min (quick) |
+| **2** | Fits Lande–Arnold selection gradients (β, γ) per population × environment. Constructs **H** from quadratic gradients. Computes **S** = **G**^{1/2} **H** **G**^{1/2} and extracts channel angles. Cross-validates with soil-based rank-1 **H** proxy. | ~2 min |
+| **3** | Produces summary figure: **G** anisotropy, pairwise g_max angles, and **S** channel angles across all populations and environments. | Seconds |
+| **4** | Analyses the multigenerational transplant data (Richards et al.) and seed-set trajectory (Walter et al. 2020). Computes F1 heterosis, F2 breakdown, extrinsic RI per generation, and backcross recovery. | Seconds |
 
-Outputs land in `data/processed/` (Stages 1–2) and `results/` (Stages 3–4). To run individual stages:
+Outputs land in `data/processed/` (Stages 1–2) and `results/` (Stages 3–4). See the pipeline's own `README.md` and `docs/expected_outputs.md` for validated reference numbers.
 
-```bash
-bash run_pipeline.sh --stage 1        # G-matrix fitting only
-bash run_pipeline.sh --stage 4        # transplant analysis only (no MCMC needed)
-```
+**Tracing paper claims to output files:**
 
-Key output files and the paper claims they support:
-
-| Paper claim | Output file | Key column |
+| Paper claim | Output file | Column |
 |---|---|---|
-| G-matrix anisotropy per population | `vegetative_G_summary.csv`, `leaf_PCs_G_summary.csv` | `lambda1_over_lambda2` |
-| Pairwise g_max angles (Schluter limit) | `pairwise_G_geometry_leafPC.csv` | `gmax_angle_deg` |
-| S channel angles (full operator) | `S_channel_angles_LA.csv` | `S_channel_angle_deg` |
+| G-matrix anisotropy per population (Fig. 5a) | `leaf_PCs_G_summary.csv` | `lambda1_over_lambda2` |
+| Pairwise g_max angles, Schluter limit (Fig. 5b) | `pairwise_G_geometry_leafPC.csv` | `gmax_angle_deg` |
+| S channel angles, full operator (Fig. 5c) | `S_channel_angles_LA.csv` | `S_channel_angle_deg` |
+| θ explains 87% of RI variance | Computed from `CrossesDH-ReciprocalsAveraged.txt` | `RIseedSet-SobelChen` vs θ |
 | F1 heterosis (+39% vs midparent) | `transplant_multigenerational_summary.csv` | `L10_mean` |
 | F2 breakdown (−29% vs F1) | same | same |
-| Extrinsic RI sign reversal (F1→F2) | `transplant_extrinsic_RI.csv` | `RI_extrinsic` |
+| RI sign reversal F1→F2 in Dune env | `transplant_extrinsic_RI.csv` | `RI_extrinsic` |
 | Seed-set F2 crash (0.61 → 0.12) | `seedset_trajectory.csv` | `mean_PropFilled` |
-| Backcross recovery (83% of parental) | `transplant_fitness_by_generation.csv` | `L10` for BCHD in HEAD |
-
-See `docs/expected_outputs.md` for validated reference numbers.
+| Backcross recovery (83% of parental) | `transplant_fitness_by_generation.csv` | `L10` for BCHD × HEAD |
 
 ### C. elegans pipeline
 
-The C. elegans pipeline tests the spectral-gap prediction using Mallard et al. (2023) data: 50 generations of adaptation to high salt in one ancestral and three evolved replicate populations.
+Located at `manuscript/analysis/celegans_pipeline/`. Tests the spectral-gap prediction using Mallard et al. (2023) data: 50 generations of adaptation to high salt in one ancestral and three evolved replicate populations.
 
 ```bash
 cd manuscript/analysis/celegans_pipeline/
@@ -147,31 +154,23 @@ cd manuscript/analysis/celegans_pipeline/
 bash run_pipeline.sh
 ```
 
-The pipeline parses posterior G-matrices from RData files, constructs a rank-1 surrogate **S** from the genetic selection gradient **β**, propagates uncertainty through the full MCMC posterior (10,000 draws × 4 populations × 2 environments), and produces a publication-ready violin figure and formatted results table.
+The pipeline parses posterior **G**-matrices from RData files, constructs a rank-1 surrogate **S** from the genetic selection gradient **β**, propagates uncertainty through the full MCMC posterior (10,000 draws × 4 populations × 2 environments), and produces a publication-ready violin figure with posterior credible intervals.
 
-Key output numbers:
+Key output numbers (high-salt environment):
 
 | Population | λ₁/λ₂ | gmax → S rotation (°) | Spectral gap erosion |
 |---|---|---|---|
-| A6140 (ancestor) | 7.22 | 6.5° | — |
-| GA150 | 1.76 | 27.8° | 84% |
-| GA250 | 1.79 | 32.8° | 86% |
-| GA450 | 3.20 | 15.2° | 49% |
-
-See `docs/expected_outputs.md` in the C. elegans pipeline for full posterior intervals.
+| A6140 (ancestor) | 7.22 [3.98, 12.22] | 6.5 [3.7, 12.1] | — |
+| GA150 | 1.76 [1.12, 3.57] | 27.8 [9.1, 84.6] | 84% |
+| GA250 | 1.79 [1.12, 3.45] | 32.8 [9.7, 85.5] | 86% |
+| GA450 | 3.20 [1.44, 7.42] | 15.2 [5.8, 47.7] | 49% |
 
 ### Figures
 
-The manuscript figures are composited in Keynote from individual PDF panels. To regenerate the panels:
+Manuscript figures are composited in Keynote from individual PDF panels. To regenerate the analysis panels:
 
 ```bash
-# Conceptual figure (Fig. 1) — cones, grids, timeline
-python3 scripts/figure_geometric_snowball_concept.py
-
-# Simulation sweeps (Fig. 2) — geometric vs mutational snowball dynamics
-python3 scripts/geometric_snowball_sims_checked.py
-
-# Senecio summary (Fig. 5 panels) — run the Senecio pipeline Stage 3
+# Senecio summary figure (Fig. 5 panels) — run pipeline Stage 3
 cd manuscript/analysis/senecio_pipeline/
 bash run_pipeline.sh --stage 3
 
@@ -180,14 +179,11 @@ cd manuscript/analysis/celegans_pipeline/
 bash run_pipeline.sh
 ```
 
-Figure panels are written to `results/figures/` within each pipeline, and to the repository root `manuscript/figures/forKeynote/` for final compositing.
-
 ### Mathematical derivations
 
-The Mathematica supplement (`manuscript/analysis/GeometricSnowballSupplement.nb`) contains all derivations:
-the channel operator construction, the geometric overlap deficit, the Davis–Kahan perturbation bound, and the connection to Schluter's line of least resistance as a limiting case. The companion file `GeometricSnowballTools.wl` provides reusable functions.
+The Mathematica supplement (`manuscript/analysis/GeometricSnowballSupplement.nb`) contains all derivations: the channel operator construction, the geometric overlap deficit, the Davis–Kahan perturbation bound, and the connection to Schluter's line of least resistance as a limiting case. The companion file `GeometricSnowballTools.wl` provides reusable functions for computing **S**, extracting channels, and measuring principal angles.
 
-The extended mathematical appendix (`extension/math_bootcamp_appendix.tex`, 61 pages) provides a pedagogical treatment of the linear algebra and matrix perturbation theory underlying the framework, written for quantitative biologists.
+The extended mathematical appendix (`extension/math_bootcamp_appendix.tex`, 61 pages) provides a pedagogical treatment of the linear algebra and matrix perturbation theory underlying the framework, written for quantitative biologists. A compiled PDF is available at `manuscript/supporting/Math_Boot_Camp.pdf`.
 
 ---
 
@@ -204,37 +200,32 @@ The extended mathematical appendix (`extension/math_bootcamp_appendix.tex`, 61 p
 
 ## Interactive tutorials
 
-Pedagogical HTML apps accompanying the theory are in the repository and can be opened directly in any browser — no installation required. Each app teaches one concept from the framework through interactive visualisations with sliders, annotated equations (rendered with KaTeX), and step-by-step explanations.
+A pedagogical HTML app explaining why hybrid cost scales nonlinearly with channel misalignment is included at `manuscript/supporting/channel_nonlinearity_tutorial.html`. Open it directly in any browser — no installation required. It teaches the cosine product structure, the sin²θ cost curve, and the spectral-gap heterogeneity prediction through interactive visualisations with sliders and annotated equations rendered with KaTeX.
 
-Topics covered include:
+Additional tutorial materials are in `extension/`, including a detailed geometric tutorial for biologists (`gph_tutorial_for_biologists_detailed.pdf`).
 
-- Channel nonlinearity: why hybrid cost scales as cos²θ
-- The channel operator: how **G** and **H** jointly determine the adaptive direction
-- Spectral gaps and rotational sensitivity
-
-These apps were created with the assistance of Claude (Anthropic).
+These tutorials were created with the assistance of Claude (Anthropic).
 
 ---
 
-## Data sources and citations
+## Data sources
 
-No new empirical data were generated for this study. All data come from published sources:
+No new empirical data were generated. All data come from published sources:
 
-| Dataset | Source | Location in repo |
+| Dataset | Source | Location |
 |---|---|---|
-| *S. lautus* common-garden morphology (Exp 1) | Walter et al. 2018 *Am Nat* | `data/amNat/` |
-| *S. lautus* breeding-design morphology (Exp 2) | Walter et al. 2018 *Am Nat* | `data/amNat/` |
-| *S. lautus* field transplant fitness | Walter et al. 2016 *Evolution*, 2020 *Evol Letters* | `data/evol/`, `data/evolLetters/` |
+| *S. lautus* common-garden morphology | Walter et al. 2018 *Am Nat* | `data/amNat/` |
+| *S. lautus* breeding-design offspring | Walter et al. 2018 *Am Nat* | `data/amNat/` |
+| *S. lautus* field transplant (4 environments) | Walter et al. 2016, 2020 | `data/evol/`, `data/evolLetters/` |
 | *S. lautus* multigenerational transplant | Richards et al. | `data/evol2/` |
 | *S. lautus* soil chemistry | Roda et al. 2013 *Evolution* | `data/` |
 | *S. lautus* reproductive isolation crosses | James et al. 2025 *Mol Ecol* | `data/phyloandGenomics/` |
-| *S. lautus* extrinsic RI (Cabarita) | Melo et al. 2014 *New Phyt* | `data/newPhyt/` |
+| *S. lautus* extrinsic RI (Cabarita Beach) | Melo et al. 2014 *New Phyt* | `data/newPhyt/` |
 | *C. elegans* G-matrices and selection gradients | Mallard et al. 2023 *eLife* | `data/elifeCelegans/` |
-| Threespine stickleback supplementary | Schluter lab | `data/sticklebacks/` |
 
 ---
 
-## Software and computation
+## Software
 
 | Tool | Version | Purpose |
 |---|---|---|
@@ -242,7 +233,7 @@ No new empirical data were generated for this study. All data come from publishe
 | Python | ≥ 3.9 | Figure generation, transplant analysis, pipeline orchestration |
 | Mathematica | ≥ 13 | Symbolic derivations, supplement notebook |
 | LaTeX | TeX Live 2024 | Extended appendix, tutorial documents |
-| Git LFS | ≥ 3.0 | Large RData file storage (C. elegans pipeline) |
+| Git LFS | ≥ 3.0 | Large file storage (C. elegans RData files) |
 
 ---
 
