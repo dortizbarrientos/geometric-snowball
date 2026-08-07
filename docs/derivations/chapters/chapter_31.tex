@@ -1,0 +1,51 @@
+\appendix
+
+\chapter{Notation glossary}
+
+\begin{longtable}{@{}p{0.18\textwidth}p{0.72\textwidth}@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+\endfirsthead
+\toprule
+Symbol & Meaning \\
+\midrule
+\endhead
+\(\mathbf z,\zbar\) & Individual phenotype vector and population mean phenotype. \\
+\(\thetav\) & Local phenotypic optimum. \\
+\(\mathbf d=\zbar-\thetav\) & Mean displacement from the optimum. \\
+\(\betav\) & Directional selection gradient, locally \(-\Hh\mathbf d\). \\
+\(\G\) & Additive genetic variance--covariance matrix. \\
+\(\Hh\) & Curvature matrix of minus log fitness near a local maximum. \\
+\(\Sop=\G^{1/2}\Hh\G^{1/2}\) & Symmetric channel or response operator. \\
+\(\mathbf v_j\) & Orthonormal eigenvector of \(\Sop\) in whitened coordinates. \\
+\(\mathbf u_j=\G^{1/2}\mathbf v_j\) & Corresponding phenotype-space response direction. \\
+\(\Vv\) & Matrix whose columns form a channel basis. \\
+\(\Pp=\Vv\Vv^\top\) & Orthogonal projector onto a channel subspace. \\
+\(k\) & Chosen channel dimension. \\
+\(\delta_k=\lambda_k-\lambda_{k+1}\) & Spectral gap separating the channel from its complement. \\
+\(\psi_j\) & Principal angles between two rank-\(k\) channel subspaces. \\
+\(d_C^2\) & Squared chordal distance, \(\sum_j\sin^2\psi_j\). \\
+\(I_V\) & Bounded volume-overlap deficit, \(1-\prod_j\cos^2\psi_j\). \\
+\(\Aa_i=\dot\Sop_i(0)\) & Initial operator velocity for population \(i\). \\
+\(\cK\) & Relative cross-channel tangent forcing matrix in a fixed shared representation. \\
+\(\Delta\mathbf K_S\) & Relative rotation tangent of the leading eigenspace of \(\Sop\). \\
+\(\mathbf X_i=D(\G^{1/2})[\dot\G_i]\) & Derivative of the square-root map, obtained from a Sylvester equation. \\
+\(\mathbf K_M\) & Full common-metric phenotype-channel tangent, including both \(\Delta\mathbf K_S\) and direct deformation by changing \(\G^{1/2}\). \\
+\(\normF{\mathbf K_M}^2\) & Exact invariant local deterministic susceptibility when \(\G\) and \(\Hh\) evolve. \\
+\(\M\) & Common SPD metric used to compare phenotype-space channels. \\
+\(\Pp_H\) & Hybrid phenotypic covariance. \\
+\(\Rr\) & Hybrid covariance excess beyond the parental average; also used contextually for \(\G^{1/2}\) in the square-root chapter, where its meaning is explicitly stated. \\
+\(L^{\log}_{H,e}\) & Expected negative log relative fitness of hybrids in environment \(e\). \\
+\(L_{\mathrm{cov}}\) & Hybrid covariance log-load relative to parental benchmarks. \\
+\(L_E\) & Total early ecological/geometric log barrier. \\
+\(m_{\mathrm{eff}}\) & Effective migration after early selection. \\
+\(K_i\) & Lineage-specific substitution count or effective amount. \\
+\(D=qK_1K_2\) & Expected number or aggregate strength of cross-lineage DMIs. \\
+\(I_D\) & Intrinsic DMI isolation. \\
+\bottomrule
+\end{longtable}
+
+\begin{cautionbox}[title={One notation collision deliberately avoided in computation}]
+The literature often uses \(\mathbf R\) both for a matrix square root and for segregation excess. In the prose above, context distinguishes them, but computational implementations should use unambiguous names such as \texttt{Ghalf} and \texttt{Rseg}.
+\end{cautionbox}

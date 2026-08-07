@@ -1,0 +1,181 @@
+\chapter{Exact arithmetic mean fitness under Gaussian phenotypes}
+
+\section{Set up the Gaussian integral}
+
+Now assume
+\begin{equation}
+\mathbf Z_H\sim N(\muv_H,\Pp_H).
+\end{equation}
+Define
+\begin{equation}
+\mathbf Y=\Hh_e^{1/2}(\mathbf Z_H-\thetav_e).
+\end{equation}
+Then
+\begin{equation}
+\mathbf Y\sim N(\mathbf m,\mathbf C),
+\end{equation}
+where
+\begin{equation}
+\mathbf m=\Hh_e^{1/2}\mathbf d_e,
+\qquad
+\mathbf C=\Hh_e^{1/2}\Pp_H\Hh_e^{1/2}.
+\end{equation}
+Relative fitness is
+\begin{equation}
+\frac{W}{W_0}=e^{-\half\mathbf Y^\top\mathbf Y}.
+\end{equation}
+Therefore
+\begin{equation}
+\frac{\bar W_{H,e}}{W_{0e}}
+=\int_{\R^n}e^{-\half\mathbf y^\top\mathbf y}
+\frac{e^{-\half(\mathbf y-\mathbf m)^\top\mathbf C^{-1}(\mathbf y-\mathbf m)}}
+{(2\pi)^{n/2}|\mathbf C|^{1/2}}\,\dd\mathbf y.
+\label{eq:GaussianFitnessIntegral}
+\end{equation}
+For clarity, first assume \(\mathbf C\succ0\). The semidefinite case follows by continuity or restriction to its support.
+
+\section{Combine the exponents}
+
+Expand the Gaussian exponent:
+\begin{align}
+(\mathbf y-\mathbf m)^\top\mathbf C^{-1}(\mathbf y-\mathbf m)
+={}&\mathbf y^\top\mathbf C^{-1}\mathbf y
+-2\mathbf m^\top\mathbf C^{-1}\mathbf y
++\mathbf m^\top\mathbf C^{-1}\mathbf m.
+\end{align}
+Adding \(\mathbf y^\top\mathbf y\), the total exponent is
+\begin{align}
+&-\half\left[
+\mathbf y^\top(\mathbf C^{-1}+\Ii)\mathbf y
+-2\mathbf m^\top\mathbf C^{-1}\mathbf y
++\mathbf m^\top\mathbf C^{-1}\mathbf m
+\right].
+\end{align}
+Define
+\begin{equation}
+\mathbf A=\mathbf C^{-1}+\Ii,
+\qquad
+\mathbf b=\mathbf C^{-1}\mathbf m.
+\end{equation}
+Then
+\begin{equation}
+\mathbf y^\top\mathbf A\mathbf y-2\mathbf b^\top\mathbf y
+=(\mathbf y-\mathbf A^{-1}\mathbf b)^\top\mathbf A
+(\mathbf y-\mathbf A^{-1}\mathbf b)
+-\mathbf b^\top\mathbf A^{-1}\mathbf b.
+\label{eq:completeSquareMatrix}
+\end{equation}
+
+\why Expanding the right-hand side gives \(\mathbf y^\top\mathbf A\mathbf y-2\mathbf b^\top\mathbf y+\mathbf b^\top\mathbf A^{-1}\mathbf b-\mathbf b^\top\mathbf A^{-1}\mathbf b\), recovering the left-hand side.
+
+Substitute into the integral. Terms independent of \(\mathbf y\) can be moved outside:
+\begin{align}
+\frac{\bar W_{H,e}}{W_{0e}}
+={}&|\mathbf C|^{-1/2}
+\exp\left[-\half\left(
+\mathbf m^\top\mathbf C^{-1}\mathbf m
+-\mathbf b^\top\mathbf A^{-1}\mathbf b
+\right)\right]\\
+&\times
+(2\pi)^{-n/2}
+\int
+\exp\left[-\half(\mathbf y-\mathbf A^{-1}\mathbf b)^\top
+\mathbf A
+(\mathbf y-\mathbf A^{-1}\mathbf b)
+\right]\dd\mathbf y.
+\end{align}
+The remaining Gaussian integral is
+\begin{equation}
+(2\pi)^{n/2}|\mathbf A|^{-1/2}.
+\end{equation}
+Therefore
+\begin{equation}
+\frac{\bar W_{H,e}}{W_{0e}}
+=|\mathbf C|^{-1/2}|\mathbf A|^{-1/2}
+\exp\left[-\half\left(
+\mathbf m^\top\mathbf C^{-1}\mathbf m
+-\mathbf b^\top\mathbf A^{-1}\mathbf b
+\right)\right].
+\label{eq:GaussianFitnessIntermediate}
+\end{equation}
+
+\section{Simplify the determinant}
+
+Since
+\begin{equation}
+\mathbf A=\mathbf C^{-1}(\Ii+\mathbf C),
+\end{equation}
+we have
+\begin{align}
+|\mathbf C||\mathbf A|
+&=|\mathbf C||\mathbf C^{-1}||\Ii+\mathbf C|\\
+&=|\Ii+\mathbf C|.
+\end{align}
+Thus
+\begin{equation}
+|\mathbf C|^{-1/2}|\mathbf A|^{-1/2}
+=|\Ii+\mathbf C|^{-1/2}.
+\end{equation}
+
+\section{Simplify the exponent}
+
+Because \(\mathbf b=\mathbf C^{-1}\mathbf m\),
+\begin{equation}
+\mathbf b^\top\mathbf A^{-1}\mathbf b
+=\mathbf m^\top\mathbf C^{-1}\mathbf A^{-1}\mathbf C^{-1}\mathbf m.
+\end{equation}
+Also
+\begin{equation}
+\mathbf A^{-1}=(\Ii+\mathbf C)^{-1}\mathbf C,
+\end{equation}
+so
+\begin{align}
+\mathbf C^{-1}\mathbf A^{-1}\mathbf C^{-1}
+&=\mathbf C^{-1}(\Ii+\mathbf C)^{-1}.
+\end{align}
+Therefore the exponent matrix is
+\begin{align}
+\mathbf C^{-1}-\mathbf C^{-1}(\Ii+\mathbf C)^{-1}
+&=\mathbf C^{-1}\left[\Ii-(\Ii+\mathbf C)^{-1}\right]\\
+&=\mathbf C^{-1}\left[\mathbf C(\Ii+\mathbf C)^{-1}\right]\\
+&=(\Ii+\mathbf C)^{-1}.
+\end{align}
+The bracket identity follows because
+\begin{equation}
+\Ii-(\Ii+\mathbf C)^{-1}
+=\left[(\Ii+\mathbf C)-\Ii\right](\Ii+\mathbf C)^{-1}
+=\mathbf C(\Ii+\mathbf C)^{-1}.
+\end{equation}
+
+Combining determinant and exponent gives
+\begin{equation}
+\boxed{
+\frac{\bar W_{H,e}}{W_{0e}}
+=|\Ii+\mathbf C|^{-1/2}
+\exp\left[-\half\mathbf m^\top(\Ii+\mathbf C)^{-1}\mathbf m\right].}
+\label{eq:GaussianFitnessCompact}
+\end{equation}
+Substituting \(\mathbf C=\Hh_e^{1/2}\Pp_H\Hh_e^{1/2}\) and \(\mathbf m=\Hh_e^{1/2}\mathbf d_e\),
+\begin{equation}
+\boxed{
+\begin{aligned}
+\bar W_{H,e}
+={}&W_{0e}
+\left|\Ii+\Hh_e^{1/2}\Pp_H\Hh_e^{1/2}\right|^{-1/2}\\
+&\times
+\exp\left[
+-\half\mathbf d_e^\top\Hh_e^{1/2}
+\left(\Ii+\Hh_e^{1/2}\Pp_H\Hh_e^{1/2}\right)^{-1}
+\Hh_e^{1/2}\mathbf d_e
+\right].
+\end{aligned}}
+\label{eq:exactGaussianMeanFitness}
+\end{equation}
+
+\begin{geombox}
+The determinant term is the loss caused by spreading a Gaussian cloud through curved fitness space. The exponential term is the loss caused by displacing its centre. Variance also softens the mean penalty through the inverse \((\Ii+\mathbf C)^{-1}\), because a broad distribution samples phenotypes on both sides of its centre.
+\end{geombox}
+
+\begin{cautionbox}
+\Cref{eq:exactGaussianMeanFitness} gives arithmetic mean fitness. \Cref{eq:expectedLogFitnessLoad} gives expected log-fitness loss. Both are exact under their assumptions, but they answer different averaging questions.
+\end{cautionbox}

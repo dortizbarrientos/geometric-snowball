@@ -1,0 +1,80 @@
+\chapter{Mean mismatch, segregation excess, and hybrid generation}
+
+\section{Midpoint mean mismatch}
+
+Suppose parental means lie at their own optima \(\thetav_1\) and \(\thetav_2\), and the hybrid mean is the midpoint
+\begin{equation}
+\muv_H=\half(\thetav_1+\thetav_2).
+\end{equation}
+Define
+\begin{equation}
+\Delta\thetav=\thetav_2-\thetav_1.
+\end{equation}
+Then in environment 1,
+\begin{equation}
+\mathbf d_1=\muv_H-\thetav_1=\half\Delta\thetav.
+\end{equation}
+In environment 2,
+\begin{equation}
+\mathbf d_2=\muv_H-\thetav_2=-\half\Delta\thetav.
+\end{equation}
+The mean log-loads are
+\begin{align}
+L_{\mathrm{mean},1}
+&=\half\mathbf d_1^\top\Hh_1\mathbf d_1
+=\frac18\Delta\thetav^\top\Hh_1\Delta\thetav,\\
+L_{\mathrm{mean},2}
+&=\frac18\Delta\thetav^\top\Hh_2\Delta\thetav.
+\end{align}
+Their equal average is
+\begin{equation}
+\boxed{
+L_{\mathrm{mean}}
+=\frac1{16}\Delta\thetav^\top(\Hh_1+\Hh_2)\Delta\thetav.}
+\label{eq:midpointMeanLoad}
+\end{equation}
+
+\inwords Mean mismatch depends on phenotypic displacement between optima and the curvature along that displacement. It is not a channel-angle term and should be estimated separately.
+
+\section{A complete log-load decomposition}
+
+For the equal parental-environment benchmark, write
+\begin{equation}
+L_E=L_{\mathrm{mean}}+L_{\mathrm{cov}}.
+\end{equation}
+Using \cref{eq:generalTraceIdentity},
+\begin{align}
+L_E
+={}&L_{\mathrm{mean}}
+-\frac18\tr[(\Hh_2-\Hh_1)(\G_2-\G_1)]\\
+&+\frac14\tr[(\Hh_1+\Hh_2)\Rr].
+\label{eq:completeHybridLogLoad}
+\end{align}
+This separates:
+\begin{enumerate}[leftmargin=1.6em]
+\item displacement of the hybrid mean;
+\item covariance--curvature coadaptation broken by hybridization;
+\item segregation or other excess covariance.
+\end{enumerate}
+
+\section{Why F1 and F2 hybrids can differ sharply}
+
+An F1 may have an approximately intermediate mean but comparatively little segregation variance because homologous parental haplotypes remain intact. Dominance can create heterosis and mask recessive incompatibilities. In F2 or later recombinant generations, recombination and segregation can increase \(\Rr\), create transgressive combinations, and expose epistatic incompatibilities.
+
+\begin{biobox}
+The additive covariance mechanism is therefore expected to be especially visible in recombinant generations. F1 fitness is not an unambiguous test: strong heterosis can coexist with a geometric load that emerges only after segregation.
+\end{biobox}
+
+\begin{connectionbox}
+This generation-specific prediction matches the existing \textit{Senecio} pattern that F1 hybrids can show heterosis while F2 hybrids show strong fertility or fitness reduction, and later generations can recover after incompatible variation has been removed. The theory supplies a quantitative route for separating mean, covariance, dominance, and intrinsic interaction components rather than treating all hybrid outcomes as one phenomenon.
+\end{connectionbox}
+
+\section{Environment dependence distinguishes early ecological load from intrinsic load}
+
+The terms containing \(\Hh_e\) depend on the environment in which fitness is measured. If hybrids fail only in parental habitats, the barrier is extrinsic. If they fail in a benign common environment, an intrinsic component is implicated.
+
+\begin{summarybox}
+A decisive experiment assays the same recombinant families in both parental habitats and in a common environment. The habitat-dependent component tests geometric ecological load; the common-environment residual tests intrinsic incompatibility.
+\end{summarybox}
+
+\part{Evolution of the channels and the handoff to intrinsic isolation}

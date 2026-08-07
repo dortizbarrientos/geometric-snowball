@@ -1,0 +1,84 @@
+\chapter{Expected negative log fitness: every step}
+
+\section{Expand the hybrid quadratic form}
+
+The individual loss is
+\begin{equation}
+\ell_e(\mathbf Z_H)
+=\half(\mathbf d_e+\boldsymbol\varepsilon)^\top
+\Hh_e
+(\mathbf d_e+\boldsymbol\varepsilon).
+\end{equation}
+Expand the product:
+\begin{align}
+(\mathbf d_e+\boldsymbol\varepsilon)^\top\Hh_e(\mathbf d_e+\boldsymbol\varepsilon)
+={}&\mathbf d_e^\top\Hh_e\mathbf d_e
++\mathbf d_e^\top\Hh_e\boldsymbol\varepsilon\\
+&+\boldsymbol\varepsilon^\top\Hh_e\mathbf d_e
++\boldsymbol\varepsilon^\top\Hh_e\boldsymbol\varepsilon.
+\end{align}
+Because \(\Hh_e\) is symmetric, the middle two scalar terms are equal:
+\begin{equation}
+\mathbf d_e^\top\Hh_e\boldsymbol\varepsilon
+=\boldsymbol\varepsilon^\top\Hh_e\mathbf d_e.
+\end{equation}
+Thus
+\begin{equation}
+\ell_e
+=\half\mathbf d_e^\top\Hh_e\mathbf d_e
++\mathbf d_e^\top\Hh_e\boldsymbol\varepsilon
++\half\boldsymbol\varepsilon^\top\Hh_e\boldsymbol\varepsilon.
+\end{equation}
+Take expectations:
+\begin{align}
+L^{\log}_{H,e}
+={}&\half\mathbf d_e^\top\Hh_e\mathbf d_e
++\mathbf d_e^\top\Hh_e\E[\boldsymbol\varepsilon]
++\half\E[\boldsymbol\varepsilon^\top\Hh_e\boldsymbol\varepsilon]\\
+={}&\half\mathbf d_e^\top\Hh_e\mathbf d_e
++\half\tr(\Hh_e\Pp_H),
+\end{align}
+using \(\E[\boldsymbol\varepsilon]=\Zero\) and \cref{eq:traceQuadraticExpectation}.
+
+Therefore
+\begin{equation}
+\boxed{
+L^{\log}_{H,e}
+=\half\mathbf d_e^\top\Hh_e\mathbf d_e
++\half\tr(\Hh_e\Pp_H).}
+\label{eq:expectedLogFitnessLoad}
+\end{equation}
+
+\begin{mathteach}
+The expected value of a quadratic function depends only on the first two moments of the distribution. Normality is not required for \cref{eq:expectedLogFitnessLoad}.
+\end{mathteach}
+
+\begin{geombox}
+The first term evaluates the location of the hybrid cloud's centre. The second evaluates the size and orientation of the cloud itself. A cloud can be centred exactly at the optimum and still have low fitness if it extends far into steep directions.
+\end{geombox}
+
+\begin{biobox}
+Hybrid failure can therefore arise from two geometrically distinct causes: mean mismatch and variance mismatch. Mean mismatch is an intermediate or transgressive phenotype lying away from the optimum. Variance mismatch is segregation or recombination placing offspring in trait combinations strongly penalised by selection.
+\end{biobox}
+
+\section{Diagonalize the curvature-weighted covariance}
+
+Use cyclic trace invariance:
+\begin{equation}
+\tr(\Hh_e\Pp_H)
+=\tr(\Hh_e^{1/2}\Pp_H\Hh_e^{1/2}).
+\end{equation}
+Let
+\begin{equation}
+\mathbf C_e=\Hh_e^{1/2}\Pp_H\Hh_e^{1/2}.
+\end{equation}
+Since \(\mathbf C_e\) is symmetric positive semidefinite, let its eigenvalues be \(c_{ej}\ge0\). Then
+\begin{equation}
+\tr(\Hh_e\Pp_H)=\sum_{j=1}^nc_{ej}.
+\end{equation}
+
+\inwords Each \(c_{ej}\) is hybrid variance measured after scaling phenotype directions by the square root of fitness curvature. The trace is the total curvature-standardised hybrid variance.
+
+\begin{connectionbox}
+This has exactly the same algebraic structure as the channel operator. The response operator \(\G^{1/2}\Hh\G^{1/2}\) asks how curvature acts on parental additive variation. The hybrid-load matrix \(\Hh^{1/2}\Pp_H\Hh^{1/2}\) asks how hybrid phenotypic variance is penalised by curvature. The order of the square-root factors reflects the question being asked, but the nonzero eigenvalues of \(\G^{1/2}\Hh\G^{1/2}\) and \(\Hh^{1/2}\G\Hh^{1/2}\) coincide.
+\end{connectionbox}

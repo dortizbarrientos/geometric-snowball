@@ -1,0 +1,229 @@
+\chapter{From an early geometric barrier to Orr's DMI snowball}
+
+\section{Effective migration as a barrier-weighted flux}
+
+Let \(m_0\) be the potential migration rate before selection. If an early ecological or geometric log barrier is \(L_E(t)\), a minimal transmission closure is
+\begin{equation}
+\boxed{
+m_{\mathrm{eff}}(t)=m_0e^{-L_E(t)}.}
+\label{eq:effectiveMigration}
+\end{equation}
+If
+\begin{equation}
+I_E=1-e^{-L_E},
+\end{equation}
+then
+\begin{equation}
+m_{\mathrm{eff}}=m_0(1-I_E).
+\end{equation}
+
+\inwords Only the fraction of migrant or hybrid ancestry surviving the early barrier contributes effectively to homogenizing gene flow.
+
+\begin{cautionbox}
+\Cref{eq:effectiveMigration} is a modelling closure. Its exact demographic form depends on life history, mating, density regulation, and the stage at which selection acts. Its virtue is transparency: an additive log barrier becomes multiplicative survival.
+\end{cautionbox}
+
+\section{A simple establishment function}
+
+Let candidate lineage-specific substitutions arise at rate \(\nu_i\). Use
+\begin{equation}
+\pi_i(m)=\frac{s_i}{s_i+2m}
+\label{eq:establishmentClosure}
+\end{equation}
+as a dimensionless establishment function that declines with homogenizing migration. Then
+\begin{equation}
+\boxed{
+\dot K_i=\nu_i\pi_i(m_{\mathrm{eff}}),}
+\label{eq:substitutionAccumulation}
+\end{equation}
+where \(K_i\) is the cumulative number or effective amount of lineage-specific substitution.
+
+The sensitivity to the ecological barrier is positive. Since
+\begin{equation}
+\frac{\partial\pi}{\partial m}
+=-\frac{2s}{(s+2m)^2}
+\end{equation}
+and
+\begin{equation}
+\frac{\partial m_{\mathrm{eff}}}{\partial L_E}
+=-m_{\mathrm{eff}},
+\end{equation}
+we have
+\begin{equation}
+\boxed{
+\frac{\partial\pi}{\partial L_E}
+=\frac{2s\,m_{\mathrm{eff}}}{(s+2m_{\mathrm{eff}})^2}>0.}
+\label{eq:establishmentBarrierSensitivity}
+\end{equation}
+
+\inwords A stronger early barrier reduces effective migration, which increases the fraction of locally favoured substitutions able to establish independently.
+
+\section{Combinatorial DMI accumulation}
+
+If lineage 1 has \(K_1\) derived substitutions and lineage 2 has \(K_2\), there are
+\begin{equation}
+K_1K_2
+\end{equation}
+possible cross-lineage pairs. If each pair has aggregate incompatibility probability \(q\), the expected incompatibility count or strength is
+\begin{equation}
+\boxed{D=qK_1K_2.}
+\label{eq:DMIcount}
+\end{equation}
+For equal lineages \(K_1=K_2=K\),
+\begin{equation}
+D=qK^2.
+\end{equation}
+
+Differentiate the general expression:
+\begin{equation}
+\dot D=q(\dot K_1K_2+K_1\dot K_2).
+\end{equation}
+As substitution counts grow, each new substitution has more possible partners in the other lineage. This is the combinatorial origin of Orr-like acceleration.
+
+\section{Map incompatibility count to intrinsic isolation}
+
+Suppose effective incompatibility events act independently and their realized count is Poisson with mean \(\eta D\). The probability of zero effective incompatibilities is
+\begin{equation}
+\Pr(N=0)=e^{-\eta D}.
+\end{equation}
+If zero is required for full intrinsic viability, define
+\begin{equation}
+\boxed{I_D=1-e^{-\eta D}.}
+\label{eq:DMIisolation}
+\end{equation}
+
+\inwords The exponential mapping is not arbitrary: it is the zero-event probability of a Poisson process. The parameter \(\eta\) converts expected DMI number or strength into fitness effect.
+
+\section{Combine early and late barriers}
+
+If ecological and intrinsic survival components multiply,
+\begin{equation}
+1-I_{\mathrm{tot}}
+=(1-I_E)(1-I_D).
+\end{equation}
+Using \(1-I_E=e^{-L_E}\) and \(1-I_D=e^{-\eta D}\),
+\begin{align}
+1-I_{\mathrm{tot}}
+&=e^{-L_E}e^{-\eta D}\\
+&=e^{-(L_E+\eta D)}.
+\end{align}
+Therefore
+\begin{equation}
+\boxed{
+I_{\mathrm{tot}}
+=1-(1-I_E)(1-I_D)
+=1-e^{-[L_E+\eta D]}.}
+\label{eq:combinedBarrier}
+\end{equation}
+
+\begin{geombox}
+Log barriers add because survival probabilities multiply. The early geometric component and the later DMI component occupy different biological layers but share a common additive scale in negative log survival.
+\end{geombox}
+
+\section{Early-time expansion and an important nuance}
+
+Suppose the ecological log barrier begins as
+\begin{equation}
+L_E(t)=bt^2+O(t^3).
+\label{eq:earlyEcologicalBarrier}
+\end{equation}
+Use the scalar exponential expansion \(e^{-x}=1-x+O(x^2)\). Because the unknown remainder in \cref{eq:earlyEcologicalBarrier} is already order \(t^3\),
+\begin{align}
+m_{\mathrm{eff}}(t)
+&=m_0e^{-L_E(t)}\\
+&=m_0\left[1-L_E(t)+O(L_E(t)^2)\right]\\
+&=m_0\left[1-bt^2+O(t^3)\right].
+\label{eq:earlyEffectiveMigrationExpansion}
+\end{align}
+
+\inwords The geometric barrier lowers effective migration at order \(t^2\). We retain \(O(t^3)\), rather than claiming \(O(t^4)\), because the ecological barrier itself may contain a cubic term.
+
+It is convenient to regard establishment as a function of the log barrier through \(m_{\mathrm{eff}}=m_0e^{-L_E}\). Taylor-expand around \(L_E=0\):
+\begin{align}
+\pi_i(L_E)
+&=\pi_i(0)
++\left.\frac{\partial\pi_i}{\partial L_E}\right|_0L_E
++O(L_E^2)\\
+&=\pi_i(m_0)
++b\left.\frac{\partial\pi_i}{\partial L_E}\right|_0t^2
++O(t^3).
+\label{eq:earlyEstablishmentExpansion}
+\end{align}
+For the closure in \cref{eq:establishmentClosure},
+\begin{equation}
+\left.\frac{\partial\pi_i}{\partial L_E}\right|_0
+=\frac{2s_im_0}{(s_i+2m_0)^2}>0.
+\end{equation}
+
+Now integrate \(\dot K_i=\nu_i\pi_i\) from zero to \(t\):
+\begin{align}
+K_i(t)
+&=\int_0^t\nu_i\pi_i(\tau)\,\dd\tau\\
+&=\nu_i\pi_i(m_0)t
++\frac{\nu_i b}{3}
+\left.\frac{\partial\pi_i}{\partial L_E}\right|_0t^3
++O(t^4).
+\label{eq:earlySubstitutionExpansion}
+\end{align}
+Define
+\begin{equation}
+a_i=\nu_i\pi_i(m_0),
+\qquad
+c_i=\frac{\nu_i b}{3}
+\left.\frac{\partial\pi_i}{\partial L_E}\right|_0.
+\end{equation}
+Then
+\begin{equation}
+K_i(t)=a_it+c_it^3+O(t^4).
+\end{equation}
+Substitute into \(D=qK_1K_2\):
+\begin{align}
+D(t)
+&=q\left[a_1t+c_1t^3+O(t^4)\right]
+\left[a_2t+c_2t^3+O(t^4)\right]\\
+&=\boxed{
+q a_1a_2t^2
++q(a_1c_2+a_2c_1)t^4
++O(t^5).}
+\label{eq:earlyDMIExpansion}
+\end{align}
+
+\begin{mathteach}
+The leading \(t^2\) term is the ordinary combinatorial product of two substitution counts that each grow linearly from a nonzero baseline establishment rate. The geometric precursor first enters this smooth expansion through \(c_i\), and therefore modifies the \(t^4\) coefficient of \(D\), not its leading exponent.
+\end{mathteach}
+
+The intrinsic-isolation mapping adds its own fourth-order correction:
+\begin{align}
+I_D(t)
+&=1-e^{-\eta D(t)}\\
+&=\eta D(t)-\half\eta^2D(t)^2+O(D(t)^3).
+\end{align}
+Thus, even at order \(t^4\), the observed intrinsic-isolation curve combines precursor-driven acceleration with saturation of the exponential mapping.
+
+\begin{biobox}
+The robust biological statement is that the early ecological barrier raises the establishment rate of lineage-specific substitutions by reducing homogenizing migration. Under a smooth model with nonzero baseline establishment, this changes the amount of later DMI accumulation before it changes the leading power law. The effect can become much sharper when migration nearly prevents establishment, or when establishment has a threshold, bistability, or other nonlinear feedback.
+\end{biobox}
+
+\begin{cautionbox}
+The handoff does not automatically create a new leading exponent for DMI accumulation under every smooth establishment function. Its robust claim is causal acceleration through reduced gene flow. Dramatic exponent changes require stronger nonlinearities, thresholds, or feedbacks and should be treated as additional hypotheses.
+\end{cautionbox}
+
+\section{Reversibility and the two-stage ratchet}
+
+If environments converge, \(L_E\) can fall as channels and fitness geometries realign. In contrast, substitutions and DMIs that have already accumulated need not disappear. Therefore the early mechanism is potentially reversible, whereas the later component is path dependent and more persistent.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/pedagogy_handoff.pdf}
+\caption{Logical handoff from divergent selection to channel rotation, ecological hybrid load, reduced effective gene flow, and later DMI accumulation.}
+\label{fig:handoffPedagogy}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.84\textwidth]{figures/04_geometric_to_dmi_handoff.pdf}
+\caption{Illustrative numerical coupling. The model demonstrates the mechanism rather than fitting empirical data.}
+\label{fig:handoffNumerical}
+\end{figure}
+
+\part{Connections to earlier quantitative-genetic machinery and empirical tests}

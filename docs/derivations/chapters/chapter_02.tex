@@ -1,0 +1,109 @@
+\chapter{Trait space, vectors, matrices, and coordinate systems}
+
+\section{A phenotype is a point in a multivariate space}
+
+Let an organism be described by \(n\) quantitative traits. We collect those trait values into a column vector
+\begin{equation}
+\mathbf z=
+\begin{bmatrix}
+z_1\\ z_2\\ \vdots\\ z_n
+\end{bmatrix}
+\in\R^n.
+\end{equation}
+
+\inwords The phenotype is represented by one point in an \(n\)-dimensional trait space. Each coordinate records one measured trait. A population mean \(\zbar\) is another point in the same space.
+
+A displacement from a reference phenotype \(\thetav\) is
+\begin{equation}
+\mathbf d=\mathbf z-\thetav.
+\end{equation}
+
+\inwords Subtraction converts two locations into a direction and distance. The vector \(\mathbf d\) points from the reference phenotype to the observed phenotype.
+
+\begin{geombox}
+For two traits, trait space is an ordinary plane. For three traits, it is three-dimensional space. In many traits, the drawing is no longer literal, but all the same operations remain valid: points, vectors, lengths, angles, ellipsoids, and projections.
+\end{geombox}
+
+\begin{biobox}
+The reference point will usually be a local phenotypic optimum. The displacement \(\mathbf d\) therefore records both how far the population is from its optimum and the combination of traits in which it is displaced.
+\end{biobox}
+
+\section{Matrices are transformations, not just tables of numbers}
+
+An \(n\times n\) matrix \(\mathbf A\) acts on a vector by matrix multiplication:
+\begin{equation}
+\mathbf y=\mathbf A\mathbf x.
+\end{equation}
+
+\inwords The matrix takes an input direction \(\mathbf x\), stretches or compresses it, possibly rotates or shears it, and returns a new vector \(\mathbf y\).
+
+The product of two matrices means composition:
+\begin{equation}
+\mathbf C=\mathbf A\mathbf B,
+\qquad
+\mathbf C\mathbf x=\mathbf A(\mathbf B\mathbf x).
+\end{equation}
+
+\inwords The rightmost transformation acts first. The product \(\mathbf A\mathbf B\) means ``apply \(\mathbf B\), then apply \(\mathbf A\).''
+
+\begin{mathteach}
+This order matters. Even if \(\mathbf A\) and \(\mathbf B\) are individually symmetric, generally \(\mathbf A\mathbf B\neq\mathbf B\mathbf A\). The matrices commute only when applying them in either order has the same effect. For symmetric matrices, commutation is equivalent to the existence of a common orthonormal eigenbasis.
+\end{mathteach}
+
+\section{Changing trait units}
+
+Suppose we replace the original traits by a new linear coordinate system
+\begin{equation}
+\mathbf z'=\mathbf T\mathbf z,
+\end{equation}
+where \(\mathbf T\) is nonsingular. This can represent rescaling, changing units, rotating to principal components, or taking any invertible linear combination of traits.
+
+A covariance matrix transforms as
+\begin{equation}
+\G'=\mathbf T\G\mathbf T^\top.
+\label{eq:Gtransform}
+\end{equation}
+
+\begin{derivationbox}
+Let \(\mathbf z\) have covariance \(\G\). Then
+\begin{align}
+\G'
+&=\Cov(\mathbf z')\\
+&=\Cov(\mathbf T\mathbf z)\\
+&=\E\left[(\mathbf T\mathbf z-\mathbf T\E\mathbf z)
+(\mathbf T\mathbf z-\mathbf T\E\mathbf z)^\top\right]\\
+&=\E\left[\mathbf T(\mathbf z-\E\mathbf z)(\mathbf z-\E\mathbf z)^\top\mathbf T^\top\right]\\
+&=\mathbf T\E\left[(\mathbf z-\E\mathbf z)(\mathbf z-\E\mathbf z)^\top\right]\mathbf T^\top\\
+&=\mathbf T\G\mathbf T^\top.
+\end{align}
+Every equality simply moves a fixed linear transformation outside an expectation.
+\end{derivationbox}
+
+A quadratic-form matrix transforms differently. If fitness loss is the same biological scalar before and after the coordinate change,
+\begin{equation}
+\mathbf d^\top\Hh\mathbf d
+=(\mathbf d')^\top\Hh'\mathbf d',
+\end{equation}
+with \(\mathbf d'=\mathbf T\mathbf d\). Substituting \(\mathbf d=\mathbf T^{-1}\mathbf d'\) gives
+\begin{align}
+\mathbf d^\top\Hh\mathbf d
+&=(\mathbf T^{-1}\mathbf d')^\top\Hh(\mathbf T^{-1}\mathbf d')\\
+&=(\mathbf d')^\top\mathbf T^{-\top}\Hh\mathbf T^{-1}\mathbf d'.
+\end{align}
+Therefore
+\begin{equation}
+\Hh'=\mathbf T^{-\top}\Hh\mathbf T^{-1}.
+\label{eq:Htransform}
+\end{equation}
+
+\begin{geombox}
+Covariance and curvature transform in complementary ways. Covariance follows the coordinates forward; curvature follows them backward so that the scalar quadratic loss remains unchanged. This complementarity is why the product \(\G\Hh\) transforms by similarity:
+\[
+\G'\Hh'=\mathbf T\G\Hh\mathbf T^{-1}.
+\]
+Similarity preserves eigenvalues and maps phenotype-space eigendirections by \(\mathbf u' = \mathbf T\mathbf u\).
+\end{geombox}
+
+\begin{cautionbox}
+A Euclidean angle between raw eigenvectors is not generally invariant to arbitrary rescaling of traits. Later we construct a common-metric comparison that is invariant under \emph{every} nonsingular linear change of coordinates.
+\end{cautionbox}

@@ -1,0 +1,44 @@
+\chapter*{How to use this document}
+\addcontentsline{toc}{chapter}{How to use this document}
+
+The argument has five logically distinct layers. Keeping them separate prevents the most common conceptual errors.
+
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{Local adaptation.} A quadratic fitness surface and the additive covariance matrix generate the response operator \(\Sop\).
+\item \textbf{Channel geometry.} Eigenvectors and invariant subspaces of \(\Sop\) define the locally efficient directions of multivariate response.
+\item \textbf{Channel divergence.} Perturbation theory determines how quickly two populations' channel subspaces rotate apart.
+\item \textbf{Fitness calibration.} A separate hybrid-fitness model determines whether and how channel divergence creates reproductive isolation.
+\item \textbf{Evolutionary handoff.} Reduced gene flow can allow lineage-specific substitutions and intrinsic incompatibilities to accumulate later.
+\end{enumerate}
+
+Each important derivation is followed by four kinds of explanation. A \emph{mathematical teaching} box explains the familiar mathematical machinery. A \emph{geometric interpretation} box turns the algebra into a picture. A \emph{biological interpretation} box states what the result means for adaptation or speciation. A \emph{connection} box shows how the result follows from, extends, or constrains something derived earlier.
+
+\begin{cautionbox}[title={What ``all derivation steps'' means here}]
+The document derives all steps that are specific to this theory, including the matrix identities on which the main biological claims depend. For foundational results whose complete proof would require a separate numerical-linear-algebra text---most notably the global Davis--Kahan theorem---the exact theorem is stated, its assumptions are unpacked, and the local formula actually used by the theory is derived in full.
+\end{cautionbox}
+
+\begin{table}[H]
+\centering
+\caption*{Status of the main claims}
+\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}X@{}}
+\toprule
+Claim & Mathematical status \\
+\midrule
+Quadratic local fitness model & A second-order local approximation near a fitness maximum. \\
+Whitened response operator \(\Sop\) & Exact when \(\G\) is treated as fixed over the local relaxation interval; also defines the instantaneous generalized response modes when \(\G\) evolves. \\
+Principal-angle and projector identities & Exact. \\
+Local quadratic channel snowball & Exact asymptotic result under smooth deterministic divergence and a nonzero subspace gap; the common-metric coefficient includes the direct effect of evolving \(\G^{1/2}\). \\
+Linear drift baseline & Exact leading expectation under Brownian motion in local normal coordinates; the quadratic term of the observed curve also contains second-order stochastic and manifold corrections. \\
+Gaussian hybrid-fitness formula & Exact under Gaussian phenotypes and quadratic fitness. \\
+Covariance--curvature trace identity & Exact given the stated hybrid covariance decomposition. \\
+Channel-ridge fitness theorem & Exact under the structured \(\G_i\) and \(\Hh_i\) model. \\
+Geometric-to-DMI handoff & A transparent dynamical closure, not an identity or universal population-genetic law. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\part{The mathematical language of the theory}

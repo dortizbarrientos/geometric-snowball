@@ -1,0 +1,81 @@
+\chapter{Estimating the theory from data}
+
+\section{Estimate \(\G_i\) at the population-pair level}
+
+A multivariate animal model or breeding design can estimate posterior draws
+\begin{equation}
+\G_i^{(s)},
+\qquad s=1,\ldots,S.
+\end{equation}
+Population-pair-specific matrices are preferable because ecotype pooling can average over precisely the among-pair channel variation the theory seeks to explain.
+
+\section{Estimate local curvature from phenotype--fitness data}
+
+Near an optimum, fit a regularized quadratic selection model
+\begin{equation}
+\log W
+=\alpha+\betav^\top\mathbf z
+-\half\mathbf z^\top\Hh\mathbf z+\varepsilon.
+\label{eq:empiricalQuadraticSelection}
+\end{equation}
+If traits are centred at the estimated optimum, the linear term should be small. If they are not centred, the optimum implied by the quadratic form is
+\begin{equation}
+\thetav=\Hh^{-1}\betav,
+\end{equation}
+provided \(\Hh\succ0\). This follows because
+\begin{align}
+\betav^\top\mathbf z-\half\mathbf z^\top\Hh\mathbf z
+&=-\half(\mathbf z-\Hh^{-1}\betav)^\top\Hh
+(\mathbf z-\Hh^{-1}\betav)
++\half\betav^\top\Hh^{-1}\betav.
+\end{align}
+
+\begin{cautionbox}
+Quadratic regression is parameter hungry: \(n(n+1)/2\) curvature parameters are required. Shrinkage, structured low-rank models, preregistered trait modules, or Bayesian regularization are likely necessary. Positive-definiteness should be imposed or carefully assessed rather than assumed from noisy estimates.
+\end{cautionbox}
+
+\section{Construct posterior channel quantities}
+
+For each posterior draw:
+\begin{enumerate}[leftmargin=1.6em]
+\item compute \(\G_i^{1/2}\);
+\item compute \(\Sop_i=\G_i^{1/2}\Hh_i\G_i^{1/2}\);
+\item choose or average over channel dimension \(k\);
+\item map channel bases to phenotype space;
+\item construct common-metric bases \(\Qq_i\);
+\item compute principal angles, \(d_C^2\), \(I_V\), and spectral gaps;
+\item compute exact expected log load and Gaussian arithmetic mean fitness for hybrids;
+\item retain the full posterior joint distribution rather than plugging in posterior means.
+\end{enumerate}
+
+\section{Estimate hybrid moments}
+
+For each cross and environment, estimate
+\begin{equation}
+\muv_H,
+\qquad
+\Pp_H.
+\end{equation}
+Then evaluate
+\begin{equation}
+L^{\log}_{H,e}
+=\half(\muv_H-\thetav_e)^\top\Hh_e(\muv_H-\thetav_e)
++\half\tr(\Hh_e\Pp_H)
+\end{equation}
+and, where Gaussian approximation is defensible, \cref{eq:exactGaussianMeanFitness}.
+
+\section{Competing predictive models}
+
+A preregistered comparison should include:
+\begin{enumerate}[leftmargin=1.6em]
+\item divergence time or neutral genetic distance alone;
+\item environmental distance alone;
+\item mean mismatch alone;
+\item \(\G\)-matrix distance alone;
+\item \(\Hh\)-matrix distance alone;
+\item channel angle or chordal distance alone;
+\item the full curvature-weighted hybrid-load model;
+\item the coupled ecological-plus-DMI model for later generations.
+\end{enumerate}
+
+The key evidentiary standard is out-of-sample prediction of hybrid fitness, not merely a significant association in the fitted data.

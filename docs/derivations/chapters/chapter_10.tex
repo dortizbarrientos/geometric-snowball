@@ -1,0 +1,114 @@
+\chapter{Comparing channels when populations have different \(\G\) matrices}
+
+\section{Why population-specific whitened spaces cannot be compared naively}
+
+Population \(i\) has a whitened coordinate
+\begin{equation}
+\mathbf x_i=\G_i^{-1/2}\mathbf d.
+\end{equation}
+If \(\G_1\neq\G_2\), the same phenotype displacement receives different whitened coordinates in the two populations. Therefore a Euclidean angle between eigenvectors of \(\Sop_1\) and \(\Sop_2\) compares vectors that live in different metrics.
+
+\begin{cautionbox}
+This is not a minor numerical detail. A raw angle between population-specific whitened eigenvectors can change when one trait is converted from centimetres to millimetres. A biologically meaningful comparison must use one shared metric.
+\end{cautionbox}
+
+\section{Map channels back into phenotype space}
+
+Let \(\Vv_i\in\R^{n\times k}\) be the orthonormal channel basis of \(\Sop_i\). Define
+\begin{equation}
+\mathbf U_i=\G_i^{1/2}\Vv_i.
+\label{eq:mapChannelsPhenotype}
+\end{equation}
+The columns of \(\mathbf U_i\) span the corresponding phenotype-space response subspace.
+
+Choose a common SPD metric \(\M\). Possible choices include ancestral \(\G_0^{-1}\), pooled \(\G^{-1}\), or a preregistered biologically motivated measurement metric.
+
+\begin{cautionbox}
+Coordinate invariance means that the result is unchanged when the same biological metric is represented in different units or coordinates. It does \emph{not} mean that every scientifically plausible choice of \(\M\) gives the same angle. The metric defines what counts as one unit of phenotypic displacement, so its choice is part of the biological model and should be stated and, where possible, tested for sensitivity.
+\end{cautionbox}
+
+The Gram matrix of \(\mathbf U_i\) under \(\M\) is
+\begin{equation}
+\mathbf A_i=\mathbf U_i^\top\M\mathbf U_i.
+\end{equation}
+Because \(\mathbf U_i\) has full column rank and \(\M\succ0\), \(\mathbf A_i\succ0\).
+
+Define the \(\M\)-orthonormal basis
+\begin{equation}
+\boxed{
+\Qq_i=\mathbf U_i\mathbf A_i^{-1/2}
+=\mathbf U_i(\mathbf U_i^\top\M\mathbf U_i)^{-1/2}.}
+\label{eq:MOrthonormalBasis}
+\end{equation}
+Check the normalization:
+\begin{align}
+\Qq_i^\top\M\Qq_i
+&=\mathbf A_i^{-1/2}\mathbf U_i^\top\M\mathbf U_i\mathbf A_i^{-1/2}\\
+&=\mathbf A_i^{-1/2}\mathbf A_i\mathbf A_i^{-1/2}\\
+&=\Ii_k.
+\end{align}
+
+The common-metric principal-angle cosines are the singular values of
+\begin{equation}
+\boxed{\Qq_1^\top\M\Qq_2.}
+\label{eq:commonMetricCrossMatrix}
+\end{equation}
+
+\inwords Each channel is first expressed in the same phenotype space, then normalized using the same rule for length and angle. Only after that are the subspaces compared.
+
+\section{Proof of coordinate invariance}
+
+Under \(\mathbf z'=\mathbf T\mathbf z\), phenotype-space channel bases transform as
+\begin{equation}
+\mathbf U_i'=\mathbf T\mathbf U_i.
+\end{equation}
+The metric transforms as
+\begin{equation}
+\M'=\mathbf T^{-\top}\M\mathbf T^{-1}.
+\end{equation}
+Then
+\begin{align}
+(\mathbf U_i')^\top\M'\mathbf U_i'
+&=(\mathbf T\mathbf U_i)^\top
+(\mathbf T^{-\top}\M\mathbf T^{-1})
+(\mathbf T\mathbf U_i)\\
+&=\mathbf U_i^\top\mathbf T^\top\mathbf T^{-\top}
+\M
+\mathbf T^{-1}\mathbf T\mathbf U_i\\
+&=\mathbf U_i^\top\M\mathbf U_i\\
+&=\mathbf A_i.
+\end{align}
+Therefore
+\begin{equation}
+\Qq_i'=\mathbf T\mathbf U_i\mathbf A_i^{-1/2}
+=\mathbf T\Qq_i.
+\end{equation}
+The cross matrix becomes
+\begin{align}
+(\Qq_1')^\top\M'\Qq_2'
+&=(\mathbf T\Qq_1)^\top
+(\mathbf T^{-\top}\M\mathbf T^{-1})
+(\mathbf T\Qq_2)\\
+&=\Qq_1^\top\M\Qq_2.
+\end{align}
+It is exactly unchanged. Consequently all singular values and principal angles are coordinate invariant.
+
+\begin{summarybox}
+When \(\G_1\neq\G_2\), the invariant comparison is: map each channel to phenotype space, orthonormalize both under one common metric, and compute principal angles from \(\Qq_1^\top\M\Qq_2\).
+\end{summarybox}
+
+\section{Recovery of the shared-\(\G\) comparison}
+
+If \(\G_1=\G_2=\G\) and choose \(\M=\G^{-1}\), then
+\begin{align}
+\mathbf U_i^\top\M\mathbf U_i
+&=(\G^{1/2}\Vv_i)^\top\G^{-1}(\G^{1/2}\Vv_i)\\
+&=\Vv_i^\top\Vv_i\\
+&=\Ii_k.
+\end{align}
+Thus \(\Qq_i=\mathbf U_i\), and
+\begin{align}
+\Qq_1^\top\M\Qq_2
+&=\Vv_1^\top\Vv_2.
+\end{align}
+The common-metric method therefore reduces exactly to the ordinary whitened-space comparison when a common \(\G\) exists.

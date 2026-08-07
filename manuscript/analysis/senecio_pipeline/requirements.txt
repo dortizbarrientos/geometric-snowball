@@ -1,9 +1,0 @@
-# Python requirements for Stage 3 (figure generation).
-# Stages 1 and 2 are R-only; this file is only needed if you want to
-# regenerate the publication figures and tables.
-#
-# Install with: pip install -r requirements.txt
-
-numpy>=1.24
-pandas>=2.0
-matplotlib>=3.7

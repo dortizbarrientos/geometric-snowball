@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geometric-snowball"
+version = "0.2.0"
+description = "Corrected mathematical and computational framework for the geometric snowball of speciation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Daniel Ortiz-Barrientos"},
+  {name = "Maddie E. James"},
+  {name = "Kevin Burrage"},
+]
+dependencies = ["numpy>=1.24", "pandas>=2.0"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering",
+]
+
+[project.optional-dependencies]
+figures = ["matplotlib>=3.8"]
+senecio = ["openpyxl>=3.1", "scipy>=1.11", "scikit-learn>=1.3"]
+dev = ["pytest>=8", "build>=1.2", "ruff>=0.6"]
+all = ["matplotlib>=3.8", "openpyxl>=3.1", "scipy>=1.11", "scikit-learn>=1.3", "pytest>=8", "build>=1.2", "ruff>=0.6"]
+
+[project.scripts]
+geometric-snowball = "geometric_snowball.cli:main"
+
+[project.urls]
+Repository = "https://github.com/dortizbarrientos/geometric-snowball"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

@@ -1,0 +1,114 @@
+\chapter{Spectral gaps, commutators, and global perturbation bounds}
+
+\section{Why a gap alone cannot rotate a channel}
+
+Define the commutator
+\begin{equation}
+[\Sop_0,\Aa]=\Sop_0\Aa-\Aa\Sop_0.
+\end{equation}
+If \([\Sop_0,\Aa]=\Zero\) and both matrices are symmetric, they share an orthonormal eigenbasis. In that basis, \(\Aa\) is diagonal, so
+\begin{equation}
+\mathbf w_a^\top\Aa\mathbf v_b=0
+\end{equation}
+for every cross-channel pair. Consequently
+\begin{equation}
+\cK(\Aa)=\Zero.
+\end{equation}
+
+\begin{geombox}
+A commuting perturbation stretches or compresses the same axes but does not turn them. A noncommuting perturbation changes the orientation of the axes.
+\end{geombox}
+
+\begin{biobox}
+An environment can alter the strength of selection along existing trait combinations without changing which combinations define the response channel. Geometric isolation requires selection or covariance evolution that changes trait combinations, not only response magnitudes.
+\end{biobox}
+
+\section{Davis--Kahan bound}
+
+Let \(\widetilde\Sop=\Sop+\Delta\Sop\) be symmetric. Let \(\mathcal C\) and \(\widetilde{\mathcal C}\) be corresponding invariant subspaces separated from the rest of the spectrum by a gap \(\delta>0\). A standard Davis--Kahan sin-theta bound gives, under the usual separation convention,
+\begin{equation}
+\boxed{
+\normtwo{\sin\boldsymbol\Theta}
+\le\frac{\normtwo{\Delta\Sop}}{\delta}.}
+\label{eq:DavisKahan}
+\end{equation}
+Here \(\normtwo{\sin\boldsymbol\Theta}=\max_j\sin\psi_j\).
+
+\inwords The largest channel angle cannot exceed the size of the operator perturbation divided by the spectral separation protecting the channel.
+
+\begin{cautionbox}
+The Davis--Kahan expression is a bound, not the predicted angle and not the exact local coefficient. It ignores the orientation of \(\Delta\Sop\). The local formula \cref{eq:relativeK} is sharper because it retains the cross-channel matrix elements.
+\end{cautionbox}
+
+For a rank-one channel, the weakest protecting separation is
+\begin{equation}
+\delta_1=\lambda_1-\lambda_2.
+\end{equation}
+For a rank-\(k\) channel, it is
+\begin{equation}
+\delta_k=\lambda_k-\lambda_{k+1}.
+\end{equation}
+
+\section{A two-dimensional diagonal bound}
+
+Suppose
+\begin{equation}
+\G=\diag(g_{\parallel},g_{\perp}),
+\qquad
+\Hh_1=\Ii,
+\qquad
+\Hh_2=\Ii+\diag(0,\Delta h).
+\end{equation}
+Then
+\begin{equation}
+\Delta\Sop
+=\G^{1/2}(\Hh_2-\Hh_1)\G^{1/2}
+=\diag(0,g_{\perp}\Delta h).
+\end{equation}
+Therefore
+\begin{equation}
+\normtwo{\Delta\Sop}=g_{\perp}|\Delta h|.
+\end{equation}
+If the original gap is \(\delta\),
+\begin{equation}
+\sin\theta\le\frac{g_{\perp}|\Delta h|}{\delta}.
+\end{equation}
+
+\inwords Variation in the direction being perturbed scales the effective operator change. A curvature change in a direction with almost no additive variance has little effect on the response channel.
+
+\begin{cautionbox}
+In this diagonal example, \(\Sop_0\) and \(\Delta\Sop\) commute. Their eigenvectors therefore do not rotate at all: the observed angle is exactly zero even though the right-hand side of the Davis--Kahan inequality can be positive. The example deliberately shows why a global upper bound is not a mechanistic prediction. The commutator and the cross-channel numerator in \cref{eq:relativeK} recover the exact zero rotation.
+\end{cautionbox}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\textwidth]{figures/figS2_DK_bound_checked.pdf}
+\caption{The spectral gap controls the upper envelope of rotation, but observed rotation also depends on the direction of the perturbation.}
+\label{fig:DavisKahanCheck}
+\end{figure}
+
+\section{Additivity and degeneracy}
+
+Define a leading-mode concentration index
+\begin{equation}
+\cA_g=\frac{\lambda_1}{\sum_{j=1}^n\lambda_j}
+\end{equation}
+and rank-one degeneracy
+\begin{equation}
+\cD=\frac{\lambda_2}{\lambda_1}.
+\end{equation}
+In two dimensions,
+\begin{align}
+\cA_g
+&=\frac{\lambda_1}{\lambda_1+\lambda_2}\\
+&=\frac{1}{1+\cD},
+\end{align}
+so
+\begin{equation}
+\boxed{\cD=\frac{1-\cA_g}{\cA_g}.}
+\end{equation}
+In higher dimensions, \(1-\cA_g\) can be distributed across many modes, so low \(\cA_g\) does not identify which competitor threatens the leading channel. The explicit gap remains the cleaner stability quantity.
+
+\begin{connectionbox}
+This distinction mirrors the earlier warning about channel dimension. A scalar concentration index summarizes how dominant the first mode is overall; perturbation sensitivity depends on the particular neighbouring modes to which the perturbation couples.
+\end{connectionbox}

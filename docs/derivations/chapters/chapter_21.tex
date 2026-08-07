@@ -1,0 +1,142 @@
+\chapter{Differentiating \(\G^{1/2}\) and partitioning channel rotation}
+
+\section{Differentiate the matrix square root}
+
+Let
+\begin{equation}
+\Rr=\G^{1/2},
+\end{equation}
+so
+\begin{equation}
+\Rr^2=\G.
+\end{equation}
+Differentiate the product:
+\begin{equation}
+\dot\Rr\Rr+\Rr\dot\Rr=\dot\G.
+\end{equation}
+Define
+\begin{equation}
+\mathbf X=\dot\Rr=D(\G^{1/2})[\dot\G].
+\end{equation}
+Then \(\mathbf X\) solves the Sylvester equation
+\begin{equation}
+\boxed{\Rr\mathbf X+\mathbf X\Rr=\dot\G.}
+\label{eq:SylvesterSqrt}
+\end{equation}
+
+\usual A Sylvester equation has the form \(\mathbf A\mathbf X+\mathbf X\mathbf B=\mathbf C\). Here it appears because differentiating a noncommuting square \(\Rr\Rr\) produces one derivative on each side.
+
+\section{Explicit solution in the eigenbasis of \(\G\)}
+
+Let
+\begin{equation}
+\G=\mathbf U\diag(g_1,\ldots,g_n)\mathbf U^\top,
+\end{equation}
+so
+\begin{equation}
+\Rr=\mathbf U\diag(r_1,\ldots,r_n)\mathbf U^\top,
+\qquad r_i=\sqrt{g_i}.
+\end{equation}
+Write
+\begin{equation}
+\mathbf X=\mathbf U\mathbf Y\mathbf U^\top,
+\qquad
+\mathbf B=\mathbf U^\top\dot\G\mathbf U.
+\end{equation}
+Substitute into \cref{eq:SylvesterSqrt} and multiply by \(\mathbf U^\top\) and \(\mathbf U\):
+\begin{equation}
+\diag(r_i)\mathbf Y+\mathbf Y\diag(r_i)=\mathbf B.
+\end{equation}
+Element \((i,j)\) satisfies
+\begin{equation}
+r_iY_{ij}+Y_{ij}r_j=B_{ij}.
+\end{equation}
+Therefore
+\begin{equation}
+\boxed{
+Y_{ij}=\frac{B_{ij}}{r_i+r_j}
+=\frac{(\mathbf U^\top\dot\G\mathbf U)_{ij}}
+{\sqrt{g_i}+\sqrt{g_j}}.}
+\label{eq:SqrtDerivativeElements}
+\end{equation}
+Finally,
+\begin{equation}
+\mathbf X=\mathbf U\mathbf Y\mathbf U^\top.
+\end{equation}
+
+\inwords Changes in \(\G\) are filtered by the existing square-root scale. Off-diagonal changes in the eigenbasis of \(\G\) contribute directly to rotation of the square-root deformation.
+
+\section{Differentiate the channel operator}
+
+Recall
+\begin{equation}
+\Sop=\Rr\Hh\Rr.
+\end{equation}
+Apply the product rule to all three factors:
+\begin{align}
+\dot\Sop
+&=\dot\Rr\Hh\Rr
++\Rr\dot\Hh\Rr
++\Rr\Hh\dot\Rr\\
+&=\boxed{
+\mathbf X\Hh\Rr
++\Rr\dot\Hh\Rr
++\Rr\Hh\mathbf X.}
+\label{eq:SdotPartition}
+\end{align}
+Define
+\begin{align}
+\dot\Sop_G
+&=\mathbf X\Hh\Rr+\Rr\Hh\mathbf X,\\
+\dot\Sop_H
+&=\Rr\dot\Hh\Rr.
+\end{align}
+Then
+\begin{equation}
+\dot\Sop=\dot\Sop_G+\dot\Sop_H.
+\end{equation}
+
+\begin{biobox}
+The first component is channel change caused by evolution of standing genetic variance. The second is channel change caused by evolution or environmental change in fitness curvature. Their effects can reinforce, cancel, or rotate the channel in different directions.
+\end{biobox}
+
+\section{Partition the response-operator eigenspace rotation}
+
+The tangent map in \cref{eq:tangentMap} is linear:
+\begin{equation}
+\cT(\Aa+\Bb)=\cT(\Aa)+\cT(\Bb).
+\end{equation}
+Therefore the relative rotation of the leading eigenspace of \(\Sop\) partitions as
+\begin{equation}
+\Delta\mathbf K_S
+=\underbrace{\cT(\Delta\dot\Sop_G)}_{\mathbf K_{S,G}}
++\underbrace{\cT(\Delta\dot\Sop_H)}_{\mathbf K_{S,H}},
+\label{eq:KpartitionGH}
+\end{equation}
+where \(\Delta\) denotes population 2 minus population 1.
+
+Its squared magnitude is
+\begin{align}
+\normF{\Delta\mathbf K_S}^2
+={}&\normF{\mathbf K_{S,G}}^2
++\normF{\mathbf K_{S,H}}^2
++2\innerF{\mathbf K_{S,G}}{\mathbf K_{S,H}}.
+\label{eq:susceptibilityPartition}
+\end{align}
+
+\inwords The cross term measures interaction between genetic-covariance evolution and curvature evolution inside the symmetric response operator. Positive alignment accelerates eigenspace rotation; negative alignment buffers it.
+
+For evolving \(\G\), this is not yet the complete phenotype-space susceptibility. Substitute \(\Delta\mathbf K_S\) and the Sylvester solutions \(\mathbf X_i\) into \cref{eq:relativeCommonMetricK}:
+\begin{equation}
+\mathbf K_M
+=\widehat{\Qq}_{\perp}^{\top}\M^{1/2}
+\left[(\mathbf X_2-\mathbf X_1)\Vv
++\mathbf R_0\Ww\Delta\mathbf K_S\right]
+\boldsymbol\Gamma_0^{-1/2}.
+\label{eq:fullEmpiricalKM}
+\end{equation}
+The first term is the direct deformation of the phenotype map by \(\dot\G\); the second carries the \(\G\)- and \(\Hh\)-driven rotation of the \(\Sop\) eigenspace.
+
+\begin{connectionbox}
+This gives the complete computational bridge to empirical work. Posterior draws of \(\dot\G\) and \(\dot\Hh\) are propagated through the Sylvester equation and \(\dot\Sop\), then combined by \cref{eq:fullEmpiricalKM}. The invariant local susceptibility is \(\normF{\mathbf K_M}^2\), while \(\normF{\Delta\mathbf K_S}^2\) is the informative but partial susceptibility of the response-operator eigenspace.
+\end{connectionbox}

@@ -1,0 +1,129 @@
+\chapter{A numerical two-trait example from beginning to end}
+
+\section{Specify \(\G\) and two curvature matrices}
+
+Let
+\begin{equation}
+\G=
+\begin{bmatrix}
+2&0\\0&0.5
+\end{bmatrix},
+\end{equation}
+so
+\begin{equation}
+\G^{1/2}=
+\begin{bmatrix}
+\sqrt2&0\\0&1/\sqrt2
+\end{bmatrix}.
+\end{equation}
+Consider two populations with
+\begin{equation}
+\Hh_1=
+\begin{bmatrix}
+1&0.3\\0.3&1.4
+\end{bmatrix},
+\qquad
+\Hh_2=
+\begin{bmatrix}
+1&-0.3\\-0.3&1.4
+\end{bmatrix}.
+\end{equation}
+Both are positive definite because their determinants are
+\begin{equation}
+1(1.4)-0.3^2=1.31>0
+\end{equation}
+and their first diagonal entry is positive.
+
+\section{Construct the channel operators}
+
+Using \cref{eq:S2D},
+\begin{equation}
+\Sop_1=
+\begin{bmatrix}
+2&0.3\\0.3&0.7
+\end{bmatrix},
+\qquad
+\Sop_2=
+\begin{bmatrix}
+2&-0.3\\-0.3&0.7
+\end{bmatrix}.
+\end{equation}
+The eigenvalues of either matrix are
+\begin{align}
+\lambda_{1,2}
+&=\frac{2+0.7}{2}
+\pm\half\sqrt{(2-0.7)^2+4(0.3)^2}\\
+&=1.35\pm\half\sqrt{2.05}\\
+&\approx2.0659,\;0.6341.
+\end{align}
+The gap is
+\begin{equation}
+\delta\approx1.4318.
+\end{equation}
+
+For population 1,
+\begin{equation}
+\phi_1
+=\half\operatorname{atan2}(0.6,1.3)
+\approx12.39^\circ.
+\end{equation}
+For population 2,
+\begin{equation}
+\phi_2\approx-12.39^\circ.
+\end{equation}
+Thus the whitened channel angle is
+\begin{equation}
+\theta_{12}=|\phi_1-\phi_2|
+\approx24.78^\circ.
+\end{equation}
+
+\section{Compute geometric discrepancy}
+
+For \(k=1\),
+\begin{equation}
+d_C^2=I_V=\sin^2\theta_{12}.
+\end{equation}
+Numerically,
+\begin{equation}
+d_C^2\approx\sin^2(24.78^\circ)\approx0.176.
+\end{equation}
+The overlap is therefore about \(1-0.176=0.824\) on this squared projection scale.
+
+\section{Map to phenotype-space directions}
+
+From \cref{eq:phenotypeAngle2D},
+\begin{equation}
+\tan\alpha_i
+=\sqrt{\frac{0.5}{2}}\tan\phi_i
+=0.5\tan\phi_i.
+\end{equation}
+Therefore
+\begin{equation}
+\alpha_1\approx6.26^\circ,
+\qquad
+\alpha_2\approx-6.26^\circ.
+\end{equation}
+The ordinary phenotype-space angle is smaller because mapping back stretches the high-variance first axis more strongly.
+
+\section{Calibrate a hypothetical ridge load}
+
+Suppose an associated ridge model has
+\begin{equation}
+\Delta g=1.5,
+\qquad
+\Delta h=1.0.
+\end{equation}
+Then
+\begin{align}
+L_{\mathrm{cov}}
+&=\frac{1.5\times1.0}{4}(0.176)\\
+&\approx0.066.
+\end{align}
+The corresponding bounded log-scale isolation is
+\begin{equation}
+I_L=1-e^{-0.066}\approx0.064.
+\end{equation}
+
+\begin{cautionbox}
+The number \(0.176\) is pure geometry. The number \(0.066\) is a fitness load only because \(\Delta g\) and \(\Delta h\) have supplied a biological scale. Different covariance and curvature contrasts would map the same angle to a different load.
+\end{cautionbox}
