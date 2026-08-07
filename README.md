@@ -1,3 +1,5 @@
+# Work in progress
+
 # The Geometric Snowball of Speciation
 
 **Daniel Ortiz-Barrientos, Maddie James, and Kevin Burrage**  
