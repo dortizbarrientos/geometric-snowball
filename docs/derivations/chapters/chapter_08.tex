@@ -1,0 +1,80 @@
+\chapter{Channels as invariant subspaces}
+
+\section{Why a channel need not be one-dimensional}
+
+Let the eigendecomposition of \(\Sop\) be
+\begin{equation}
+\Sop=\sum_{j=1}^n\lambda_j\mathbf v_j\mathbf v_j^\top,
+\qquad
+\lambda_1\ge\cdots\ge\lambda_n.
+\end{equation}
+A rank-\(k\) channel basis is
+\begin{equation}
+\Vv_k=
+\begin{bmatrix}
+\mathbf v_1&\cdots&\mathbf v_k
+\end{bmatrix}.
+\end{equation}
+The channel itself is the subspace
+\begin{equation}
+\mathcal C_k=\Span(\Vv_k).
+\end{equation}
+
+\inwords A basis is a particular set of coordinate vectors. A subspace is the collection of all linear combinations of those vectors. Rotating the basis within the same subspace changes coordinates but not the biological channel.
+
+\section{The projector removes arbitrary basis choice}
+
+Define the orthogonal projector
+\begin{equation}
+\Pp_k=\Vv_k\Vv_k^\top.
+\label{eq:projectorDefinition}
+\end{equation}
+For any vector \(\mathbf x\),
+\begin{equation}
+\Pp_k\mathbf x
+\end{equation}
+is its projection onto the channel.
+
+Suppose \(\widetilde{\Vv}_k=\Vv_k\mathbf O\), where \(\mathbf O\) is any \(k\times k\) orthogonal rotation. Then
+\begin{align}
+\widetilde{\Vv}_k\widetilde{\Vv}_k^\top
+&=\Vv_k\mathbf O\mathbf O^\top\Vv_k^\top\\
+&=\Vv_k\Vv_k^\top\\
+&=\Pp_k.
+\end{align}
+Thus the projector depends only on the subspace, not on the arbitrary basis used to represent it.
+
+\begin{mathteach}
+The set of all \(k\)-dimensional subspaces of \(\R^n\) is the Grassmann manifold \(\Grass(k,n)\). Channel evolution is therefore naturally a trajectory on a Grassmannian, not merely a trajectory of individual eigenvectors.
+\end{mathteach}
+
+\section{The biologically relevant spectral gap}
+
+The gap separating the selected channel from excluded modes is
+\begin{equation}
+\delta_k=\lambda_k-\lambda_{k+1}.
+\label{eq:kGap}
+\end{equation}
+
+If \(\lambda_1\approx\lambda_2\) but \(\lambda_2\gg\lambda_3\), the leading vector is unstable but the leading two-dimensional subspace is stable. A forced rank-one analysis would report dramatic ``rotation'' that is largely an arbitrary exchange between two nearly tied modes.
+
+\begin{biobox}
+The appropriate channel dimension should reflect the number of response modes that are biologically distinguishable from the remainder. A channel boundary is always relative to \(k\). There is no universal reason to define it only by \(\lambda_1-\lambda_2\).
+\end{biobox}
+
+\section{Choosing \(k\) in practice}
+
+A defensible choice can combine:
+\begin{enumerate}[leftmargin=1.6em]
+\item a posterior distribution for eigengaps;
+\item stability of the subspace under resampling;
+\item cumulative response rate \(\sum_{j\le k}\lambda_j/\sum_j\lambda_j\);
+\item predictive performance for observed response or hybrid fitness;
+\item a preregistered biological hypothesis about modular trait combinations.
+\end{enumerate}
+
+\begin{cautionbox}
+Choosing \(k\) after inspecting which dimension gives the strongest association with reproductive isolation will inflate evidence. The dimension should be selected by independent stability or predictive criteria and propagated through uncertainty.
+\end{cautionbox}
+
+\part{Comparing channels and deriving the geometric snowball}

@@ -1,0 +1,117 @@
+\chapter{Square roots, whitening, trace, determinant, and singular values}
+
+\section{The symmetric square root of an SPD matrix}
+
+If
+\begin{equation}
+\G=\mathbf Q\diag(g_1,\ldots,g_n)\mathbf Q^\top,
+\qquad g_j>0,
+\end{equation}
+then the symmetric square root is
+\begin{equation}
+\G^{1/2}=\mathbf Q\diag(\sqrt{g_1},\ldots,\sqrt{g_n})\mathbf Q^\top.
+\end{equation}
+
+Multiplying it by itself gives
+\begin{align}
+\G^{1/2}\G^{1/2}
+&=\mathbf Q\diag(\sqrt{g_j})\mathbf Q^\top
+\mathbf Q\diag(\sqrt{g_j})\mathbf Q^\top\\
+&=\mathbf Q\diag(g_j)\mathbf Q^\top\\
+&=\G.
+\end{align}
+
+\inwords The square root applies half of the stretching represented by \(\G\). Applying that half-transformation twice reconstructs the full covariance transformation.
+
+The inverse square root is
+\begin{equation}
+\G^{-1/2}=\mathbf Q\diag(g_1^{-1/2},\ldots,g_n^{-1/2})\mathbf Q^\top.
+\end{equation}
+
+\section{Whitening}
+
+Define a whitened displacement
+\begin{equation}
+\mathbf x=\G^{-1/2}\mathbf d.
+\label{eq:whiteningDef}
+\end{equation}
+Equivalently,
+\begin{equation}
+\mathbf d=\G^{1/2}\mathbf x.
+\label{eq:unwhiteningDef}
+\end{equation}
+
+If \(\mathbf d\) has covariance \(\G\), then
+\begin{align}
+\Cov(\mathbf x)
+&=\Cov(\G^{-1/2}\mathbf d)\\
+&=\G^{-1/2}\G\G^{-1/2}\\
+&=\Ii.
+\end{align}
+
+\inwords Whitening measures every displacement in units of the available genetic standard deviation. After whitening, the genetic covariance ellipsoid becomes a sphere.
+
+Substituting \cref{eq:unwhiteningDef} into the fitness quadratic gives
+\begin{align}
+\mathbf d^\top\Hh\mathbf d
+&=(\G^{1/2}\mathbf x)^\top\Hh(\G^{1/2}\mathbf x)\\
+&=\mathbf x^\top\G^{1/2}\Hh\G^{1/2}\mathbf x.
+\end{align}
+This motivates the operator
+\begin{equation}
+\Sop=\G^{1/2}\Hh\G^{1/2}.
+\label{eq:SdefinitionEarly}
+\end{equation}
+
+\begin{geombox}
+A unit vector in whitened space represents one genetic standard deviation of displacement. Therefore \(\mathbf x^\top\Sop\mathbf x\) is the fitness curvature experienced by a genetically standardised displacement. The operator \(\Sop\) is the fitness landscape viewed through the amount and correlation structure of standing genetic variation.
+\end{geombox}
+
+\section{Trace as total curvature-weighted variance}
+
+The trace is the sum of diagonal elements:
+\begin{equation}
+\tr(\mathbf A)=\sum_iA_{ii}.
+\end{equation}
+It is invariant under cyclic permutation:
+\begin{equation}
+\tr(\mathbf A\mathbf B)=\tr(\mathbf B\mathbf A).
+\end{equation}
+
+For a zero-mean random vector \(\boldsymbol\varepsilon\) with covariance \(\Pp\),
+\begin{align}
+\E[\boldsymbol\varepsilon^\top\Hh\boldsymbol\varepsilon]
+&=\E\left[\tr(\boldsymbol\varepsilon^\top\Hh\boldsymbol\varepsilon)\right]\\
+&=\E\left[\tr(\Hh\boldsymbol\varepsilon\boldsymbol\varepsilon^\top)\right]\\
+&=\tr\left(\Hh\E[\boldsymbol\varepsilon\boldsymbol\varepsilon^\top]\right)\\
+&=\tr(\Hh\Pp).
+\label{eq:traceQuadraticExpectation}
+\end{align}
+
+\inwords The trace adds the variance in every direction after weighting each direction by fitness curvature. This identity is the mathematical bridge from hybrid covariance to hybrid fitness load.
+
+\section{Determinant as volume scaling}
+
+For a square transformation \(\mathbf A\), \(|\det\mathbf A|\) is the factor by which \(\mathbf A\) changes volume. For an SPD covariance matrix, \(\det\G\) is the generalized variance: it measures the squared volume scale of the covariance ellipsoid.
+
+This volume interpretation later explains why
+\begin{equation}
+\det(\Vv_1^\top\Vv_2)^2
+\end{equation}
+measures squared overlap of two channel subspaces.
+
+\section{Singular values}
+
+Any rectangular matrix has a singular value decomposition
+\begin{equation}
+\mathbf A=\mathbf U\boldsymbol\Sigma\mathbf V^\top,
+\end{equation}
+where \(\mathbf U\) and \(\mathbf V\) have orthonormal columns and \(\boldsymbol\Sigma\) contains nonnegative singular values.
+
+\usual Eigenanalysis asks for directions preserved by one square operator. Singular-value analysis asks how strongly one orthonormal set projects onto another. This is why principal angles between subspaces are defined using an SVD rather than an eigenanalysis.
+
+\begin{summarybox}
+The square root \(\G^{1/2}\) converts genetically standardised coordinates back to phenotype space. The inverse square root whitens genetic covariance. The trace converts a covariance into an expected quadratic loss. The determinant measures volume. Singular values measure mutual projection between subspaces. These four pieces of machinery carry nearly the entire theory.
+\end{summarybox}
+
+\part{Deriving additive genetic channels}

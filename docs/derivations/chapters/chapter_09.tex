@@ -1,0 +1,166 @@
+\chapter{Principal angles, projectors, and overlap between subspaces}
+
+\section{The one-dimensional case}
+
+For two unit vectors \(\mathbf u_1\) and \(\mathbf u_2\), the acute angle is
+\begin{equation}
+\psi=\arccos\left(|\mathbf u_1^\top\mathbf u_2|\right).
+\end{equation}
+The absolute value appears because a line has no inherent sign: \(\mathbf u\) and \(-\mathbf u\) span the same one-dimensional subspace.
+
+\inwords The inner product is the length of one unit vector retained when it is projected onto the other. Perfect alignment gives one; orthogonality gives zero.
+
+\section{Principal angles for \(k\)-dimensional channels}
+
+Let \(\Vv_1,\Vv_2\in\R^{n\times k}\) contain orthonormal bases:
+\begin{equation}
+\Vv_i^\top\Vv_i=\Ii_k.
+\end{equation}
+Form the cross-basis matrix
+\begin{equation}
+\mathbf C=\Vv_1^\top\Vv_2.
+\end{equation}
+Take its singular value decomposition:
+\begin{equation}
+\mathbf C=\mathbf L\diag(\sigma_1,\ldots,\sigma_k)\mathbf R^\top,
+\qquad
+1\ge\sigma_1\ge\cdots\ge\sigma_k\ge0.
+\end{equation}
+The principal angles are defined by
+\begin{equation}
+\boxed{\cos\psi_j=\sigma_j.}
+\label{eq:principalAngles}
+\end{equation}
+
+\begin{mathteach}
+The matrices \(\mathbf L\) and \(\mathbf R\) merely choose the paired directions within the two subspaces that align best, second-best, and so on. The singular values are invariant to arbitrary rotations of either basis and therefore belong to the subspaces themselves.
+\end{mathteach}
+
+\section{Projector form of chordal distance}
+
+Let
+\begin{equation}
+\Pp_i=\Vv_i\Vv_i^\top.
+\end{equation}
+First compute
+\begin{align}
+\tr(\Pp_1\Pp_2)
+&=\tr(\Vv_1\Vv_1^\top\Vv_2\Vv_2^\top)\\
+&=\tr(\Vv_1^\top\Vv_2\Vv_2^\top\Vv_1)\\
+&=\tr(\mathbf C\mathbf C^\top)\\
+&=\normF{\mathbf C}^2\\
+&=\sum_{j=1}^k\sigma_j^2\\
+&=\sum_{j=1}^k\cos^2\psi_j.
+\label{eq:traceProjectorOverlap}
+\end{align}
+The second line uses cyclic invariance of trace. The fifth uses the fact that the squared Frobenius norm is the sum of squared singular values.
+
+Now expand the projector difference:
+\begin{align}
+\normF{\Pp_1-\Pp_2}^2
+&=\tr\left[(\Pp_1-\Pp_2)^2\right]\\
+&=\tr(\Pp_1^2)+\tr(\Pp_2^2)-2\tr(\Pp_1\Pp_2).
+\end{align}
+Because projectors satisfy \(\Pp_i^2=\Pp_i\) and \(\tr(\Pp_i)=k\),
+\begin{align}
+\normF{\Pp_1-\Pp_2}^2
+&=2k-2\tr(\Pp_1\Pp_2)\\
+&=2\sum_{j=1}^k(1-\cos^2\psi_j)\\
+&=2\sum_{j=1}^k\sin^2\psi_j.
+\end{align}
+Therefore the squared chordal distance is
+\begin{equation}
+\boxed{
+d_C^2(\mathcal C_1,\mathcal C_2)
+=\half\normF{\Pp_1-\Pp_2}^2
+=\sum_{j=1}^k\sin^2\psi_j.}
+\label{eq:chordalIdentity}
+\end{equation}
+
+\inwords Chordal distance is the total squared amount by which the paired channel directions fail to project onto one another.
+
+\begin{geombox}
+The projector map embeds the curved Grassmann manifold into the flat Euclidean space of symmetric matrices. Chordal distance is ordinary Euclidean distance between the embedded projectors, scaled by one half.
+\end{geombox}
+
+\section{Volume overlap}
+
+From the SVD,
+\begin{align}
+\det(\Vv_1^\top\Vv_2)^2
+&=\det(\mathbf L)^2
+\det[\diag(\sigma_j)]^2
+\det(\mathbf R)^2\\
+&=\prod_{j=1}^k\sigma_j^2\\
+&=\prod_{j=1}^k\cos^2\psi_j,
+\end{align}
+because orthogonal matrices have determinant \(\pm1\).
+
+Define the bounded channel-overlap deficit
+\begin{equation}
+\boxed{
+I_V=1-\det(\Vv_1^\top\Vv_2)^2
+=1-\prod_{j=1}^k\cos^2\psi_j.}
+\label{eq:volumeDeficit}
+\end{equation}
+
+\inwords The product \(\prod_j\cos\psi_j\) is the factor by which projecting a unit \(k\)-dimensional volume element from one channel into the other shrinks that volume. Squaring removes orientation and gives a convenient overlap measure.
+
+A related additive quantity is the log-overlap loss
+\begin{equation}
+L_V=-\log(1-I_V)
+=-2\sum_{j=1}^k\log(\cos\psi_j).
+\label{eq:logOverlap}
+\end{equation}
+It is additive across principal directions, but it is still a geometric descriptor rather than a calibrated fitness load.
+
+\section{Small-angle expansion}
+
+For small \(\psi\),
+\begin{align}
+\sin^2\psi
+&=\psi^2-\frac{\psi^4}{3}+O(\psi^6),\\
+\cos^2\psi
+&=1-\psi^2+\frac{\psi^4}{3}+O(\psi^6).
+\end{align}
+Therefore
+\begin{equation}
+d_C^2
+=\sum_j\psi_j^2-\frac13\sum_j\psi_j^4+O(\normtwo{\psiv}^6).
+\label{eq:chordalExpansion}
+\end{equation}
+For the volume deficit,
+\begin{align}
+\prod_j\cos^2\psi_j
+&=\prod_j\left(1-\psi_j^2+\frac{\psi_j^4}{3}+O(\psi_j^6)\right)\\
+&=1-\sum_j\psi_j^2
++\frac13\sum_j\psi_j^4
++\sum_{i<j}\psi_i^2\psi_j^2
++O(\normtwo{\psiv}^6),
+\end{align}
+so
+\begin{equation}
+I_V
+=\sum_j\psi_j^2
+-\frac13\sum_j\psi_j^4
+-\sum_{i<j}\psi_i^2\psi_j^2
++O(\normtwo{\psiv}^6).
+\label{eq:volumeExpansion}
+\end{equation}
+Thus
+\begin{equation}
+\boxed{I_V=d_C^2+O(\normtwo{\psiv}^4)
+=\sum_j\psi_j^2+O(\normtwo{\psiv}^4).}
+\label{eq:overlapLocalEquivalence}
+\end{equation}
+
+\begin{connectionbox}
+The quadratic snowball does not depend on choosing the determinant deficit rather than chordal distance. All smooth overlap deficits with a nonzero quadratic term agree locally up to scaling. The choice matters at larger angles and for interpretation, but not for the early exponent.
+\end{connectionbox}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.96\textwidth]{figures/pedagogy_principal_angles.pdf}
+\caption{Three equivalent geometric readings of channel alignment: angle, projection length, and projected \(k\)-volume.}
+\label{fig:principalAnglePedagogy}
+\end{figure}

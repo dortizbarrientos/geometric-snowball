@@ -1,0 +1,140 @@
+\chapter{A multilocus route from standing variation to evolving \(\G\)}
+
+\section{Additive allelic effects}
+
+Consider \(L\) diploid biallelic loci. At locus \(\ell\), let the count of the focal allele be
+\begin{equation}
+X_\ell\in\{0,1,2\}.
+\end{equation}
+Let \(\mathbf a_\ell\in\R^n\) be the additive phenotypic effect per copy. Relative to a reference mean, the additive phenotype is
+\begin{equation}
+\mathbf z_A=\sum_{\ell=1}^L(X_\ell-2p_{\ell0})\mathbf a_\ell.
+\label{eq:additiveGenotypeModel}
+\end{equation}
+
+If the allele frequency in population \(i\) is \(p_{i\ell}\), then under Hardy--Weinberg sampling
+\begin{equation}
+\E[X_\ell]=2p_{i\ell}.
+\end{equation}
+Therefore the mean additive phenotype is
+\begin{align}
+\zbar_i
+&=\E[\mathbf z_A]\\
+&=\sum_\ell(2p_{i\ell}-2p_{\ell0})\mathbf a_\ell\\
+&=\boxed{2\sum_{\ell=1}^L(p_{i\ell}-p_{\ell0})\mathbf a_\ell.}
+\label{eq:meanFromAlleleFrequencies}
+\end{align}
+
+\inwords The population mean is a weighted sum of allelic effect vectors. Changing an allele frequency moves the mean in the direction of that allele's multivariate effect.
+
+\section{Derive \(\G\) under linkage equilibrium}
+
+At a biallelic diploid locus under Hardy--Weinberg equilibrium,
+\begin{equation}
+\Var(X_\ell)=2p_{i\ell}(1-p_{i\ell}).
+\end{equation}
+The covariance contributed by that locus is
+\begin{align}
+\Cov(X_\ell\mathbf a_\ell)
+&=\Var(X_\ell)\mathbf a_\ell\mathbf a_\ell^\top\\
+&=2p_{i\ell}(1-p_{i\ell})\mathbf a_\ell\mathbf a_\ell^\top.
+\end{align}
+If loci are in linkage equilibrium, cross-locus covariances vanish, so contributions add:
+\begin{equation}
+\boxed{
+\G_i=2\sum_{\ell=1}^Lp_{i\ell}(1-p_{i\ell})
+\mathbf a_\ell\mathbf a_\ell^\top.}
+\label{eq:GfromAlleleFrequencies}
+\end{equation}
+
+\begin{geombox}
+Each outer product \(\mathbf a_\ell\mathbf a_\ell^\top\) is a rank-one covariance ellipsoid pointing along the allelic effect vector. The full \(\G\) is the weighted sum of those rank-one contributions. Alleles near frequency one half receive the largest weight.
+\end{geombox}
+
+With linkage disequilibrium, additional cross-locus terms appear. Schematically,
+\begin{equation}
+\G_i
+=2\sum_\ell p_{i\ell}q_{i\ell}\mathbf a_\ell\mathbf a_\ell^\top
++\sum_{\ell\neq m}\Cov(X_\ell,X_m)\mathbf a_\ell\mathbf a_m^\top.
+\end{equation}
+The linkage-equilibrium model is therefore a transparent baseline rather than a claim that LD is biologically absent.
+
+\section{Weak-selection allele-frequency dynamics}
+
+Let the local directional selection gradient be \(\betav_i\). The marginal directional effect of one focal allele at locus \(\ell\) is
+\begin{equation}
+s_{i\ell}=\mathbf a_\ell^\top\betav_i.
+\end{equation}
+Under weak additive selection, the leading allele-frequency change is
+\begin{equation}
+\dot p_{i\ell}^{\mathrm{sel}}
+=p_{i\ell}(1-p_{i\ell})\mathbf a_\ell^\top\betav_i.
+\label{eq:alleleSelectionDynamics}
+\end{equation}
+With symmetric migration from population \(j\) at rate \(m\),
+\begin{equation}
+\boxed{
+\dot p_{i\ell}
+=p_{i\ell}(1-p_{i\ell})\mathbf a_\ell^\top\betav_i
++m(p_{j\ell}-p_{i\ell}).}
+\label{eq:alleleDynamicsMigration}
+\end{equation}
+
+\section{Recover the multivariate response equation, including migration}
+
+Differentiate \cref{eq:meanFromAlleleFrequencies}:
+\begin{equation}
+\dot{\zbar}_i=2\sum_\ell\dot p_{i\ell}\mathbf a_\ell.
+\end{equation}
+Substitute \cref{eq:alleleDynamicsMigration}:
+\begin{align}
+\dot{\zbar}_i
+={}&2\sum_\ell p_{i\ell}(1-p_{i\ell})
+\mathbf a_\ell\mathbf a_\ell^\top\betav_i\\
+&+2m\sum_\ell(p_{j\ell}-p_{i\ell})\mathbf a_\ell.
+\end{align}
+The first sum is \(\G_i\betav_i\) by \cref{eq:GfromAlleleFrequencies}. The second is
+\begin{align}
+2m\sum_\ell(p_{j\ell}-p_{i\ell})\mathbf a_\ell
+&=m(\zbar_j-\zbar_i),
+\end{align}
+provided the populations share the same effect-vector representation and reference. Thus
+\begin{equation}
+\boxed{
+\dot{\zbar}_i
+=\G_i\betav_i+m(\zbar_j-\zbar_i).}
+\label{eq:LandeWithMigration}
+\end{equation}
+
+\begin{cautionbox}
+When migration is included at the allele-frequency level, it produces an explicit mean-migration term. The simpler identity \(\dot{\zbar}=\G\betav\) is the selection component or the \(m=0\) limit, not the full dynamics.
+\end{cautionbox}
+
+\section{How allele-frequency change alters \(\G\)}
+
+Differentiate \cref{eq:GfromAlleleFrequencies}:
+\begin{align}
+\dot\G_i
+&=2\sum_\ell\frac{\dd}{\dd t}
+[p_{i\ell}(1-p_{i\ell})]
+\mathbf a_\ell\mathbf a_\ell^\top\\
+&=2\sum_\ell[(1-p_{i\ell})-p_{i\ell}]\dot p_{i\ell}
+\mathbf a_\ell\mathbf a_\ell^\top\\
+&=\boxed{
+2\sum_\ell(1-2p_{i\ell})\dot p_{i\ell}
+\mathbf a_\ell\mathbf a_\ell^\top.}
+\label{eq:GdotAlleles}
+\end{align}
+
+\inwords An allele rising toward frequency one half increases its contribution to additive variance; an allele moving from one half toward fixation decreases it. Because different loci point in different multivariate directions, unequal frequency changes can rotate \(\G\) as well as change its total magnitude.
+
+\begin{biobox}
+The mechanism does not require new mutation or drift. Divergent selection can reweight pre-existing effect vectors in different populations, causing their covariance ellipsoids and response channels to rotate apart using standing variation alone.
+\end{biobox}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.84\textwidth]{figures/05_standing_variation_rotation.pdf}
+\caption{A deterministic multilocus simulation in which divergent selection changes standing allele frequencies, rotates \(\G\), and generates channel misalignment.}
+\label{fig:standingVariationRotation}
+\end{figure}

@@ -1,0 +1,217 @@
+\chapter{Whitening the dynamics and deriving the symmetric channel operator}
+
+\section{Why \(\G\Hh\) is mathematically awkward}
+
+The local dynamics in \cref{eq:localDynamicsGH} involve \(\G\Hh\). Although \(\G\) and \(\Hh\) are symmetric,
+\begin{equation}
+(\G\Hh)^\top=\Hh\G,
+\end{equation}
+which generally differs from \(\G\Hh\). Thus \(\G\Hh\) is usually nonsymmetric.
+
+\inwords A nonsymmetric operator can have nonorthogonal right eigenvectors, distinct left eigenvectors, and a geometry that depends awkwardly on the coordinate metric. The biological dynamics are valid, but the raw representation is not the cleanest one for measuring rotations and angles.
+
+\section{Whitened dynamics when \(\G\) is locally fixed}
+
+Define
+\begin{equation}
+\mathbf x=\G^{-1/2}\mathbf d.
+\end{equation}
+If \(\G\) is constant over the local relaxation interval,
+\begin{align}
+\dot{\mathbf x}
+&=\G^{-1/2}\dot{\mathbf d}\\
+&=\G^{-1/2}(-\G\Hh\mathbf d)\\
+&=-\G^{1/2}\Hh\mathbf d\\
+&=-\G^{1/2}\Hh\G^{1/2}\mathbf x.
+\end{align}
+The third line uses
+\begin{equation}
+\G^{-1/2}\G=\G^{1/2},
+\end{equation}
+which follows immediately from the eigendecomposition of \(\G\). The fourth line substitutes \(\mathbf d=\G^{1/2}\mathbf x\).
+
+Define
+\begin{equation}
+\boxed{\Sop=\G^{1/2}\Hh\G^{1/2}.}
+\label{eq:channelOperator}
+\end{equation}
+Then
+\begin{equation}
+\boxed{\dot{\mathbf x}=-\Sop\mathbf x.}
+\label{eq:whitenedDynamics}
+\end{equation}
+
+\begin{mathteach}
+Whitening is a change of metric, not a biological transformation of the organism. It expresses displacement in units of standing additive variation. Once genetic covariance has been made spherical, the joint effect of variance and curvature is represented by a symmetric matrix.
+\end{mathteach}
+
+\section{Proof that \(\Sop\) is symmetric positive definite}
+
+Transpose \(\Sop\):
+\begin{align}
+\Sop^\top
+&=(\G^{1/2}\Hh\G^{1/2})^\top\\
+&=(\G^{1/2})^\top\Hh^\top(\G^{1/2})^\top\\
+&=\G^{1/2}\Hh\G^{1/2}\\
+&=\Sop.
+\end{align}
+The third line uses symmetry of both \(\G^{1/2}\) and \(\Hh\).
+
+For any nonzero \(\mathbf x\),
+\begin{align}
+\mathbf x^\top\Sop\mathbf x
+&=\mathbf x^\top\G^{1/2}\Hh\G^{1/2}\mathbf x\\
+&=(\G^{1/2}\mathbf x)^\top\Hh(\G^{1/2}\mathbf x)\\
+&>0,
+\end{align}
+because \(\G^{1/2}\mathbf x\neq\Zero\) and \(\Hh\succ0\). Hence \(\Sop\succ0\).
+
+\begin{summarybox}
+The operator \(\Sop\) is symmetric, has positive real eigenvalues, and admits an orthonormal eigenbasis. This is the precise reason it supports principal angles, stable subspaces, projector geometry, and symmetric perturbation theory.
+\end{summarybox}
+
+\section{Equivalence to the original dynamics}
+
+The symmetric operator does not change the eigenvalues of the original response matrix. Observe that
+\begin{align}
+\G\Hh
+&=\G^{1/2}(\G^{1/2}\Hh\G^{1/2})\G^{-1/2}\\
+&=\G^{1/2}\Sop\G^{-1/2}.
+\label{eq:similarityGH}
+\end{align}
+Thus \(\G\Hh\) and \(\Sop\) are similar matrices and have the same eigenvalues.
+
+Suppose
+\begin{equation}
+\Sop\mathbf v_j=\lambda_j\mathbf v_j.
+\end{equation}
+Define the corresponding phenotype-space vector
+\begin{equation}
+\mathbf u_j=\G^{1/2}\mathbf v_j.
+\label{eq:phenotypeChannelDirection}
+\end{equation}
+Then
+\begin{align}
+\G\Hh\mathbf u_j
+&=\G\Hh\G^{1/2}\mathbf v_j\\
+&=\G^{1/2}\Sop\mathbf v_j\\
+&=\lambda_j\G^{1/2}\mathbf v_j\\
+&=\lambda_j\mathbf u_j.
+\end{align}
+Therefore \(\mathbf u_j\) is a right eigenvector of \(\G\Hh\).
+
+The same result can be written as a generalized symmetric eigenproblem. Starting from
+\begin{equation}
+\G\Hh\mathbf u_j=\lambda_j\mathbf u_j,
+\end{equation}
+left-multiply by \(\G^{-1}\):
+\begin{equation}
+\Hh\mathbf u_j=\lambda_j\G^{-1}\mathbf u_j.
+\label{eq:generalisedEigenproblem}
+\end{equation}
+
+\inwords A response direction balances fitness curvature against inverse genetic covariance. It is an eigenvector of curvature measured in the genetic metric.
+
+The phenotype-space directions are orthonormal under the \(\G^{-1}\) metric:
+\begin{align}
+\mathbf u_i^\top\G^{-1}\mathbf u_j
+&=(\G^{1/2}\mathbf v_i)^\top\G^{-1}(\G^{1/2}\mathbf v_j)\\
+&=\mathbf v_i^\top\G^{1/2}\G^{-1}\G^{1/2}\mathbf v_j\\
+&=\mathbf v_i^\top\mathbf v_j\\
+&=\delta_{ij}.
+\label{eq:GinverseOrthogonality}
+\end{align}
+
+\begin{geombox}
+In whitened space, channels are ordinary orthogonal axes. In phenotype space, the same directions are generally not Euclidean-orthogonal, but they are orthogonal when distances are measured in units of genetic covariance. The two descriptions encode the same dynamics.
+\end{geombox}
+
+\section{Solving the local dynamics mode by mode}
+
+Let
+\begin{equation}
+\Sop=\Vv\boldsymbol\Lambda\Vv^\top,
+\qquad
+\boldsymbol\Lambda=\diag(\lambda_1,\ldots,\lambda_n),
+\end{equation}
+with \(\lambda_1\ge\cdots\ge\lambda_n>0\). Expand the initial displacement as
+\begin{equation}
+\mathbf x(0)=\sum_{j=1}^nc_j\mathbf v_j,
+\qquad
+c_j=\mathbf v_j^\top\mathbf x(0).
+\end{equation}
+Seek a solution of the form
+\begin{equation}
+\mathbf x(t)=\sum_{j=1}^na_j(t)\mathbf v_j.
+\end{equation}
+Substitute into \cref{eq:whitenedDynamics}:
+\begin{align}
+\sum_j\dot a_j(t)\mathbf v_j
+&=-\Sop\sum_ja_j(t)\mathbf v_j\\
+&=-\sum_ja_j(t)\lambda_j\mathbf v_j.
+\end{align}
+Orthogonality implies that each coefficient satisfies
+\begin{equation}
+\dot a_j=-\lambda_ja_j.
+\end{equation}
+The scalar solution is
+\begin{equation}
+a_j(t)=c_je^{-\lambda_jt}.
+\end{equation}
+Hence
+\begin{equation}
+\boxed{\mathbf x(t)=\sum_{j=1}^nc_je^{-\lambda_jt}\mathbf v_j
+=e^{-\Sop t}\mathbf x(0).}
+\label{eq:modeSolution}
+\end{equation}
+
+\inwords Every channel mode decays independently. A larger eigenvalue means faster local relaxation of displacement along that mode.
+
+\begin{biobox}
+The leading channel is the trait combination for which the product of available genetic variation and local restoring curvature generates the fastest local response. It is not necessarily the shallowest fitness ridge and not necessarily \(\mathbf g_{\max}\); it is the dominant mode of the combined system.
+\end{biobox}
+
+\begin{cautionbox}[title={A terminology condition in the ridge model}]
+Later we model a ``channel ridge'' with high genetic variance \(g_{\parallel}\) and low curvature \(h_{\parallel}\) along a subspace. For that subspace to be the \emph{leading response channel}, it must also satisfy
+\[
+g_{\parallel}h_{\parallel}>g_{\perp}h_{\perp}.
+\]
+High variance along a shallow ridge does not automatically imply the largest response rate; the product matters.
+\end{cautionbox}
+
+\section{Recovery of \(\mathbf g_{\max}\)}
+
+If curvature is isotropic,
+\begin{equation}
+\Hh=h\Ii,
+\end{equation}
+then
+\begin{align}
+\Sop
+&=\G^{1/2}(h\Ii)\G^{1/2}\\
+&=h\G.
+\end{align}
+Thus \(\Sop\) and \(\G\) have identical eigenvectors, and the leading channel is \(\mathbf g_{\max}\).
+
+\begin{connectionbox}
+This is the exact Schluter limit. The new framework does not reject genetic lines of least resistance. It identifies the condition under which they are complete: local fitness curvature must be isotropic, or at least commute with \(\G\) so that both matrices share axes.
+\end{connectionbox}
+
+\section{What changes if \(\G\) itself changes through time?}
+
+If \(\G=\G(t)\), then
+\begin{equation}
+\mathbf x(t)=\G(t)^{-1/2}\mathbf d(t)
+\end{equation}
+and the product rule gives
+\begin{equation}
+\dot{\mathbf x}
+=\frac{\dd}{\dd t}\left(\G^{-1/2}\right)\mathbf d
++\G^{-1/2}\dot{\mathbf d}.
+\label{eq:timeVaryingWhitening}
+\end{equation}
+The second term still contains \(-\Sop\mathbf x\), but the first term records motion of the coordinate metric itself.
+
+\begin{cautionbox}
+Therefore \(\dot{\mathbf x}=-\Sop\mathbf x\) is an exact dynamical transformation when \(\G\) is fixed over the interval. When \(\G\) evolves, \(\Sop(t)\) remains the correct instantaneous symmetric response operator and its eigenspaces remain meaningful, but the full whitened trajectory includes an additional moving-metric term. Later we differentiate \(\Sop(t)\) directly to study channel rotation.
+\end{cautionbox}

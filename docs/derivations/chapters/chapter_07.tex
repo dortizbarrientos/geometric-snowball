@@ -1,0 +1,166 @@
+\chapter{A complete two-trait worked example}
+
+\section{Write the operator in the eigenbasis of \(\G\)}
+
+Choose coordinates aligned with the eigenvectors of \(\G\), so
+\begin{equation}
+\G=
+\begin{bmatrix}
+g_1&0\\0&g_2
+\end{bmatrix},
+\qquad g_1\ge g_2>0.
+\end{equation}
+Let
+\begin{equation}
+\Hh=
+\begin{bmatrix}
+h_{11}&h_{12}\\h_{12}&h_{22}
+\end{bmatrix}.
+\end{equation}
+Then
+\begin{equation}
+\G^{1/2}=
+\begin{bmatrix}
+\sqrt{g_1}&0\\0&\sqrt{g_2}
+\end{bmatrix}.
+\end{equation}
+Multiply in two steps:
+\begin{align}
+\G^{1/2}\Hh
+&=
+\begin{bmatrix}
+\sqrt{g_1}h_{11}&\sqrt{g_1}h_{12}\\
+\sqrt{g_2}h_{12}&\sqrt{g_2}h_{22}
+\end{bmatrix},\\[0.5em]
+\Sop=\G^{1/2}\Hh\G^{1/2}
+&=
+\begin{bmatrix}
+g_1h_{11}&\sqrt{g_1g_2}h_{12}\\
+\sqrt{g_1g_2}h_{12}&g_2h_{22}
+\end{bmatrix}.
+\label{eq:S2D}
+\end{align}
+
+\inwords The diagonal entries combine variance and curvature along the genetic axes. The off-diagonal entry is curvature that mixes the two genetic axes, scaled by their geometric-mean variance.
+
+\section{Derive the eigenvector angle}
+
+Write a generic symmetric two-by-two matrix as
+\begin{equation}
+\Sop=
+\begin{bmatrix}
+a&b\\b&c
+\end{bmatrix}.
+\end{equation}
+A unit vector at angle \(\phi\) is
+\begin{equation}
+\mathbf v=
+\begin{bmatrix}\cos\phi\\\sin\phi\end{bmatrix}.
+\end{equation}
+The Rayleigh quotient is
+\begin{align}
+r(\phi)
+&=\mathbf v^\top\Sop\mathbf v\\
+&=a\cos^2\phi+2b\sin\phi\cos\phi+c\sin^2\phi.
+\end{align}
+Use
+\begin{equation}
+\cos^2\phi=\frac{1+\cos2\phi}{2},
+\quad
+\sin^2\phi=\frac{1-\cos2\phi}{2},
+\quad
+2\sin\phi\cos\phi=\sin2\phi,
+\end{equation}
+to obtain
+\begin{equation}
+r(\phi)=\frac{a+c}{2}+\frac{a-c}{2}\cos2\phi+b\sin2\phi.
+\end{equation}
+Differentiate:
+\begin{equation}
+\frac{\dd r}{\dd\phi}=-(a-c)\sin2\phi+2b\cos2\phi.
+\end{equation}
+At an eigenvector direction, the Rayleigh quotient is stationary, so
+\begin{equation}
+-(a-c)\sin2\phi+2b\cos2\phi=0.
+\end{equation}
+Rearranging,
+\begin{equation}
+\tan2\phi=\frac{2b}{a-c}.
+\end{equation}
+The quadrant-safe expression is
+\begin{equation}
+\boxed{\phi=\half\operatorname{atan2}(2b,a-c).}
+\label{eq:2DeigenAngle}
+\end{equation}
+Substituting the entries from \cref{eq:S2D},
+\begin{equation}
+\boxed{
+\tan2\phi=
+\frac{2\sqrt{g_1g_2}\,h_{12}}
+{g_1h_{11}-g_2h_{22}}.}
+\label{eq:2DchannelAngle}
+\end{equation}
+
+\begin{mathteach}
+The numerator is rotational forcing: it mixes the two axes. The denominator is the separation between their uncoupled response rates. Rotation is large when mixing is strong or when the two rates are nearly tied.
+\end{mathteach}
+
+\begin{geombox}
+The two-dimensional formula already contains the later perturbation theory. The off-diagonal term tries to turn the axes; the eigenvalue gap resists that turn. Near a tie, a small off-diagonal perturbation can cause a large angle.
+\end{geombox}
+
+\section{Map the whitened angle back to phenotype space}
+
+The whitened eigenvector is
+\begin{equation}
+\mathbf v=
+\begin{bmatrix}\cos\phi\\\sin\phi\end{bmatrix}.
+\end{equation}
+The phenotype-space response direction is
+\begin{equation}
+\mathbf u=\G^{1/2}\mathbf v
+=
+\begin{bmatrix}
+\sqrt{g_1}\cos\phi\\
+\sqrt{g_2}\sin\phi
+\end{bmatrix}.
+\end{equation}
+If \(\alpha\) is its ordinary Euclidean angle,
+\begin{equation}
+\tan\alpha
+=\frac{u_2}{u_1}
+=\sqrt{\frac{g_2}{g_1}}\tan\phi.
+\label{eq:phenotypeAngle2D}
+\end{equation}
+
+\inwords Whitening and phenotype space do not assign the same Euclidean angle when genetic variance is anisotropic. The phenotype direction is stretched more along high-variance axes when mapped back from whitened coordinates.
+
+\section{Three informative special cases}
+
+\subsection{Isotropic curvature}
+If \(\Hh=h\Ii\), then \(h_{12}=0\), \(h_{11}=h_{22}=h\), and \cref{eq:2DchannelAngle} gives \(\phi=0\) when \(g_1>g_2\). The leading channel is \(\mathbf g_{\max}\).
+
+\subsection{Aligned but anisotropic curvature}
+If \(h_{12}=0\), the matrices share axes. There is no smooth rotation. The leading direction is axis 1 when
+\begin{equation}
+g_1h_{11}>g_2h_{22}
+\end{equation}
+and axis 2 when the inequality reverses. At
+\begin{equation}
+g_1h_{11}=g_2h_{22},
+\end{equation}
+the eigenvalues are equal and the rank-one leading direction is undefined.
+
+\begin{biobox}
+Selection can change the strength of response modes without rotating them. Rotation requires a change in trait combinations, represented locally by cross-channel terms. A population can therefore experience strong selection and major eigenvalue change while its channel orientation remains constant.
+\end{biobox}
+
+\subsection{Misaligned curvature}
+If \(h_{12}\neq0\), curvature couples the genetic axes and the leading channel rotates smoothly. The rotation becomes most sensitive as \(g_1h_{11}-g_2h_{22}\) approaches zero.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{figures/figS1_channel_rotation_checked.pdf}
+\caption{Two-trait illustration of rotation away from \(\mathbf g_{\max}\) as curvature anisotropy increases. Genetic correlation changes the orientation and susceptibility of the joint operator.}
+\label{fig:2Drotation}
+\end{figure}

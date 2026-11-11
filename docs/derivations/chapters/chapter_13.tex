@@ -1,0 +1,118 @@
+\chapter{Deterministic selection and stochastic channel diffusion have different exponents}
+
+\section{Deterministic divergence}
+
+From \cref{eq:localSnowballTheorem,eq:commonMetricLocalSnowball}, smooth deterministic forcing gives
+\begin{equation}
+d_{C,M}^2(t)=\chi_M^2t^2+O(t^3),
+\qquad
+\chi_M^2=\normF{\mathbf K_M}^2.
+\end{equation}
+When the whitening map is shared and fixed, \(\mathbf K_M=\cK\) and \(\chi_M^2=\chi_k^2=\normF{\cK}^2\). Equivalently, each principal angle is \(O(t)\).
+
+\section{Brownian motion in the tangent space}
+
+Let a local \emph{normal-coordinate} tangent displacement obey
+\begin{equation}
+\dd\mathbf K_t=\mathbf B_K\,\dd t+\boldsymbol\Sigma_K\,\dd\mathbf W_t,
+\label{eq:tangentSDE}
+\end{equation}
+where \(\mathbf W_t\) is a vector of independent Brownian motions after vectorizing the tangent matrix. Starting from zero,
+\begin{equation}
+\mathbf K_t=\mathbf B_Kt+\boldsymbol\Sigma_K\mathbf W_t.
+\end{equation}
+
+First define the quadratic tangent-space surrogate
+\begin{equation}
+\widetilde d_C^2(t)=\normF{\mathbf K_t}^2.
+\label{eq:tangentDistanceSurrogate}
+\end{equation}
+Its expectation can be calculated exactly:
+\begin{align}
+\E[\widetilde d_C^2(t)]
+&=\E\left[\normF{\mathbf B_Kt+\boldsymbol\Sigma_K\mathbf W_t}^2\right]\\
+&=\normF{\mathbf B_K}^2t^2
++2t\E\innerF{\mathbf B_K}{\boldsymbol\Sigma_K\mathbf W_t}
++\E\normF{\boldsymbol\Sigma_K\mathbf W_t}^2.
+\end{align}
+Because \(\E[\mathbf W_t]=\Zero\), the cross term is zero. Since \(\Cov(\mathbf W_t)=t\Ii\),
+\begin{equation}
+\E\normF{\boldsymbol\Sigma_K\mathbf W_t}^2
+=t\tr(\boldsymbol\Sigma_K\boldsymbol\Sigma_K^\top).
+\end{equation}
+Therefore
+\begin{equation}
+\boxed{
+\E[\widetilde d_C^2(t)]
+=a t+b t^2,}
+\label{eq:selectionDriftMixture}
+\end{equation}
+where
+\begin{equation}
+a=\tr(\boldsymbol\Sigma_K\boldsymbol\Sigma_K^\top),
+\qquad
+b=\normF{\mathbf B_K}^2.
+\end{equation}
+
+\subsection{Relate the tangent surrogate to actual chordal distance}
+
+Let \(\kappa_j(t)\) be the singular values of the normal-coordinate tangent matrix \(\mathbf K_t\). Along the corresponding Grassmann exponential map, the principal angles are \(\kappa_j\), so
+\begin{align}
+d_C^2(t)
+&=\sum_j\sin^2\kappa_j(t)\\
+&=\sum_j\left[\kappa_j(t)^2-\frac13\kappa_j(t)^4
++O(\kappa_j(t)^6)\right]\\
+&=\normF{\mathbf K_t}^2+O(\normF{\mathbf K_t}^4).
+\label{eq:stochasticChordalExpansion}
+\end{align}
+For Brownian motion, \(\mathbf K_t=O_p(t^{1/2})\), so the geometric correction has expectation of order \(t^2\). Consequently
+\begin{equation}
+\boxed{
+\E[d_C^2(t)]=a t+O(t^2).}
+\label{eq:stochasticLeadingLaw}
+\end{equation}
+The coefficient of the leading linear term is still exactly
+\begin{equation}
+a=\tr(\boldsymbol\Sigma_K\boldsymbol\Sigma_K^\top).
+\end{equation}
+
+When diffusion is absent, \(a=0\), the deterministic tangent term gives the quadratic coefficient \(b=\normF{\mathbf B_K}^2\), consistent with \cref{eq:localSnowballTheorem,eq:commonMetricLocalSnowball}. When drift and diffusion act together, fitting
+\begin{equation}
+\E[d_C^2(t)]\approx a t+b_{\mathrm{eff}}t^2
+\end{equation}
+is useful, but \(b_{\mathrm{eff}}\) contains not only deterministic directional forcing. It can also contain second-order manifold curvature, diffusion, and nonlinear path corrections.
+
+\inwords Unbiased stochastic motion produces root-time angle and therefore a linear leading expectation for squared distance. Repeatable directional forcing produces linear angle and therefore a quadratic contribution. The linear coefficient cleanly diagnoses diffusion in this local model; the empirical quadratic coefficient is a composite unless stochastic second-order corrections are modelled explicitly.
+
+\begin{mathteach}
+\Cref{eq:selectionDriftMixture} is exact for the tangent-space surrogate. \Cref{eq:stochasticLeadingLaw} is the corresponding asymptotic statement for the actual curved Grassmann geometry. Keeping those statements separate prevents a second-order approximation from being mistaken for an exact decomposition of the observed chordal curve.
+\end{mathteach}
+
+\begin{biobox}
+Replicate divergence is essential. Deterministic ecological forcing should produce a repeatable direction of channel rotation across comparable population pairs. Drift or mutation-order effects can generate similar magnitudes but less directional repeatability and a stronger linear baseline. Estimating the higher-order deterministic component requires either an explicit stochastic channel model or enough replication to quantify the diffusion correction.
+\end{biobox}
+
+\section{General scaling law}
+
+If a characteristic angle obeys
+\begin{equation}
+\psi(t)\propto t^\alpha,
+\end{equation}
+then every local quadratic overlap deficit obeys
+\begin{equation}
+I(t)\propto t^{2\alpha}.
+\end{equation}
+A superlinear isolation curve requires \(\alpha>1/2\). The canonical deterministic geometric snowball has \(\alpha=1\), hence exponent two.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/02_selection_vs_drift_scaling.pdf}
+\caption{Numerical comparison of deterministic and Brownian channel divergence. The fitted log--log slopes approach two and one, respectively.}
+\label{fig:selectionDriftScaling}
+\end{figure}
+
+\begin{summarybox}
+A quadratic curve is a prediction of smooth directional channel rotation, not a generic consequence of any divergence. A linear leading term identifies local diffusion in this model. A fitted form \(a t+b_{\mathrm{eff}}t^2\) is useful, but interpreting \(b_{\mathrm{eff}}\) as purely deterministic requires an explicit treatment of second-order stochastic and manifold corrections.
+\end{summarybox}
+
+\part{From channel geometry to reproductive isolation}

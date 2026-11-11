@@ -1,0 +1,25 @@
+\chapter{Useful matrix identities collected in one place}
+
+\begin{longtable}{@{}p{0.31\textwidth}p{0.59\textwidth}@{}}
+\toprule
+Identity & Interpretation and use \\
+\midrule
+\endfirsthead
+\toprule
+Identity & Interpretation and use \\
+\midrule
+\endhead
+\(\tr(\mathbf A\mathbf B)=\tr(\mathbf B\mathbf A)\) & Cyclic trace invariance; moves factors to expose covariance or projector products. \\
+\(\E[\boldsymbol\varepsilon^\top\mathbf A\boldsymbol\varepsilon]=\tr(\mathbf A\Pp)\) & Converts quadratic variance into expected loss. \\
+\(\normF{\mathbf A}^2=\tr(\mathbf A^\top\mathbf A)\) & Matrix analogue of squared Euclidean length. \\
+\(\half\normF{\Pp_1-\Pp_2}^2=\sum_j\sin^2\psi_j\) & Chordal distance between equal-rank subspaces. \\
+\(\tr(\Pp_1\Pp_2)=\sum_j\cos^2\psi_j\) & Total squared projection overlap. \\
+\(\det(\Vv_1^\top\Vv_2)^2=\prod_j\cos^2\psi_j\) & Squared projected \(k\)-volume overlap. \\
+\(\G\Hh=\G^{1/2}\Sop\G^{-1/2}\) & Similarity between original and symmetric response operators. \\
+\(\Hh\mathbf u=\lambda\G^{-1}\mathbf u\) & Generalized symmetric eigenproblem for phenotype channels. \\
+\(\Rr\mathbf X+\mathbf X\Rr=\dot\G\) & Fr\'echet derivative of the matrix square root. \\
+\(d_{C,M}^2(t)=t^2\normF{\mathbf K_M}^2+O(t^3)\) & Fully invariant local snowball when the phenotype-space channel and \(\G^{1/2}\) both move. \\
+\(\svec(\mathbf A)^\top\svec(\mathbf B)=\tr(\mathbf A\mathbf B)\) & Isometric vectorization used by covariance tensors. \\
+\(1-(1-I_1)(1-I_2)=1-e^{-(L_1+L_2)}\) & Independent survival barriers multiply; log barriers add. \\
+\bottomrule
+\end{longtable}

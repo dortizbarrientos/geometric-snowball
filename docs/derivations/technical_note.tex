@@ -1,0 +1,370 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{placeins}
+\usepackage[colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.65em}
+\setlength{\emergencystretch}{1em}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newcommand{\G}{\mathbf G}
+\newcommand{\Hh}{\mathbf H}
+\newcommand{\Sop}{\mathbf S}
+\newcommand{\Rr}{\mathbf R}
+\newcommand{\Pp}{\mathbf P}
+\newcommand{\Vv}{\mathbf V}
+\newcommand{\Qq}{\mathbf Q}
+\newcommand{\M}{\mathbf M}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\R}{\mathbb R}
+\newcommand{\cC}{\mathcal C}
+\newcommand{\cK}{\mathcal K}
+\title{The geometric snowball of speciation\\\large Mathematical audit, fitness calibration, evolutionary dynamics, and a handoff to Dobzhansky--Muller isolation}
+\author{Working theory note for Daniel Ortiz-Barrientos}
+\date{5 August 2026}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The geometric snowball is viable, but its strongest formulation requires separating three claims. First, divergent natural selection can rotate additive-response subspaces, and deterministic rotation produces an exact quadratic early law in squared principal-angle distance. Second, subspace angle is not itself reproductive isolation: it predicts hybrid load only after the parental covariance structures are coupled to the local fitness curvatures. A tractable ridge-channel model gives that bridge exactly. Third, early ecological/geometric isolation can reduce effective gene flow and thereby accelerate the later accumulation of lineage-specific substitutions and Dobzhansky--Muller incompatibilities. This final step is a dynamical handoff, not an identity between geometry and DMIs. The resulting theory predicts when a quadratic snowball should occur, when it should collapse to a linear drift baseline, how to compare channels when parental \(\G\) matrices differ, and how to test the mechanism prospectively in replicated \textit{Senecio lautus} populations.
+\end{abstract}
+
+\section{Central judgement}
+
+The core idea is stronger than a metaphor. There is a mathematically exact early quadratic law, but the object that snowballs is initially a \emph{subspace discrepancy}. Reproductive isolation follows only under a further biological condition: each population must have evolved covariance concentrated in directions that are relatively weakly penalised in its own environment and strongly penalised away from those directions. Under that covariance--curvature coadaptation, channel rotation generates hybrid fitness loss. Without it, a large angle can coexist with little load, or even heterosis.
+
+This refinement preserves the proposed mechanism while making four points explicit:
+\begin{enumerate}[leftmargin=1.5em]
+\item deterministic selection and drift predict different early exponents;
+\item the relevant boundary is the spectral gap separating the chosen channel subspace from excluded dimensions;
+\item channels from populations with different \(\G\) matrices must be compared under a common metric;
+\item the geometric and Orr snowballs are sequentially coupled mechanisms, not alternative names for the same quantity.
+\end{enumerate}
+
+\section{Local adaptive dynamics and the channel operator}
+
+For population \(i\), write local log fitness near the optimum \(\bm\theta_i\) as
+\begin{equation}
+\log W_i(\mathbf z)=c_i-\frac12(\mathbf z-\bm\theta_i)^\top\Hh_i(\mathbf z-\bm\theta_i),
+\qquad \Hh_i\succ0.
+\end{equation}
+With additive covariance \(\G_i\), the local Lande dynamics are
+\begin{equation}
+\dot{\bar{\mathbf z}}_i=\G_i\Hh_i(\bm\theta_i-\bar{\mathbf z}_i).
+\end{equation}
+For displacement \(\mathbf d_i=\bar{\mathbf z}_i-\bm\theta_i\), define genetically whitened coordinates \(\mathbf x_i=\G_i^{-1/2}\mathbf d_i\). Then
+\begin{equation}
+\dot{\mathbf x}_i=-\Sop_i\mathbf x_i,
+\qquad
+\Sop_i=\G_i^{1/2}\Hh_i\G_i^{1/2}.
+\end{equation}
+The symmetric positive-definite operator \(\Sop_i\) has an orthonormal eigenbasis. Its leading invariant subspace gives the trait combinations for which standing additive variation and local curvature jointly generate the largest relaxation rates. When \(\Hh_i=h\mathbf I\), \(\Sop_i=h\G_i\), so the channels reduce exactly to the eigendirections of \(\G_i\), including \(\mathbf g_{\max}\).
+
+\section{Comparing channels when \(\G_1\neq\G_2\)}
+
+A population-specific whitened basis \(\Vv_i\) lives in coordinates defined by \(\G_i^{-1/2}\). Directly taking the Euclidean angle between \(\Vv_1\) and \(\Vv_2\) is therefore not invariant to trait rescaling when the two \(\G\) matrices differ.
+
+Map each basis back to phenotype space,
+\begin{equation}
+\mathbf U_i=\G_i^{1/2}\Vv_i,
+\end{equation}
+and choose one biologically defensible reference metric \(\M\succ0\), such as the inverse ancestral covariance or the inverse pooled covariance. Define
+\begin{equation}
+\Qq_i=\mathbf U_i(\mathbf U_i^\top\M\mathbf U_i)^{-1/2},
+\qquad \Qq_i^\top\M\Qq_i=\mathbf I_k.
+\end{equation}
+The cosines of the common-metric principal angles are the singular values of
+\begin{equation}
+\Qq_1^\top\M\Qq_2.
+\end{equation}
+This construction is invariant under any nonsingular linear change of trait coordinates. It also reduces to the original whitened-space comparison when the two populations share the same \(\G\) and that matrix defines the reference metric.
+
+\section{The exact early quadratic law}
+
+Suppose the populations start from the same operator and diverge smoothly,
+\begin{equation}
+\Sop_i(t)=\Sop_0+t\mathbf A_i+O(t^2).
+\end{equation}
+Let \(\mathbf v_1,\ldots,\mathbf v_k\) span the chosen channel subspace and \(\mathbf w_1,\ldots,\mathbf w_{n-k}\) its orthogonal complement, with eigenvalues \(\lambda_1\geq\cdots\geq\lambda_n\). Define the relative rotational-forcing matrix
+\begin{equation}
+\cK_{ab}=
+\frac{\mathbf w_a^\top(\mathbf A_2-\mathbf A_1)\mathbf v_b}
+{\lambda_b-\lambda_{k+a}}.
+\end{equation}
+
+\begin{proposition}[Local geometric snowball]
+For sufficiently small \(t\), the squared chordal distance between the two \(k\)-dimensional channel subspaces satisfies
+\begin{equation}
+ d_C^2(t)=\sum_{j=1}^k\sin^2\psi_j(t)
+ =t^2\lVert\cK\rVert_F^2+O(t^3).
+\end{equation}
+\end{proposition}
+
+For a one-dimensional channel,
+\begin{equation}
+\theta_{12}^2(t)=t^2\sum_{a=2}^n
+\left[
+\frac{\mathbf v_a^\top(\mathbf A_2-\mathbf A_1)\mathbf v_1}
+{\lambda_1-\lambda_a}
+\right]^2+O(t^3).
+\end{equation}
+This is sharper than a Davis--Kahan bound. The spectral gap controls susceptibility, but rotation also requires \emph{off-diagonal forcing}. A perturbation that commutes with \(\Sop_0\) can change eigenvalues without rotating the channels at all.
+
+The relevant boundary is
+\begin{equation}
+\delta_k=\lambda_k-\lambda_{k+1},
+\end{equation}
+not automatically \(\lambda_1-\lambda_2\). If \(\lambda_1\simeq\lambda_2\) but \(\lambda_2\gg\lambda_3\), the rank-one direction is poorly identified, whereas the two-dimensional channel is stable. A biological ``channel boundary'' should therefore be defined relative to the subspace dimension being modelled.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/01_local_quadratic_law.pdf}
+\caption{Numerical verification of the exact local quadratic coefficient. The approximation is deliberately local; divergence at larger path lengths reflects higher-order curvature of the eigenspace trajectory.}
+\end{figure}
+\FloatBarrier
+
+\section{Selection and drift have different early exponents}
+
+The quadratic law is not automatic under every source of divergence. Under smooth deterministic divergence, \(\psi_j(t)=O(t)\), so the squared deficit is \(O(t^2)\). Under unbiased Brownian motion of the operator or its eigenspace, \(E[\psi_j^2(t)]=O(t)\), so expected geometric divergence is linear at early times.
+
+More generally, if \(\psi(t)\propto t^\alpha\), then
+\begin{equation}
+I(t)\propto t^{2\alpha}.
+\end{equation}
+A superlinear snowball requires \(\alpha>1/2\); the canonical quadratic case requires \(\alpha=1\). A mixed early model has the testable form
+\begin{equation}
+E[I(t)]\simeq a t+b t^2,
+\end{equation}
+where the linear component captures stochastic channel diffusion and the quadratic component captures repeatable directional forcing.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/02_selection_vs_drift_scaling.pdf}
+\caption{Simulated scaling exponents. Deterministic divergence gives a slope near two on log--log axes, whereas unbiased drift gives a slope near one.}
+\end{figure}
+\FloatBarrier
+
+\section{Subspace overlap is not yet hybrid fitness}
+
+Two natural geometric summaries are
+\begin{align}
+I_V&=1-\det(\Qq_1^\top\M\Qq_2)^2
+    =1-\prod_{j=1}^k\cos^2\psi_j,\\
+d_C^2&=\sum_{j=1}^k\sin^2\psi_j.
+\end{align}
+Both satisfy
+\begin{equation}
+I_V=d_C^2+O(\lVert\bm\psi\rVert^4)
+=\sum_j\psi_j^2+O(\lVert\bm\psi\rVert^4)
+\end{equation}
+near the origin. However, neither quantity is intrinsically a fitness reduction. The product-based volume deficit is a useful bounded descriptor, but a fitness model is required to determine the scale, sign, and environmental dependence of hybrid load.
+
+\subsection{Exact Gaussian hybrid fitness}
+
+Let a hybrid phenotype be distributed as \(\mathbf Z_H\sim N(\bm\mu_H,\Pp_H)\). Under the quadratic fitness surface above, arithmetic mean fitness in environment \(e\) is
+\begin{align}
+\bar W_{H,e}
+=&\;W_{0e}\left|\mathbf I+\Hh_e^{1/2}\Pp_H\Hh_e^{1/2}\right|^{-1/2}\\
+&\times\exp\left[-\frac12\mathbf d_e^\top\Hh_e^{1/2}
+\left(\mathbf I+\Hh_e^{1/2}\Pp_H\Hh_e^{1/2}\right)^{-1}
+\Hh_e^{1/2}\mathbf d_e\right],
+\end{align}
+where \(\mathbf d_e=\bm\mu_H-\bm\theta_e\). The corresponding expected negative log fitness is
+\begin{equation}
+E[-\log(W_{H,e}/W_{0e})]
+=\frac12\mathbf d_e^\top\Hh_e\mathbf d_e
++\frac12\tr(\Hh_e\Pp_H).
+\end{equation}
+This separates mismatch of the hybrid mean from the curvature-weighted cost of hybrid variance.
+
+\subsection{A general trace identity}
+
+Suppose the hybrid covariance can be written
+\begin{equation}
+\Pp_H=\frac12(\G_1+\G_2)+\Rr,
+\end{equation}
+where \(\Rr\) is segregation excess beyond the parental covariance average. Relative to each parent in its own environment, the equally weighted covariance component of hybrid log-load is
+\begin{equation}
+L_{\mathrm{cov}}
+=-\frac18\tr[(\Hh_2-\Hh_1)(\G_2-\G_1)]
++\frac14\tr[(\Hh_1+\Hh_2)\Rr].
+\end{equation}
+The first term is signed. Channel divergence alone is therefore insufficient. Positive hybrid load requires covariance--curvature coadaptation, segregation excess, or both. If the covariance difference is aligned in the wrong sense with the curvature difference, the hybrid can outperform the parental benchmark.
+
+\subsection{The ridge-channel theorem}
+
+Let \(\mathbf P_i\) be the rank-\(k\) projector onto the response channel of population \(i\), and suppose
+\begin{align}
+\G_i&=g_\perp\mathbf I+(g_\parallel-g_\perp)\mathbf P_i,\\
+\Hh_i&=h_\perp\mathbf I-(h_\perp-h_\parallel)\mathbf P_i,
+\end{align}
+with \(g_\parallel>g_\perp\) and \(h_\perp>h_\parallel\). Thus genetic variance is concentrated along a locally shallow fitness ridge.
+
+\begin{proposition}[Fitness calibration]
+With \(\Rr=0\), the covariance component of hybrid log-load is exactly
+\begin{equation}
+L_{\mathrm{cov}}
+=\frac{(g_\parallel-g_\perp)(h_\perp-h_\parallel)}{4}
+\sum_{j=1}^k\sin^2\psi_j.
+\end{equation}
+\end{proposition}
+
+Under equal angles \(\psi_j=\theta\),
+\begin{equation}
+L_{\mathrm{cov}}
+\simeq \frac{\Delta g\,\Delta h}{4}k\theta^2
+\end{equation}
+for small \(\theta\). The geometric snowball now has a fitness scale. A bounded ecological isolation measure follows naturally as
+\begin{equation}
+I_E=1-e^{-L_E},
+\qquad
+L_E=L_{\mathrm{mean}}+L_{\mathrm{cov}}+L_{\mathrm{seg}}.
+\end{equation}
+For a midpoint hybrid mean, the mean-mismatch component is
+\begin{equation}
+L_{\mathrm{mean}}
+=\frac1{16}(\bm\theta_2-\bm\theta_1)^\top
+(\Hh_1+\Hh_2)(\bm\theta_2-\bm\theta_1).
+\end{equation}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/03_hybrid_load_calibration.pdf}
+\caption{The channel-angle law becomes a fitness law only after covariance--curvature coadaptation is specified. The uncalibrated volume deficit is not numerically equivalent to hybrid load.}
+\end{figure}
+\FloatBarrier
+
+\section{Evolution of \(\G\) from standing variation alone}
+
+The mechanism can be made explicitly selection-driven without mutation or drift. For additive effects \(\mathbf a_\ell\) and allele frequencies \(p_{i\ell}\), write
+\begin{align}
+\bar{\mathbf z}_i&=2\sum_{\ell=1}^L(p_{i\ell}-p_{\ell0})\mathbf a_\ell,\\
+\G_i&=2\sum_{\ell=1}^L p_{i\ell}(1-p_{i\ell})
+\mathbf a_\ell\mathbf a_\ell^\top.
+\end{align}
+Under weak selection and symmetric migration,
+\begin{equation}
+\dot p_{i\ell}=p_{i\ell}(1-p_{i\ell})\mathbf a_\ell^\top\bm\beta_i
++m(p_{j\ell}-p_{i\ell}),
+\qquad
+\bm\beta_i=\Hh_i(\bm\theta_i-\bar{\mathbf z}_i).
+\end{equation}
+Then \(\dot{\bar{\mathbf z}}_i=\G_i\bm\beta_i\), while allele-frequency changes also alter the size and orientation of \(\G_i\). This supplies a concrete route from divergent selection on standing variation to channel rotation.
+
+When both \(\G\) and \(\Hh\) evolve, let \(\mathbf R=\G^{1/2}\). The Fr\'echet derivative \(\mathbf X=D(\G^{1/2})[\dot\G]\) is the solution of
+\begin{equation}
+\mathbf R\mathbf X+\mathbf X\mathbf R=\dot\G.
+\end{equation}
+The operator derivative entering the local rotation coefficient is
+\begin{equation}
+\dot\Sop=\mathbf X\Hh\mathbf R+
+\mathbf R\dot\Hh\mathbf R+
+\mathbf R\Hh\mathbf X.
+\end{equation}
+This decomposition separates rotation caused by changing standing variation from rotation caused by changing landscape curvature.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/05_standing_variation_rotation.pdf}
+\caption{A deterministic multilocus simulation in which divergent selection changes allele frequencies, rotates \(\G\), and produces channel misalignment using standing variation alone.}
+\end{figure}
+\FloatBarrier
+
+\section{A handoff to the Orr snowball}
+
+The geometric mechanism is initially ecological and potentially reversible. To let it facilitate intrinsic isolation, couple it to gene flow and lineage-specific substitutions. One minimal closure is
+\begin{align}
+m_{\mathrm{eff}}(t)&=m_0e^{-L_E(t)}=m_0[1-I_E(t)],\\
+\dot K_i(t)&=\nu_i\,\pi_i(m_{\mathrm{eff}}),
+\qquad
+\pi_i(m)=\frac{s_i}{s_i+2m},\\
+D(t)&=qK_1(t)K_2(t),\\
+I_D(t)&=1-e^{-\eta D(t)},\\
+I_{\mathrm{tot}}(t)&=1-(1-I_E)(1-I_D)
+=1-e^{-[L_E+\eta D]}.
+\end{align}
+Here \(K_i\) counts lineage-specific substitutions, \(D\) is the expected number or aggregate strength of cross-lineage incompatibilities, and \(q\) and \(\eta\) calibrate their probability and fitness effect. The establishment function is deliberately phenomenological. Its role is to encode the claim that an early ecological barrier reduces homogenising gene flow and permits more independent substitutions to persist.
+
+This generates a two-stage process. Geometric isolation rises first, reducing effective migration. Intrinsic isolation then accelerates as lineage-specific substitutions accumulate and interact combinatorially. If environments later converge, \(I_E\) may fall; the DMI component need not. The model therefore turns the geometric snowball into an early, reversible ratchet that can hand the system to a later, less reversible Orr process.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/04_geometric_to_dmi_handoff.pdf}
+\caption{Illustrative dimensionless coupling. The dashed curve holds geometric load at zero; it shows that the intrinsic snowball can proceed without a precursor, but more slowly under the chosen migration regime. The figure is a mechanism demonstration, not a fit to data.}
+\end{figure}
+\FloatBarrier
+
+\section{Predictions that distinguish the theory}
+
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{Prospective susceptibility.} Early channel rotation per unit ecological perturbation is predicted by the exact coefficient \(\lVert\cK\rVert_F^2\), not by spectral gap alone.
+\item \textbf{Selection--drift exponent.} Replicate populations under parallel directional forcing should show an environment-linked quadratic component; stochastic mutation order or drift contributes a linear early baseline and poorer directional repeatability.
+\item \textbf{Fitness calibration.} Hybrid load should be predicted by curvature-weighted hybrid covariance, or by the ridge-model term \(\Delta g\Delta h\sum\sin^2\psi_j/4\), more strongly than by raw \(\G\)-matrix distance or environmental Euclidean distance.
+\item \textbf{Generation specificity.} The additive covariance mechanism should be clearest in recombinant F2 and later hybrids. F1 outcomes can be dominated by dominance, heterosis, and cytoplasmic effects.
+\item \textbf{Reversibility followed by persistence.} Experimental relaxation of divergent selection or increased gene flow should reduce the ecological component before it removes intrinsic hybrid breakdown.
+\item \textbf{Handoff.} Population pairs with stronger early geometric load should exhibit lower effective gene flow and, conditional on divergence time, more intrinsic incompatibility in a common environment.
+\end{enumerate}
+
+\section{A decisive \textit{Senecio} programme}
+
+The replicated Dune--Headland system is particularly valuable because it separates habitat-level repeatability from pair-specific evolutionary routes. The most direct programme is:
+
+\begin{enumerate}[leftmargin=1.6em]
+\item Estimate population-pair-specific \(\G_i\) matrices from replicated quantitative-genetic pedigrees rather than relying only on ecotype-pooled matrices.
+\item Estimate local curvature from individual phenotype--fitness data in each habitat using a regularised quadratic selection model,
+\begin{equation}
+\log W=\alpha+\bm\beta^\top\mathbf z-\frac12\mathbf z^\top\Hh\mathbf z+\varepsilon.
+\end{equation}
+\item Propagate posterior uncertainty jointly through \(\Sop_i\), the choice of \(k\), common-metric principal angles, \(d_C^2\), and exact Gaussian hybrid-fitness predictions.
+\item Produce F2 or advanced recombinant hybrids for each pair, assay intrinsic fitness in a common garden, and transplant the same families into both parental habitats.
+\item Compare preregistered models: mean mismatch only; \(\G\) distance; \(\Hh\) distance; channel distance; and the full curvature-weighted hybrid-load model.
+\item Contrast Dune--Headland pairs with within-Dune and within-Headland pairs. Repeatable channel forcing across Dune--Headland pairs supports the deterministic geometric term; pair-specific within-ecotype incompatibility supports mutation-order or stochastic components.
+\end{enumerate}
+
+A crucial negative control is already apparent: a scalar Euclidean distance between soil variables should not be treated as \(\lVert\Delta\Hh\rVert\). Environmental distance is not fitness curvature, and it can fail even when local adaptation is strong. The theory should therefore be tested against directly estimated selection surfaces.
+
+\section{Recommended reframing of the central claim}
+
+The most defensible novelty is not that geometry can affect hybrid fitness; geometric models of hybridisation already establish that broad point. The distinctive contribution is the combination of:
+\begin{enumerate}[leftmargin=1.6em]
+\item evolving \(\G\times\Hh\) response subspaces rather than distance to a fixed optimum alone;
+\item an exact spectral susceptibility that predicts which populations rotate fastest;
+\item a deterministic-versus-stochastic scaling test;
+\item a calibrated hybrid-load theorem; and
+\item a dynamical handoff from reversible ecological isolation to the DMI snowball.
+\end{enumerate}
+
+A revised concise statement is:
+
+\begin{quote}
+When populations adapt to different environments, natural selection can rotate the multivariate subspaces in which standing genetic variation responds most efficiently. Deterministic differences in this rotation generate a quadratic early increase in channel mismatch. Channel mismatch becomes reproductive isolation when each population's covariance structure is coadapted to the curvature of its own fitness surface, causing recombinant hybrids to express variance in directions strongly penalised in both parental habitats. This early, reversible barrier can reduce gene flow and permit the later combinatorial accumulation of intrinsic Dobzhansky--Muller incompatibilities.
+\end{quote}
+
+\section{Computational verification}
+
+The accompanying Python module implements common-metric channel comparison, local eigenspace perturbation, exact Gaussian hybrid fitness, the covariance--curvature trace identity, a deterministic standing-variation model, selection-versus-drift scaling, and the geometric-to-DMI handoff. Numerical checks give coordinate-invariance error \(1.8\times10^{-15}\), trace-identity error \(1.1\times10^{-16}\), and relative error \(8.3\times10^{-8}\) for the local quadratic coefficient at the audit point. All internal checks pass.
+
+\section*{Selected literature anchors}
+\begin{small}
+\begin{itemize}[leftmargin=1.5em]
+\item Orr, H. A. (1995). The population genetics of speciation: the evolution of hybrid incompatibilities. \textit{Genetics} 139, 1805--1813.
+\item Schneemann, H. et al. (2020). The geometry and genetics of hybridization. \textit{Evolution} 74, 2575--2590.
+\item Thompson, K. A., Osmond, M. M. and Schluter, D. (2019). Parallel genetic evolution and speciation from standing variation. \textit{Evolution Letters} 3, 129--141.
+\item Walter, G. M. et al. (2018). Evolution of genetic variance during adaptive radiation. \textit{The American Naturalist} 191, E108--E128.
+\item Walter, G. M. et al. (2020). Loss of ecologically important genetic variation in late generation hybrids reveals links between adaptation and speciation. \textit{Evolution Letters} 4, 302--316.
+\item James, M. E. et al. (2025). Ecological and mutation-order speciation in \textit{Senecio}. \textit{Molecular Ecology} 34, e70090.
+\end{itemize}
+\end{small}
+
+\end{document}

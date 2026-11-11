@@ -1,0 +1,152 @@
+\chapter{From a local fitness surface to multivariate selection}
+
+\section{Second-order Taylor expansion at a local optimum}
+
+Let \(f(\mathbf z)=\log W(\mathbf z)\). A second-order Taylor expansion around \(\thetav\) is
+\begin{equation}
+f(\thetav+\mathbf d)
+=f(\thetav)
++\nabla f(\thetav)^\top\mathbf d
++\half\mathbf d^\top\nabla^2f(\thetav)\mathbf d
++R_3(\mathbf d),
+\label{eq:TaylorLogFitness}
+\end{equation}
+where \(R_3(\mathbf d)=O(\normtwo{\mathbf d}^3)\) if the required derivatives are continuous.
+
+At a local optimum,
+\begin{equation}
+\nabla f(\thetav)=\Zero.
+\end{equation}
+At a strict local maximum, \(\nabla^2f(\thetav)\) is negative definite. Define
+\begin{equation}
+\Hh=-\nabla^2f(\thetav)\succ0.
+\end{equation}
+Then \cref{eq:TaylorLogFitness} becomes
+\begin{equation}
+\log W(\thetav+\mathbf d)
+=\log W_0-\half\mathbf d^\top\Hh\mathbf d+R_3(\mathbf d),
+\label{eq:quadraticLogFitnessFull}
+\end{equation}
+where \(W_0=W(\thetav)\).
+
+\inwords The constant term is peak log fitness. The linear term disappears because the gradient is zero at the optimum. The first nonzero local change is therefore quadratic. The minus sign ensures that moving away from the maximum lowers fitness.
+
+\begin{cautionbox}
+The quadratic landscape is local. It does not assume that the entire adaptive landscape is globally Gaussian or that a single optimum describes all phenotypes. It says that sufficiently near any smooth local maximum, the leading fitness loss is quadratic.
+\end{cautionbox}
+
+\section{Differentiating the quadratic form}
+
+We now derive the selection gradient. Write
+\begin{equation}
+q(\mathbf d)=\half\mathbf d^\top\Hh\mathbf d.
+\end{equation}
+In coordinates,
+\begin{equation}
+q(\mathbf d)=\half\sum_{i=1}^n\sum_{j=1}^n d_iH_{ij}d_j.
+\end{equation}
+Differentiate with respect to coordinate \(d_k\):
+\begin{align}
+\frac{\partial q}{\partial d_k}
+&=\half\sum_{j=1}^n H_{kj}d_j
++\half\sum_{i=1}^n d_iH_{ik}.
+\end{align}
+Because \(\Hh\) is symmetric, \(H_{ik}=H_{ki}\), so the two sums are equal:
+\begin{align}
+\frac{\partial q}{\partial d_k}
+&=\sum_{j=1}^nH_{kj}d_j\\
+&=(\Hh\mathbf d)_k.
+\end{align}
+Collecting all coordinates gives
+\begin{equation}
+\nabla_{\mathbf d}\left(\half\mathbf d^\top\Hh\mathbf d\right)
+=\Hh\mathbf d.
+\label{eq:quadraticGradientIdentity}
+\end{equation}
+
+Since \(\mathbf d=\zbar-\thetav\) and the optimum is locally fixed,
+\begin{equation}
+\frac{\partial\mathbf d}{\partial\zbar}=\Ii.
+\end{equation}
+Therefore the gradient of log fitness with respect to the population mean is
+\begin{align}
+\betav
+&=\nabla_{\zbar}\log W(\zbar)\\
+&=-\nabla_{\mathbf d}\left(\half\mathbf d^\top\Hh\mathbf d\right)\\
+&=-\Hh\mathbf d\\
+&=\Hh(\thetav-\zbar).
+\label{eq:selectionGradient}
+\end{align}
+
+\inwords Selection points back toward the optimum. Curvature changes both the magnitude and the direction of that pull. If the fitness surface is tilted relative to the measured trait axes, selection on one displacement component can generate a gradient involving several traits.
+
+\begin{geombox}
+The vector \(-\Hh\mathbf d\) is normal to the local equal-fitness contour passing through \(\mathbf d\). It points in the direction of steepest increase in log fitness under the ordinary Euclidean metric.
+\end{geombox}
+
+\section{Lande's response equation closes the loop}
+
+The continuous-time multivariate response equation is
+\begin{equation}
+\dot{\zbar}=\G\betav.
+\label{eq:LandeContinuous}
+\end{equation}
+Substituting \cref{eq:selectionGradient},
+\begin{align}
+\dot{\zbar}
+&=\G\Hh(\thetav-\zbar)\\
+&=-\G\Hh(\zbar-\thetav).
+\end{align}
+Define the mean displacement
+\begin{equation}
+\mathbf d=\zbar-\thetav.
+\end{equation}
+If \(\thetav\) is fixed over the local interval,
+\begin{equation}
+\dot{\mathbf d}=\dot{\zbar}.
+\end{equation}
+Hence
+\begin{equation}
+\boxed{\dot{\mathbf d}=-\G\Hh\mathbf d.}
+\label{eq:localDynamicsGH}
+\end{equation}
+
+\begin{derivationbox}
+The logic is sequential.
+\begin{enumerate}[leftmargin=1.6em]
+\item The displacement \(\mathbf d\) determines the local selection gradient through \(-\Hh\mathbf d\).
+\item The additive covariance matrix transforms that gradient into an evolutionary response through \(\G\betav\).
+\item Their composition is \(-\G\Hh\mathbf d\).
+\end{enumerate}
+No new biological assumption is introduced in the matrix product beyond the quadratic local landscape and the standard linear response equation.
+\end{derivationbox}
+
+\begin{connectionbox}
+When \(\Hh=h\Ii\), selection has the same curvature in every direction. Then
+\[
+\dot{\mathbf d}=-h\G\mathbf d.
+\]
+The response directions are the eigenvectors of \(\G\), recovering the classical lines-of-least-resistance setting. The geometric snowball begins by relaxing the isotropic-curvature restriction.
+\end{connectionbox}
+
+\section{Moving optima}
+
+If the optimum changes through time, then
+\begin{equation}
+\mathbf d(t)=\zbar(t)-\thetav(t)
+\end{equation}
+and
+\begin{equation}
+\dot{\mathbf d}=\dot{\zbar}-\dot{\thetav}.
+\end{equation}
+Therefore
+\begin{equation}
+\dot{\mathbf d}=-\G\Hh\mathbf d-\dot{\thetav}.
+\label{eq:movingOptimumDynamics}
+\end{equation}
+
+\inwords The first term is the population's restoring response. The second term is environmental forcing caused by movement of the optimum. A population tracks well when its response rates are fast relative to the speed and direction of optimum movement.
+
+\begin{biobox}
+Different habitats can diverge through different optima, different curvature matrices, different covariance matrices, or all three. Mean divergence is controlled strongly by the optima and forcing. Channel divergence concerns the geometry of the response operator and can occur even when current means are similar.
+\end{biobox}

@@ -1,0 +1,431 @@
+\chapter{First-order eigenspace perturbation}
+
+\section{Set up two smoothly diverging populations}
+
+\begin{cautionbox}
+The theorem first derived in this chapter is an abstract perturbation result for symmetric operators represented in one fixed Euclidean inner-product space. It applies directly to biological channels when the whitening transformation is shared and fixed---for example, when both populations are compared using the same ancestral \(\G\). When \(\G_i(t)\) itself evolves, the phenotype-space channel also changes through the map \(\G_i^{1/2}\). The fully coordinate-invariant coefficient including that additional term is derived later in this chapter.
+\end{cautionbox}
+
+Assume both populations begin from the same symmetric operator \(\Sop_0\) and then diverge smoothly:
+\begin{equation}
+\Sop_i(t)=\Sop_0+t\Aa_i+O(t^2),
+\qquad i\in\{1,2\}.
+\label{eq:operatorPaths}
+\end{equation}
+The matrix \(\Aa_i=\dot\Sop_i(0)\) is the initial operator velocity.
+
+Let
+\begin{equation}
+\Sop_0\mathbf v_j=\lambda_j\mathbf v_j,
+\qquad
+\lambda_1\ge\cdots\ge\lambda_n.
+\end{equation}
+For a rank-\(k\) channel, collect
+\begin{equation}
+\Vv=
+\begin{bmatrix}\mathbf v_1&\cdots&\mathbf v_k\end{bmatrix},
+\qquad
+\Ww=
+\begin{bmatrix}\mathbf w_1&\cdots&\mathbf w_{n-k}\end{bmatrix},
+\end{equation}
+where \(\mathbf w_a=\mathbf v_{k+a}\) span the orthogonal complement.
+
+\section{Derive the change of a single eigenvector}
+
+For one population, suppress the subscript \(i\). Let
+\begin{equation}
+\Sop(t)\mathbf v_b(t)=\lambda_b(t)\mathbf v_b(t).
+\label{eq:eigenEquationTime}
+\end{equation}
+Differentiate at \(t=0\):
+\begin{equation}
+\Aa\mathbf v_b+\Sop_0\dot{\mathbf v}_b
+=\dot\lambda_b\mathbf v_b+\lambda_b\dot{\mathbf v}_b.
+\label{eq:eigenDerivativeRaw}
+\end{equation}
+
+The eigenvector is normalized:
+\begin{equation}
+\mathbf v_b(t)^\top\mathbf v_b(t)=1.
+\end{equation}
+Differentiate:
+\begin{equation}
+2\mathbf v_b^\top\dot{\mathbf v}_b=0,
+\end{equation}
+so
+\begin{equation}
+\mathbf v_b^\top\dot{\mathbf v}_b=0.
+\label{eq:eigenvectorDerivativeOrthogonal}
+\end{equation}
+Thus the derivative has no component along the eigenvector itself.
+
+Left-multiply \cref{eq:eigenDerivativeRaw} by \(\mathbf v_b^\top\):
+\begin{align}
+\mathbf v_b^\top\Aa\mathbf v_b
++\mathbf v_b^\top\Sop_0\dot{\mathbf v}_b
+&=\dot\lambda_b
++\lambda_b\mathbf v_b^\top\dot{\mathbf v}_b.
+\end{align}
+Because \(\mathbf v_b^\top\Sop_0=\lambda_b\mathbf v_b^\top\) and \cref{eq:eigenvectorDerivativeOrthogonal} holds, the terms involving \(\dot{\mathbf v}_b\) cancel:
+\begin{equation}
+\boxed{\dot\lambda_b=\mathbf v_b^\top\Aa\mathbf v_b.}
+\label{eq:eigenvalueDerivative}
+\end{equation}
+
+\inwords The first-order change in an eigenvalue is the perturbation measured along its own eigenvector.
+
+Now left-multiply \cref{eq:eigenDerivativeRaw} by a different eigenvector \(\mathbf v_a^\top\), with \(a\neq b\):
+\begin{align}
+\mathbf v_a^\top\Aa\mathbf v_b
++\lambda_a\mathbf v_a^\top\dot{\mathbf v}_b
+&=\lambda_b\mathbf v_a^\top\dot{\mathbf v}_b,
+\end{align}
+because \(\mathbf v_a^\top\mathbf v_b=0\). Rearranging,
+\begin{equation}
+\boxed{
+\mathbf v_a^\top\dot{\mathbf v}_b
+=\frac{\mathbf v_a^\top\Aa\mathbf v_b}{\lambda_b-\lambda_a}.}
+\label{eq:eigenvectorDerivativeCoefficient}
+\end{equation}
+Therefore
+\begin{equation}
+\dot{\mathbf v}_b
+=\sum_{a\neq b}
+\frac{\mathbf v_a^\top\Aa\mathbf v_b}{\lambda_b-\lambda_a}\mathbf v_a,
+\label{eq:fullEigenvectorDerivative}
+\end{equation}
+up to a sign convention or gauge inside exactly degenerate eigenspaces.
+
+\begin{mathteach}
+The numerator is off-diagonal forcing: it asks whether the perturbation maps the current eigenvector into another eigendirection. The denominator is resistance supplied by eigenvalue separation. A large gap stabilizes orientation; a small gap amplifies rotation.
+\end{mathteach}
+
+\section{From eigenvectors to a rank-\(k\) subspace}
+
+Only components that leave the channel subspace change the subspace itself. Rotations among the first \(k\) vectors merely change the internal basis. The complement component is
+\begin{equation}
+\Ww^\top\dot{\Vv}=\cK(\Aa),
+\end{equation}
+with entries
+\begin{equation}
+\boxed{
+\cK(\Aa)_{ab}
+=\frac{\mathbf w_a^\top\Aa\mathbf v_b}
+{\lambda_b-\lambda_{k+a}}.}
+\label{eq:tangentMap}
+\end{equation}
+We call \(\cT:\Aa\mapsto\cK(\Aa)\) the local tangent map from operator change to channel rotation.
+
+For the two populations, the relative tangent forcing is
+\begin{equation}
+\boxed{
+\cK=\cK(\Aa_2-\Aa_1),
+\qquad
+\cK_{ab}=
+\frac{\mathbf w_a^\top(\Aa_2-\Aa_1)\mathbf v_b}
+{\lambda_b-\lambda_{k+a}}.}
+\label{eq:relativeK}
+\end{equation}
+
+\section{Derive the local quadratic channel law using projectors}
+
+Choose the parallel-transport gauge \(\Vv^\top\dot{\Vv}_i=\Zero\). Then
+\begin{equation}
+\dot{\Vv}_i=\Ww\cK_i,
+\end{equation}
+where \(\cK_i=\cK(\Aa_i)\). Thus
+\begin{equation}
+\Vv_i(t)=\Vv+t\Ww\cK_i+O(t^2).
+\end{equation}
+The projector is
+\begin{align}
+\Pp_i(t)
+&=\Vv_i(t)\Vv_i(t)^\top\\
+&=\left(\Vv+t\Ww\cK_i+O(t^2)\right)
+\left(\Vv^\top+t\cK_i^\top\Ww^\top+O(t^2)\right)\\
+&=\Vv\Vv^\top
++t\Ww\cK_i\Vv^\top
++t\Vv\cK_i^\top\Ww^\top
++O(t^2).
+\end{align}
+Subtract the two populations:
+\begin{equation}
+\Pp_2(t)-\Pp_1(t)
+=t\left(\Ww\cK\Vv^\top+\Vv\cK^\top\Ww^\top\right)+O(t^2).
+\label{eq:projectorDifferenceExpansion}
+\end{equation}
+
+Let
+\begin{equation}
+\mathbf B=\Ww\cK\Vv^\top.
+\end{equation}
+Then \(\mathbf B^\top=\Vv\cK^\top\Ww^\top\). Because \(\Vv^\top\Ww=\Zero\),
+\begin{equation}
+\innerF{\mathbf B}{\mathbf B^\top}
+=\tr(\mathbf B^2)=0.
+\end{equation}
+Also
+\begin{align}
+\normF{\mathbf B}^2
+&=\tr(\Vv\cK^\top\Ww^\top\Ww\cK\Vv^\top)\\
+&=\tr(\Vv\cK^\top\cK\Vv^\top)\\
+&=\tr(\cK^\top\cK)\\
+&=\normF{\cK}^2.
+\end{align}
+Therefore
+\begin{align}
+\normF{\Pp_2(t)-\Pp_1(t)}^2
+&=t^2\normF{\mathbf B+\mathbf B^\top}^2+O(t^3)\\
+&=t^2\left(\normF{\mathbf B}^2+\normF{\mathbf B^\top}^2
++2\innerF{\mathbf B}{\mathbf B^\top}\right)+O(t^3)\\
+&=2t^2\normF{\cK}^2+O(t^3).
+\end{align}
+Using \cref{eq:chordalIdentity},
+\begin{theorem}[Local geometric snowball]
+If the rank-\(k\) channel of \(\Sop_0\) is separated from its complement by a nonzero gap and the two operators diverge smoothly as in \cref{eq:operatorPaths}, then
+\begin{equation}
+\boxed{
+d_C^2(t)=\sum_{j=1}^k\sin^2\psi_j(t)
+=t^2\normF{\cK}^2+O(t^3).}
+\label{eq:localSnowballTheorem}
+\end{equation}
+\end{theorem}
+
+\inwords Channel angle grows linearly at first, while any squared overlap deficit grows quadratically. The coefficient is not an unspecified constant: it is the sum of squared cross-channel forcings, each divided by the relevant squared eigengap.
+
+For \(k=1\),
+\begin{equation}
+\boxed{
+\theta_{12}^2(t)
+=t^2\sum_{a=2}^n
+\left[
+\frac{\mathbf v_a^\top(\Aa_2-\Aa_1)\mathbf v_1}
+{\lambda_1-\lambda_a}
+\right]^2+O(t^3).}
+\label{eq:rankOneSnowball}
+\end{equation}
+
+\begin{summarybox}
+In a fixed shared representation, the exact local susceptibility is
+\[
+\chi_k^2=\normF{\cK}^2.
+\]
+A small gap is only one ingredient. Rapid rotation also requires the ecological or genetic perturbation to couple the selected channel to excluded directions. When \(\G\) evolves, the fully invariant susceptibility is \(\chi_M^2=\normF{\mathbf K_M}^2\), derived in the next section.
+\end{summarybox}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.84\textwidth]{figures/01_local_quadratic_law.pdf}
+\caption{Numerical verification of the local coefficient in \cref{eq:localSnowballTheorem}. The approximation is exact asymptotically; higher-order curvature of the path becomes visible at larger divergence.}
+\label{fig:localQuadraticCheck}
+\end{figure}
+
+\section{The fully invariant local coefficient when \(\G\) evolves}
+
+The preceding theorem describes the rotation of the leading eigenspace of \(\Sop_i(t)\) inside one fixed Euclidean representation. We now derive the coefficient for the biologically relevant phenotype-space channels when \(\G_i(t)\) itself changes.
+
+Assume the two populations share the same starting point,
+\begin{equation}
+\G_i(0)=\G_0,
+\qquad
+\Hh_i(0)=\Hh_0,
+\qquad
+\Sop_0=\mathbf R_0\Hh_0\mathbf R_0,
+\qquad
+\mathbf R_0=\G_0^{1/2}.
+\end{equation}
+Let \(\Vv\) and \(\Ww\) contain the starting channel and complementary eigenvectors of \(\Sop_0\). The phenotype-space channel basis for population \(i\) is
+\begin{equation}
+\mathbf U_i(t)=\mathbf R_i(t)\Vv_i(t),
+\qquad
+\mathbf R_i(t)=\G_i(t)^{1/2}.
+\label{eq:timeVaryingPhenotypeChannel}
+\end{equation}
+
+Choose the fixed common metric \(\M\succ0\) introduced in the previous chapter. Multiplication by \(\M^{1/2}\) converts that metric into an ordinary Euclidean one. Define
+\begin{equation}
+\mathbf B_i(t)=\M^{1/2}\mathbf U_i(t),
+\qquad
+\boldsymbol\Gamma_i(t)=\mathbf B_i(t)^\top\mathbf B_i(t).
+\label{eq:metricEuclideanization}
+\end{equation}
+Then an ordinary Euclidean orthonormal basis for the transformed channel is
+\begin{equation}
+\widehat{\Qq}_i(t)
+=\mathbf B_i(t)\boldsymbol\Gamma_i(t)^{-1/2}.
+\label{eq:EuclideanizedChannelBasis}
+\end{equation}
+At the common origin, write
+\begin{equation}
+\mathbf B_0=\M^{1/2}\mathbf R_0\Vv,
+\qquad
+\boldsymbol\Gamma_0=\mathbf B_0^\top\mathbf B_0,
+\qquad
+\widehat{\Qq}_0=\mathbf B_0\boldsymbol\Gamma_0^{-1/2}.
+\end{equation}
+Let \(\widehat{\Qq}_{\perp}\) be any Euclidean orthonormal basis for the complement of \(\widehat{\Qq}_0\):
+\begin{equation}
+\widehat{\Qq}_{\perp}^{\top}\widehat{\Qq}_0=\Zero.
+\end{equation}
+
+\subsection{Differentiate the metric-normalized basis}
+
+Differentiate \cref{eq:EuclideanizedChannelBasis} at \(t=0\):
+\begin{align}
+\dot{\widehat{\Qq}}_i
+&=\dot{\mathbf B}_i\boldsymbol\Gamma_0^{-1/2}
++\mathbf B_0
+\left.\frac{\dd}{\dd t}\boldsymbol\Gamma_i(t)^{-1/2}\right|_{t=0}.
+\label{eq:QhatDerivativeRaw}
+\end{align}
+The second term changes the normalization and the internal basis, but it lies entirely in the starting channel because it is left-multiplied by \(\mathbf B_0\). Projecting onto the complement removes it:
+\begin{align}
+\widehat{\Qq}_{\perp}^{\top}\dot{\widehat{\Qq}}_i
+&=\widehat{\Qq}_{\perp}^{\top}\dot{\mathbf B}_i
+\boldsymbol\Gamma_0^{-1/2}
++\underbrace{\widehat{\Qq}_{\perp}^{\top}\mathbf B_0}_{\Zero}
+\left.\frac{\dd}{\dd t}\boldsymbol\Gamma_i^{-1/2}\right|_0\\
+&=\widehat{\Qq}_{\perp}^{\top}\dot{\mathbf B}_i
+\boldsymbol\Gamma_0^{-1/2}.
+\label{eq:metricTangentProjection}
+\end{align}
+
+\inwords Only motion that leaves the current subspace changes the subspace. Renormalizing vectors or rotating the basis within the same channel does not contribute to a principal angle.
+
+Define the population-specific common-metric tangent matrix
+\begin{equation}
+\mathbf K_{M,i}
+=\widehat{\Qq}_{\perp}^{\top}\dot{\widehat{\Qq}}_i.
+\label{eq:KMiDefinition}
+\end{equation}
+By \cref{eq:metricTangentProjection},
+\begin{equation}
+\mathbf K_{M,i}
+=\widehat{\Qq}_{\perp}^{\top}\M^{1/2}\dot{\mathbf U}_i
+\boldsymbol\Gamma_0^{-1/2}.
+\label{eq:KMiFromUdot}
+\end{equation}
+
+\subsection{Separate map-back deformation from eigenspace rotation}
+
+Differentiate \(\mathbf U_i=\mathbf R_i\Vv_i\):
+\begin{equation}
+\dot{\mathbf U}_i
+=\dot{\mathbf R}_i\Vv+\mathbf R_0\dot{\Vv}_i.
+\label{eq:UdotProductRule}
+\end{equation}
+Let
+\begin{equation}
+\mathbf X_i=\dot{\mathbf R}_i.
+\end{equation}
+Because \(\mathbf R_i^2=\G_i\), \(\mathbf X_i\) is the unique symmetric solution of
+\begin{equation}
+\boxed{
+\mathbf R_0\mathbf X_i+\mathbf X_i\mathbf R_0=\dot\G_i.}
+\label{eq:localSylvesterXi}
+\end{equation}
+The derivation and explicit solution of this Sylvester equation are given again in \cref{eq:SylvesterSqrt,eq:SqrtDerivativeElements}.
+
+The derivative of the leading eigenspace of \(\Sop_i\) can be decomposed as
+\begin{equation}
+\dot{\Vv}_i
+=\Ww\mathbf K_{S,i}+\Vv\boldsymbol\Omega_i,
+\label{eq:VdotExternalInternal}
+\end{equation}
+where \(\boldsymbol\Omega_i\) is an internal basis rotation and
+\begin{equation}
+(\mathbf K_{S,i})_{ab}
+=\frac{\mathbf w_a^\top\dot\Sop_i\mathbf v_b}
+{\lambda_b-\lambda_{k+a}}.
+\label{eq:KSiDefinition}
+\end{equation}
+Substitute \cref{eq:VdotExternalInternal} into \cref{eq:UdotProductRule}:
+\begin{equation}
+\dot{\mathbf U}_i
+=\mathbf X_i\Vv
++\mathbf R_0\Ww\mathbf K_{S,i}
++\mathbf R_0\Vv\boldsymbol\Omega_i.
+\end{equation}
+The last term is internal to the phenotype-space channel. Indeed,
+\begin{align}
+\widehat{\Qq}_{\perp}^{\top}\M^{1/2}
+\mathbf R_0\Vv\boldsymbol\Omega_i
+&=\widehat{\Qq}_{\perp}^{\top}\mathbf B_0\boldsymbol\Omega_i\\
+&=\Zero.
+\end{align}
+Hence
+\begin{equation}
+\boxed{
+\mathbf K_{M,i}
+=\widehat{\Qq}_{\perp}^{\top}\M^{1/2}
+\left(\mathbf X_i\Vv+\mathbf R_0\Ww\mathbf K_{S,i}\right)
+\boldsymbol\Gamma_0^{-1/2}.}
+\label{eq:KMiFull}
+\end{equation}
+
+\begin{mathteach}
+\Cref{eq:KMiFull} is a product-rule decomposition for a moving subspace. The term \(\mathbf X_i\Vv\) records how evolution of \(\G_i^{1/2}\) deforms the map from whitened space back to phenotype space. The term \(\mathbf R_0\Ww\mathbf K_{S,i}\) records rotation of the eigenspace of \(\Sop_i\) itself. Both must be retained when \(\G_i\) evolves.
+\end{mathteach}
+
+Subtract the two populations:
+\begin{equation}
+\boxed{
+\mathbf K_M
+=\widehat{\Qq}_{\perp}^{\top}\M^{1/2}
+\left[
+(\mathbf X_2-\mathbf X_1)\Vv
++\mathbf R_0\Ww(\mathbf K_{S,2}-\mathbf K_{S,1})
+\right]
+\boldsymbol\Gamma_0^{-1/2}.}
+\label{eq:relativeCommonMetricK}
+\end{equation}
+
+\subsection{The invariant local snowball theorem}
+
+The bases \(\widehat{\Qq}_i(t)\) now live in one ordinary Euclidean space, so the projector derivation used for \cref{eq:localSnowballTheorem} applies without alteration. Therefore:
+
+\begin{theorem}[Common-metric local geometric snowball]
+If the starting channel is separated from its complement, \(\G_i(t)\) and \(\Hh_i(t)\) are differentiable, and both populations share the same starting \(\G_0\) and \(\Hh_0\), then the common-metric chordal distance between their phenotype-space channels satisfies
+\begin{equation}
+\boxed{
+ d_{C,M}^2(t)
+=t^2\normF{\mathbf K_M}^2+O(t^3),}
+\label{eq:commonMetricLocalSnowball}
+\end{equation}
+where \(\mathbf K_M\) is given by \cref{eq:relativeCommonMetricK}.
+\end{theorem}
+
+\begin{geombox}
+There are two ways for a phenotype-space channel to turn. Its preferred eigenspace can rotate inside whitened coordinates, and the genetic ellipsoid used to unwhiten that eigenspace can itself rotate or deform. \Cref{eq:relativeCommonMetricK} adds those two tangent motions before measuring the part that leaves the ancestral channel.
+\end{geombox}
+
+\begin{biobox}
+When standing allele frequencies change, the geometry of \(\G\) contributes twice: it changes the response operator \(\Sop\), and it changes how an eigenvector of \(\Sop\) is expressed as a phenotypic direction. The fully invariant susceptibility therefore distinguishes genuine evolutionary rotation from an artefact of comparing population-specific whitening systems.
+\end{biobox}
+
+\subsection{Recovery of the simpler coefficient}
+
+If \(\G_1(t)=\G_2(t)=\G_0\) locally and choose \(\M=\G_0^{-1}\), then
+\begin{equation}
+\mathbf X_2-\mathbf X_1=\Zero,
+\qquad
+\M^{1/2}\mathbf R_0=\Ii,
+\qquad
+\boldsymbol\Gamma_0=\Ii_k,
+\qquad
+\widehat{\Qq}_{\perp}=\Ww.
+\end{equation}
+Consequently,
+\begin{align}
+\mathbf K_M
+&=\Ww^\top\Ww(\mathbf K_{S,2}-\mathbf K_{S,1})\\
+&=\mathbf K_{S,2}-\mathbf K_{S,1}\\
+&=\cK.
+\end{align}
+Thus \cref{eq:commonMetricLocalSnowball} reduces exactly to \cref{eq:localSnowballTheorem}.
+
+\begin{connectionbox}
+The partition of \(\dot\Sop\) into \(\dot\G\)- and \(\dot\Hh\)-driven components, derived later in \cref{eq:SdotPartition}, determines \(\mathbf K_{S,i}\). \Cref{eq:relativeCommonMetricK} then adds the direct map-back term \((\mathbf X_2-\mathbf X_1)\Vv\). Together, those equations provide the complete first-order decomposition of channel divergence when both genetic covariance and fitness curvature evolve.
+\end{connectionbox}
+
+Because the common-metric principal angles were proven invariant to any nonsingular coordinate transformation in the preceding chapter, their derivative and the coefficient \(\normF{\mathbf K_M}^2\) are invariant as well. Coordinate changes may alter the matrices appearing in \cref{eq:relativeCommonMetricK}, but not the resulting geometric susceptibility.

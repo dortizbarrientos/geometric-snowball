@@ -1,0 +1,101 @@
+\chapter{Why angle is not yet fitness}
+
+\section{A geometric discrepancy has no inherent biological sign}
+
+The quantities
+\begin{equation}
+d_C^2=\sum_j\sin^2\psi_j
+\qquad\text{and}\qquad
+I_V=1-\prod_j\cos^2\psi_j
+\end{equation}
+measure channel discrepancy. Neither contains a fitness scale, a habitat, a hybrid mean, or a hybrid covariance. Consequently neither can, by itself, determine whether hybrids are less fit, equally fit, or more fit than their parents.
+
+\begin{cautionbox}
+Calling \(I_V\) ``reproductive isolation'' without a fitness model would be circular. The channels would be declared incompatible because they overlap poorly, and poor overlap would then be treated as evidence of incompatibility. The missing bridge is a model of hybrid phenotypes evaluated on parental fitness surfaces.
+\end{cautionbox}
+
+\section{Hybrid phenotype distribution}
+
+Let a hybrid phenotype be a random vector
+\begin{equation}
+\mathbf Z_H\sim(\muv_H,\Pp_H),
+\end{equation}
+where
+\begin{equation}
+\E[\mathbf Z_H]=\muv_H,
+\qquad
+\Cov(\mathbf Z_H)=\Pp_H.
+\end{equation}
+We do not initially require normality.
+
+In environment \(e\), let the optimum and curvature be \(\thetav_e\) and \(\Hh_e\). Define the hybrid mean displacement
+\begin{equation}
+\mathbf d_e=\muv_H-\thetav_e.
+\end{equation}
+Write
+\begin{equation}
+\mathbf Z_H-\thetav_e
+=\mathbf d_e+\boldsymbol\varepsilon,
+\end{equation}
+where
+\begin{equation}
+\E[\boldsymbol\varepsilon]=\Zero,
+\qquad
+\Cov(\boldsymbol\varepsilon)=\Pp_H.
+\end{equation}
+
+\section{Three different fitness summaries}
+
+It is useful to distinguish three quantities.
+
+\subsection{Individual log-fitness loss}
+For one phenotype,
+\begin{equation}
+\ell_e(\mathbf z)
+=-\log\frac{W_e(\mathbf z)}{W_{0e}}
+=\half(\mathbf z-\thetav_e)^\top\Hh_e(\mathbf z-\thetav_e).
+\end{equation}
+
+\subsection{Expected log-fitness loss}
+\begin{equation}
+L^{\log}_{H,e}=\E[\ell_e(\mathbf Z_H)].
+\end{equation}
+This is algebraically simple and additive across independent log-fitness components.
+
+\subsection{Arithmetic mean fitness}
+\begin{equation}
+\bar W_{H,e}=\E[W_e(\mathbf Z_H)].
+\end{equation}
+This is often the directly relevant demographic quantity, but its relationship to expected log fitness is nonlinear.
+
+By Jensen's inequality,
+\begin{equation}
+-\log\E\left[\frac{W}{W_0}\right]
+\le
+\E\left[-\log\frac{W}{W_0}\right],
+\end{equation}
+because \(-\log x\) is convex. Thus the log of arithmetic mean fitness and expected log-fitness loss are not identical.
+
+\begin{mathteach}
+The geometric mean relative fitness is \(\exp[-L^{\log}]\). The arithmetic mean relative fitness is \(\bar W/W_0\). They agree only under special conditions or approximately when variation in log fitness is small.
+\end{mathteach}
+
+\section{Bounded isolation measures}
+
+A log-scale barrier may be mapped to \([0,1)\) by
+\begin{equation}
+I_L=1-e^{-\Delta L^{\log}},
+\end{equation}
+where \(\Delta L^{\log}\) is hybrid log-load relative to a chosen parental benchmark. This is a geometric-mean interpretation.
+
+An arithmetic-fitness isolation measure is
+\begin{equation}
+I_A=1-\frac{\bar W_H}{\bar W_{\mathrm{ref}}}.
+\end{equation}
+For weak load, both satisfy
+\begin{equation}
+I_L\approx\Delta L^{\log},
+\qquad
+I_A\approx-\log\left(\frac{\bar W_H}{\bar W_{\mathrm{ref}}}\right),
+\end{equation}
+but they should not be silently interchanged.

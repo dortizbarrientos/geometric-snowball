@@ -1,0 +1,116 @@
+\chapter{The channel-ridge theorem: exact calibration by principal angles}
+
+\section{Structured parental covariance and curvature}
+
+The theorem is written in one fixed reference metric. Equivalently, first transform phenotype space by \(\M^{1/2}\) so that the chosen common metric becomes Euclidean, and then define ordinary orthogonal projectors in that transformed space. Let \(\Pp_i\) be the resulting rank-\(k\) projector onto population \(i\)'s channel. Define
+\begin{align}
+\G_i
+&=g_{\perp}\Ii+(g_{\parallel}-g_{\perp})\Pp_i,
+\label{eq:ridgeG}\\
+\Hh_i
+&=h_{\perp}\Ii-(h_{\perp}-h_{\parallel})\Pp_i.
+\label{eq:ridgeH}
+\end{align}
+Set
+\begin{equation}
+\Delta g=g_{\parallel}-g_{\perp}>0,
+\qquad
+\Delta h=h_{\perp}-h_{\parallel}>0.
+\end{equation}
+Then
+\begin{equation}
+\G_i=g_{\perp}\Ii+\Delta g\Pp_i,
+\qquad
+\Hh_i=h_{\perp}\Ii-\Delta h\Pp_i.
+\end{equation}
+
+\begin{cautionbox}
+The result is invariant to a change of trait units when the metric is transformed with those units, but it can depend on the scientifically chosen reference metric itself. In applications with different \(\G_i\), the projectors should therefore be constructed from the common-metric bases of \cref{eq:metricEuclideanization,eq:EuclideanizedChannelBasis}, not from raw population-specific whitened eigenvectors.
+\end{cautionbox}
+
+\inwords Genetic variance is enriched along the channel, while fitness curvature is reduced along the same channel. Each parental covariance is therefore coadapted to a shallow local ridge.
+
+For \(\Pp_i\) to be the leading response subspace of \(\Sop_i\), require
+\begin{equation}
+g_{\parallel}h_{\parallel}>g_{\perp}h_{\perp}.
+\label{eq:ridgeLeadingCondition}
+\end{equation}
+Indeed, along \(\Pp_i\) the response eigenvalue is \(g_{\parallel}h_{\parallel}\); in the complement it is \(g_{\perp}h_{\perp}\).
+
+\section{Compute covariance and curvature differences}
+
+Subtract the two covariance matrices:
+\begin{equation}
+\G_2-\G_1=\Delta g(\Pp_2-\Pp_1).
+\end{equation}
+Subtract the curvature matrices:
+\begin{equation}
+\Hh_2-\Hh_1=-\Delta h(\Pp_2-\Pp_1).
+\end{equation}
+With \(\Rr=\Zero\), substitute into \cref{eq:generalTraceIdentity}:
+\begin{align}
+L_{\mathrm{cov}}
+&=-\frac18\tr\left[
+-\Delta h(\Pp_2-\Pp_1)
+\Delta g(\Pp_2-\Pp_1)
+\right]\\
+&=\frac{\Delta g\Delta h}{8}
+\tr[(\Pp_2-\Pp_1)^2].
+\end{align}
+Use \cref{eq:chordalIdentity}:
+\begin{equation}
+\tr[(\Pp_2-\Pp_1)^2]
+=\normF{\Pp_2-\Pp_1}^2
+=2\sum_{j=1}^k\sin^2\psi_j.
+\end{equation}
+Therefore
+\begin{theorem}[Channel-ridge fitness calibration]
+Under \cref{eq:ridgeG,eq:ridgeH}, equal channel rank, zero segregation excess, and the parental benchmark above,
+\begin{equation}
+\boxed{
+L_{\mathrm{cov}}
+=\frac{\Delta g\Delta h}{4}
+\sum_{j=1}^k\sin^2\psi_j
+=\frac{\Delta g\Delta h}{4}d_C^2.}
+\label{eq:ridgeTheorem}
+\end{equation}
+\end{theorem}
+
+\inwords Channel mismatch becomes a positive fitness load because the exact same projector difference controls both covariance divergence and curvature divergence, with opposite signs.
+
+\section{Early-time fitness snowball}
+
+Combine \cref{eq:ridgeTheorem} with \cref{eq:localSnowballTheorem}:
+\begin{align}
+L_{\mathrm{cov}}(t)
+&=\frac{\Delta g\Delta h}{4}
+\left[t^2\normF{\cK}^2+O(t^3)\right]\\
+&=\boxed{
+\frac{\Delta g\Delta h}{4}\normF{\cK}^2t^2+O(t^3).}
+\label{eq:fitnessSnowballLocal}
+\end{align}
+
+For equal principal angles \(\psi_j=\theta\),
+\begin{equation}
+L_{\mathrm{cov}}
+=\frac{\Delta g\Delta h}{4}k\sin^2\theta
+\approx\frac{\Delta g\Delta h}{4}k\theta^2.
+\end{equation}
+
+\begin{connectionbox}
+The theory now has two distinct quadratic statements. Channel discrepancy is quadratic in time under deterministic forcing. Hybrid covariance load is proportional to channel discrepancy under covariance--curvature coadaptation. Only their combination justifies calling the result a reproductive-isolation snowball.
+\end{connectionbox}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/pedagogy_hybrid_load.pdf}
+\caption{Geometric reading of the channel-ridge theorem. Parental genetic variance lies along differently oriented shallow ridges. The averaged hybrid covariance occupies directions that are steep in the parental fitness geometries.}
+\label{fig:hybridLoadPedagogy}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/03_hybrid_load_calibration.pdf}
+\caption{Numerical calibration of raw channel geometry against the exact covariance--curvature load. Geometry acquires a fitness scale only after \(\Delta g\) and \(\Delta h\) are specified.}
+\label{fig:hybridLoadCheck}
+\end{figure}

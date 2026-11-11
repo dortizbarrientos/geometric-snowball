@@ -1,0 +1,198 @@
+\documentclass[11pt,a4paper,oneside]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=24mm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,longtable,tabularx,array,multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{caption,subcaption,float,placeins}
+\usepackage{pdflscape}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage{xurl}
+\usepackage[colorlinks=true,linkcolor=blue!48!black,citecolor=blue!48!black,urlcolor=blue!48!black,
+  pdftitle={The Geometric Snowball of Speciation: Full Derivations and Interpretations},
+  pdfauthor={Daniel Ortiz-Barrientos},
+  pdfsubject={Mathematical derivation, geometric interpretation, biological interpretation, and computational audit of the geometric snowball of speciation},
+  pdfkeywords={speciation, reproductive isolation, quantitative genetics, G matrix, fitness curvature, principal angles, Dobzhansky-Muller incompatibilities}]{hyperref}
+\usepackage{bookmark}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\setstretch{1.08}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.58em}
+\setlength{\emergencystretch}{2em}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}
+\numberwithin{equation}{chapter}
+
+\definecolor{ink}{HTML}{252525}
+\definecolor{deepblue}{HTML}{205493}
+\definecolor{teal}{HTML}{237C79}
+\definecolor{forest}{HTML}{2E6F51}
+\definecolor{amber}{HTML}{A96816}
+\definecolor{brick}{HTML}{9A3C31}
+\definecolor{violet}{HTML}{6A4C93}
+\definecolor{paleBlue}{HTML}{EDF4FB}
+\definecolor{paleTeal}{HTML}{EDF8F7}
+\definecolor{paleGreen}{HTML}{EFF7F1}
+\definecolor{paleAmber}{HTML}{FCF6EA}
+\definecolor{paleRed}{HTML}{FAEFED}
+\definecolor{paleViolet}{HTML}{F4F0F8}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small The geometric snowball of speciation}
+\fancyhead[R]{\small Full derivations and interpretations}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\color{deepblue}}
+  {\filleft\Large\chaptername\ \thechapter}
+  {0.4ex}
+  {\titlerule\vspace{1ex}\Huge}
+\titlespacing*{\chapter}{0pt}{-16pt}{24pt}
+\titleformat{\section}{\Large\bfseries\color{teal}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries\color{forest}}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{amber}}{\thesubsubsection}{0.7em}{}
+
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{remark}[theorem]{Remark}
+
+\tcbset{enhanced,breakable,boxrule=0.7pt,arc=1.3mm,left=1.8mm,right=1.8mm,top=1.4mm,bottom=1.4mm}
+\newtcolorbox{mathteach}[1][]{colback=paleTeal,colframe=teal,title={Mathematical teaching},fonttitle=\bfseries,#1}
+\newtcolorbox{geombox}[1][]{colback=paleBlue,colframe=deepblue,title={Geometric interpretation},fonttitle=\bfseries,#1}
+\newtcolorbox{biobox}[1][]{colback=paleGreen,colframe=forest,title={Biological interpretation},fonttitle=\bfseries,#1}
+\newtcolorbox{connectionbox}[1][]{colback=paleAmber,colframe=amber,title={Connection to earlier results},fonttitle=\bfseries,#1}
+\newtcolorbox{cautionbox}[1][]{colback=paleRed,colframe=brick,title={Assumption, limitation, or failure mode},fonttitle=\bfseries,#1}
+\newtcolorbox{summarybox}[1][]{colback=paleViolet,colframe=violet,title={Result to retain},fonttitle=\bfseries,#1}
+\newtcolorbox{derivationbox}[1][]{colback=white,colframe=deepblue,title={Line-by-line derivation},fonttitle=\bfseries,#1}
+
+\newcommand{\G}{\mathbf{G}}
+\newcommand{\Hh}{\mathbf{H}}
+\newcommand{\Sop}{\mathbf{S}}
+\newcommand{\Rr}{\mathbf{R}}
+\newcommand{\Pp}{\mathbf{P}}
+\newcommand{\Vv}{\mathbf{V}}
+\newcommand{\Ww}{\mathbf{W}}
+\newcommand{\Qq}{\mathbf{Q}}
+\newcommand{\M}{\mathbf{M}}
+\newcommand{\Aa}{\mathbf{A}}
+\newcommand{\Bb}{\mathbf{B}}
+\newcommand{\Ii}{\mathbf{I}}
+\newcommand{\Zero}{\mathbf{0}}
+\newcommand{\zbar}{\bar{\mathbf z}}
+\newcommand{\thetav}{\boldsymbol{\theta}}
+\newcommand{\betav}{\boldsymbol{\beta}}
+\newcommand{\psiv}{\boldsymbol{\psi}}
+\newcommand{\muv}{\boldsymbol{\mu}}
+\newcommand{\cK}{\mathcal K}
+\newcommand{\cT}{\mathcal T}
+\newcommand{\cA}{\mathcal A}
+\newcommand{\cD}{\mathcal D}
+\newcommand{\R}{\mathbb R}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\svec}{\operatorname{svec}}
+\newcommand{\mat}{\operatorname{mat}}
+\newcommand{\Span}{\operatorname{span}}
+\newcommand{\Grass}{\operatorname{Gr}}
+\newcommand{\sym}{\operatorname{sym}}
+\newcommand{\normF}[1]{\left\lVert #1\right\rVert_F}
+\newcommand{\normtwo}[1]{\left\lVert #1\right\rVert_2}
+\newcommand{\innerF}[2]{\left\langle #1,#2\right\rangle_F}
+\newcommand{\dd}{\mathrm d}
+\newcommand{\half}{\tfrac12}
+
+\newcommand{\inwords}{\par\noindent\textbf{In words.}\ }
+\newcommand{\why}{\par\noindent\textbf{Why this step is valid.}\ }
+\newcommand{\usual}{\par\noindent\textbf{Usual linear-algebra interpretation.}\ }
+\newcommand{\bio}{\par\noindent\textbf{Biological reading.}\ }
+\newcommand{\linkback}{\par\noindent\textbf{Link to the previous result.}\ }
+
+\lstset{basicstyle=\ttfamily\small,frame=single,breaklines=true,columns=fullflexible,showstringspaces=false}
+
+\title{\textbf{The Geometric Snowball of Speciation}\\[0.6em]
+\Large Every derivation step, the mathematical machinery behind it, and its biological and geometric meaning}
+\author{Daniel Ortiz-Barrientos\\\small Mathematical development and computational audit}
+\date{5 August 2026}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+\maketitle
+
+\begin{abstract}
+This document develops the geometric snowball of speciation from first principles. It begins with the geometry of multivariate quantitative genetics, derives the symmetric response operator
+\[
+\Sop=\G^{1/2}\Hh\G^{1/2},
+\]
+shows how its leading invariant subspaces define additive genetic channels, and then derives how those subspaces rotate when populations experience different deterministic or stochastic evolutionary forces. The central local result is
+\[
+d_C^2(t)=t^2\normF{\cK}^2+O(t^3),
+\]
+where \(d_C\) is the chordal distance between channels and \(\cK\) is the curvature- and gap-weighted cross-channel forcing in a fixed shared representation. A common-metric generalization is then derived for evolving \(\G_i\), including both rotation of the \(\Sop_i\) eigenspaces and deformation by the changing square-root maps \(\G_i^{1/2}\). The document then proves that channel angle is not, by itself, reproductive isolation. It becomes a hybrid-fitness load only when genetic covariance and local fitness curvature are coadapted. Under a channel-ridge model, the covariance component of hybrid log-load is exactly
+\[
+L_{\mathrm{cov}}=\frac{\Delta g\,\Delta h}{4}\sum_{j=1}^k\sin^2\psi_j.
+\]
+Finally, the theory is connected to standing genetic variation, the evolution of \(\G\), effective gene flow, and the later combinatorial accumulation of Dobzhansky--Muller incompatibilities. Every substantial algebraic step is written out and immediately translated into ordinary mathematical language, geometric meaning, biological meaning, and its relation to earlier results. The final chapters connect the framework to covariance-tensor analyses and the existing \textit{Senecio lautus} programme.
+\end{abstract}
+\clearpage
+\hypersetup{pageanchor=true}
+\pagenumbering{roman}
+
+% Chapters are kept in separate source files for review and maintenance.
+\input{chapters/chapter_01.tex}
+\input{chapters/chapter_02.tex}
+\input{chapters/chapter_03.tex}
+\input{chapters/chapter_04.tex}
+\input{chapters/chapter_05.tex}
+\input{chapters/chapter_06.tex}
+\input{chapters/chapter_07.tex}
+\input{chapters/chapter_08.tex}
+\input{chapters/chapter_09.tex}
+\input{chapters/chapter_10.tex}
+\input{chapters/chapter_11.tex}
+\input{chapters/chapter_12.tex}
+\input{chapters/chapter_13.tex}
+\input{chapters/chapter_14.tex}
+\input{chapters/chapter_15.tex}
+\input{chapters/chapter_16.tex}
+\input{chapters/chapter_17.tex}
+\input{chapters/chapter_18.tex}
+\input{chapters/chapter_19.tex}
+\input{chapters/chapter_20.tex}
+\input{chapters/chapter_21.tex}
+\input{chapters/chapter_22.tex}
+\input{chapters/chapter_23.tex}
+\input{chapters/chapter_24.tex}
+\input{chapters/chapter_25.tex}
+\input{chapters/chapter_26.tex}
+\input{chapters/chapter_27.tex}
+\input{chapters/chapter_28.tex}
+\input{chapters/chapter_29.tex}
+\input{chapters/chapter_30.tex}
+\input{chapters/chapter_31.tex}
+\input{chapters/chapter_32.tex}
+\input{chapters/chapter_33.tex}
+\input{chapters/chapter_34.tex}
+\input{chapters/chapter_35.tex}
+
+\end{document}

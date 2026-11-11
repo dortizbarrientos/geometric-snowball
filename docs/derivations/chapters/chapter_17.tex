@@ -1,0 +1,95 @@
+\chapter{The general covariance--curvature trace identity}
+
+\section{Define a parental benchmark}
+
+Assume parental population \(i\) is centred at its own optimum and has covariance \(\G_i\). Its covariance component of expected log loss is
+\begin{equation}
+L_{P_i,i}^{\mathrm{cov}}=\half\tr(\Hh_i\G_i).
+\end{equation}
+The hybrid covariance loss in environment \(i\) is
+\begin{equation}
+L_{H,i}^{\mathrm{cov}}=\half\tr(\Hh_i\Pp_H).
+\end{equation}
+The hybrid excess relative to that parent is
+\begin{equation}
+\Delta L_i^{\mathrm{cov}}
+=\half\tr[\Hh_i(\Pp_H-\G_i)].
+\end{equation}
+Take an equal average over the two parental environments:
+\begin{equation}
+L_{\mathrm{cov}}
+=\half(\Delta L_1^{\mathrm{cov}}+\Delta L_2^{\mathrm{cov}})
+=\frac14\left
+\{\tr[\Hh_1(\Pp_H-\G_1)]
++\tr[\Hh_2(\Pp_H-\G_2)]\right\}.
+\label{eq:covLoadBenchmark}
+\end{equation}
+
+\section{Decompose hybrid covariance}
+
+Write
+\begin{equation}
+\boxed{\Pp_H=\half(\G_1+\G_2)+\Rr.}
+\label{eq:hybridCovDecomposition}
+\end{equation}
+The matrix \(\Rr\) is excess covariance beyond the parental average. It can represent segregation variance, linkage disequilibrium, transgressive covariance, environmental variance differences, or any other departure from the simple average, depending on the biological model.
+
+Then
+\begin{align}
+\Pp_H-\G_1
+&=\half(\G_2-\G_1)+\Rr,\\
+\Pp_H-\G_2
+&=-\half(\G_2-\G_1)+\Rr.
+\end{align}
+Substitute into \cref{eq:covLoadBenchmark}:
+\begin{align}
+L_{\mathrm{cov}}
+={}&\frac14\left\{
+\half\tr[\Hh_1(\G_2-\G_1)]
++\tr(\Hh_1\Rr)\right.\\
+&\left.\qquad
+-\half\tr[\Hh_2(\G_2-\G_1)]
++\tr(\Hh_2\Rr)
+\right\}\\
+={}&\frac18\tr[(\Hh_1-\Hh_2)(\G_2-\G_1)]
++\frac14\tr[(\Hh_1+\Hh_2)\Rr]\\
+={}&-\frac18\tr[(\Hh_2-\Hh_1)(\G_2-\G_1)]
++\frac14\tr[(\Hh_1+\Hh_2)\Rr].
+\end{align}
+Therefore
+\begin{theorem}[General covariance--curvature identity]
+Under \cref{eq:hybridCovDecomposition}, the equally weighted hybrid covariance log-load relative to the parents in their own environments is
+\begin{equation}
+\boxed{
+L_{\mathrm{cov}}
+=-\frac18\tr[(\Hh_2-\Hh_1)(\G_2-\G_1)]
++\frac14\tr[(\Hh_1+\Hh_2)\Rr].}
+\label{eq:generalTraceIdentity}
+\end{equation}
+\end{theorem}
+
+\section{Interpret the sign}
+
+The first term is a negative Frobenius inner product:
+\begin{equation}
+-\frac18\innerF{\Hh_2-\Hh_1}{\G_2-\G_1}.
+\end{equation}
+It is positive when directions that gain genetic variance in population 2 tend to lose curvature there relative to population 1, and vice versa. It is negative under the opposite association.
+
+\begin{biobox}
+Positive geometric hybrid load requires covariance--curvature coadaptation: each population carries relatively more variance in directions that are relatively less costly in its own environment. Recombining those covariance structures then places hybrid variance into directions that are not jointly protected by either fitness surface.
+\end{biobox}
+
+\begin{cautionbox}
+Large channel angle alone does not determine the sign of the trace. If variance and curvature differences are aligned in the opposite sense, the covariance term can be negative and hybrids can exhibit heterosis relative to the chosen parental benchmark.
+\end{cautionbox}
+
+\section{Interpret segregation excess}
+
+If \(\Rr\succeq0\), then
+\begin{equation}
+\tr[(\Hh_1+\Hh_2)\Rr]\ge0
+\end{equation}
+because both matrices are positive semidefinite. Thus additional segregation variance raises expected log load. If \(\Rr\) is indefinite, some recombination-generated covariances can instead reduce load.
+
+\inwords Segregation excess is not automatically an isotropic inflation. Its orientation matters. Variance added along steep directions is costly; variance added along shallow directions can be comparatively benign.

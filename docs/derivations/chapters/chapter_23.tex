@@ -1,0 +1,142 @@
+\chapter{The covariance tensor and the new channel geometry}
+
+\section{Two different spaces must not be confused}
+
+The covariance-tensor approach compares whole symmetric matrices such as \(\G_1,\ldots,\G_m\). The channel approach compares invariant subspaces inside ordinary trait space after constructing \(\Sop_i\). These are related but distinct geometries:
+
+\begin{itemize}[leftmargin=1.6em]
+\item \textbf{Matrix space:} each complete \(\G_i\) or \(\Sop_i\) is one point.
+\item \textbf{Trait space:} each eigenvector of a matrix is a direction; each leading eigenspace is a channel.
+\end{itemize}
+
+\begin{cautionbox}
+An eigentensor is an axis of variation among matrices. A channel eigenvector is an axis of response among traits. They live in different spaces and answer different questions.
+\end{cautionbox}
+
+\section{The space of symmetric matrices}
+
+The real symmetric \(n\times n\) matrices form a vector space \(\operatorname{Sym}(n)\) of dimension
+\begin{equation}
+q=\frac{n(n+1)}2.
+\end{equation}
+The Frobenius inner product is
+\begin{equation}
+\innerF{\mathbf A}{\mathbf B}
+=\tr(\mathbf A^\top\mathbf B)
+=\tr(\mathbf A\mathbf B)
+\end{equation}
+for symmetric matrices.
+
+Define \(\svec(\mathbf A)\in\R^q\) by listing diagonal entries without scaling and one copy of every off-diagonal entry multiplied by \(\sqrt2\). For example, for a two-by-two symmetric matrix,
+\begin{equation}
+\mathbf A=
+\begin{bmatrix}
+a_{11}&a_{12}\\a_{12}&a_{22}
+\end{bmatrix},
+\qquad
+\svec(\mathbf A)=
+\begin{bmatrix}
+a_{11}\\a_{22}\\\sqrt2a_{12}
+\end{bmatrix}.
+\end{equation}
+
+For symmetric \(\mathbf A\) and \(\mathbf B\),
+\begin{align}
+\svec(\mathbf A)^\top\svec(\mathbf B)
+&=\sum_iA_{ii}B_{ii}
++2\sum_{i>j}A_{ij}B_{ij}\\
+&=\sum_{i,j}A_{ij}B_{ij}\\
+&=\tr(\mathbf A\mathbf B)\\
+&=\innerF{\mathbf A}{\mathbf B}.
+\label{eq:svecIsometry}
+\end{align}
+
+\inwords The \(\sqrt2\) factor makes vectorization preserve matrix lengths and angles. Without it, off-diagonal information would be underweighted because a symmetric off-diagonal entry occurs twice in the full matrix.
+
+\begin{connectionbox}
+This is exactly why the existing covariance-tensor code multiplies covariance--covariance blocks by \(2\), cross blocks by \(\sqrt2\), and maps eigentensor off-diagonal loadings back with \(1/\sqrt2\). The code is implementing an isometry between symmetric-matrix space and ordinary Euclidean vector space.
+\end{connectionbox}
+
+\section{Construct the covariance tensor as an ordinary covariance matrix}
+
+Let
+\begin{equation}
+\mathbf g_r=\svec(\G_r),
+\qquad r=1,\ldots,m,
+\end{equation}
+and
+\begin{equation}
+\bar{\mathbf g}=\frac1m\sum_{r=1}^m\mathbf g_r.
+\end{equation}
+The covariance of matrix elements is
+\begin{equation}
+\mathbf C_G
+=\frac1{m-1}\sum_{r=1}^m
+(\mathbf g_r-\bar{\mathbf g})
+(\mathbf g_r-\bar{\mathbf g})^\top.
+\label{eq:matrixSpaceCovariance}
+\end{equation}
+This \(q\times q\) symmetric matrix is the coordinate representation of the fourth-order covariance tensor.
+
+Diagonalize it:
+\begin{equation}
+\mathbf C_G\mathbf e_s=\alpha_s\mathbf e_s.
+\end{equation}
+Map each eigenvector back to a symmetric matrix:
+\begin{equation}
+\mathbf E_s=\svec^{-1}(\mathbf e_s).
+\end{equation}
+The matrices \(\mathbf E_s\) are eigentensors.
+
+\section{Coordinates of each original matrix}
+
+The coordinate of \(\G_r\) on eigentensor \(\mathbf E_s\) is
+\begin{align}
+c_{rs}
+&=\mathbf e_s^\top\mathbf g_r\\
+&=\svec(\mathbf E_s)^\top\svec(\G_r)\\
+&=\innerF{\mathbf E_s}{\G_r}\\
+&=\tr(\mathbf E_s\G_r).
+\label{eq:eigentensorCoordinate}
+\end{align}
+
+\inwords A matrix coordinate is a dot product. Large positive and negative coordinates identify matrices that differ strongly and oppositely along an eigentensor axis.
+
+An eigentensor can itself be diagonalized:
+\begin{equation}
+\mathbf E_s=\sum_{j=1}^n\eta_{sj}\mathbf e_{sj}\mathbf e_{sj}^\top.
+\end{equation}
+The vectors \(\mathbf e_{sj}\) identify trait combinations that contribute to the matrix-space difference captured by \(\mathbf E_s\).
+
+\begin{geombox}
+The first eigenanalysis finds directions through the cloud of whole matrices. The second eigenanalysis opens one such direction back up and asks which trait combinations create it.
+\end{geombox}
+
+\section{Three uses in the geometric snowball programme}
+
+\subsection{Tensor on \(\G_i\)}
+This reproduces the earlier question: how has the distribution of additive variance changed among populations or ecotypes? It is directly continuous with the established \textit{Senecio} analyses \cite{walter2018,aguirre2014,hine2009}.
+
+\subsection{Tensor on \(\Hh_i\)}
+This asks how local fitness curvature differs among habitats. It can identify recurrent combinations of traits in which selection surfaces diverge.
+
+\subsection{Tensor on \(\Sop_i\)}
+This asks how the complete joint response operators differ. It is useful for describing operator-level divergence across many populations. Principal-angle analysis is then applied to the leading eigenspaces of each \(\Sop_i\) to quantify channel mismatch directly.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/pedagogy_tensor_bridge.pdf}
+\caption{Bridge from the established covariance-tensor framework to response-operator and channel geometry. Eigentensors describe axes of whole-matrix divergence; principal angles describe divergence among response subspaces.}
+\label{fig:tensorBridge}
+\end{figure}
+
+\section{A new synthesis statistic}
+
+Across multiple populations, one can separate three levels:
+\begin{enumerate}[leftmargin=1.6em]
+\item \(\alpha_s\): how much matrices differ along eigentensor \(s\);
+\item \(c_{rs}\): which populations occupy opposite ends of that matrix-space axis;
+\item \(\psi_{ij,1},\ldots,\psi_{ij,k}\): the principal angles measuring how much the biologically chosen response subspaces of populations \(i\) and \(j\) differ.
+\end{enumerate}
+
+This makes it possible to ask whether the major axes of operator divergence identified by a tensor are the same changes that generate large channel angles and hybrid load.

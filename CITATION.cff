@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "Please cite this software and the associated manuscript when using the geometric snowball framework."
+title: "The Geometric Snowball of Speciation: mathematical and computational framework"
+type: software
+version: 0.2.0
+date-released: 2026-08-07
+authors:
+  - family-names: Ortiz-Barrientos
+    given-names: Daniel
+    orcid: "https://orcid.org/0000-0002-7493-416X"
+  - family-names: James
+    given-names: Maddie E.
+  - family-names: Burrage
+    given-names: Kevin
+repository-code: "https://github.com/dortizbarrientos/geometric-snowball"
+license: MIT
+keywords:
+  - speciation
+  - reproductive isolation
+  - quantitative genetics
+  - fitness landscapes
+  - principal angles

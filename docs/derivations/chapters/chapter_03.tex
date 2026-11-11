@@ -1,0 +1,120 @@
+\chapter{Quadratic forms, ellipsoids, and the meanings of \(\G\) and \(\Hh\)}
+
+\section{The quadratic form}
+
+For a symmetric matrix \(\mathbf A\), the scalar
+\begin{equation}
+q_{\mathbf A}(\mathbf x)=\mathbf x^\top\mathbf A\mathbf x
+\end{equation}
+is called a quadratic form.
+
+Writing the multiplication explicitly,
+\begin{equation}
+\mathbf x^\top\mathbf A\mathbf x
+=\sum_{i=1}^n\sum_{j=1}^n x_iA_{ij}x_j.
+\end{equation}
+
+\inwords Diagonal terms \(A_{ii}x_i^2\) weight movement along individual trait axes. Off-diagonal terms \(A_{ij}x_ix_j\) describe how pairs of traits contribute jointly.
+
+If \(\mathbf A\succ0\), then \(\mathbf x^\top\mathbf A\mathbf x>0\) for every nonzero \(\mathbf x\). Such a matrix is symmetric positive definite.
+
+\section{Eigenvectors turn a quadratic form into independent axes}
+
+Because a real symmetric matrix has an orthonormal eigendecomposition,
+\begin{equation}
+\mathbf A=\mathbf Q\boldsymbol\Lambda\mathbf Q^\top,
+\qquad
+\boldsymbol\Lambda=\diag(\lambda_1,\ldots,\lambda_n),
+\qquad
+\mathbf Q^\top\mathbf Q=\Ii,
+\end{equation}
+we may write \(\mathbf x=\mathbf Q\mathbf y\). Then
+\begin{align}
+\mathbf x^\top\mathbf A\mathbf x
+&=(\mathbf Q\mathbf y)^\top
+(\mathbf Q\boldsymbol\Lambda\mathbf Q^\top)
+(\mathbf Q\mathbf y)\\
+&=\mathbf y^\top\mathbf Q^\top\mathbf Q
+\boldsymbol\Lambda
+\mathbf Q^\top\mathbf Q\mathbf y\\
+&=\mathbf y^\top\boldsymbol\Lambda\mathbf y\\
+&=\sum_{j=1}^n\lambda_jy_j^2.
+\label{eq:quadDiagonal}
+\end{align}
+
+\inwords Rotating into the eigenvector coordinates removes all cross-products. The quadratic form becomes a weighted sum of independent squared coordinates.
+
+\begin{mathteach}
+An eigenvector is a direction that a transformation does not turn. It is only stretched or compressed. Its eigenvalue gives the amount and sign of that scaling. Symmetry guarantees that the full collection of eigenvectors can be chosen orthonormally.
+\end{mathteach}
+
+\section{The additive covariance matrix \(\G\)}
+
+The additive genetic covariance matrix is
+\begin{equation}
+\G=\Cov(\mathbf a),
+\end{equation}
+where \(\mathbf a\) is the vector of additive breeding values.
+
+For any unit trait combination \(\mathbf u\), the additive variance in that direction is
+\begin{equation}
+V_A(\mathbf u)=\Var(\mathbf u^\top\mathbf a)
+=\mathbf u^\top\G\mathbf u.
+\label{eq:directionalVariance}
+\end{equation}
+
+\begin{derivationbox}
+Because \(\mathbf u^\top\mathbf a\) is a scalar,
+\begin{align}
+\Var(\mathbf u^\top\mathbf a)
+&=\mathbf u^\top\Cov(\mathbf a)\mathbf u\\
+&=\mathbf u^\top\G\mathbf u.
+\end{align}
+The first equality is the standard rule for the variance of a linear combination; the second substitutes the definition of \(\G\).
+\end{derivationbox}
+
+The level set
+\begin{equation}
+\mathbf d^\top\G^{-1}\mathbf d=c
+\end{equation}
+is an ellipsoid. Its principal axes are the eigenvectors of \(\G\), and the squared semi-axis lengths are proportional to the eigenvalues of \(\G\).
+
+\begin{geombox}
+The \(\G\)-ellipsoid is a map of available additive variation. Long directions contain abundant additive variance; short directions contain little. The leading eigenvector is \(\mathbf g_{\max}\), the line of greatest additive variance.
+\end{geombox}
+
+\section{The curvature matrix \(\Hh\)}
+
+At a local maximum of log fitness, the Hessian of log fitness is negative definite. We therefore define
+\begin{equation}
+\Hh=-\nabla^2\log W(\thetav),
+\end{equation}
+so that \(\Hh\succ0\). The local fitness-loss approximation is
+\begin{equation}
+-\left[\log W(\thetav+\mathbf d)-\log W(\thetav)\right]
+\approx\half\mathbf d^\top\Hh\mathbf d.
+\end{equation}
+
+For a unit direction \(\mathbf u\), the directional curvature is
+\begin{equation}
+h(\mathbf u)=\mathbf u^\top\Hh\mathbf u.
+\end{equation}
+
+\inwords Large \(h(\mathbf u)\) means fitness falls sharply when phenotype moves in direction \(\mathbf u\). Small \(h(\mathbf u)\) means a shallow ridge or weak penalty.
+
+The level sets
+\begin{equation}
+\mathbf d^\top\Hh\mathbf d=c
+\end{equation}
+are equal-fitness-loss ellipsoids. Their longest geometric axis corresponds to the smallest eigenvalue of \(\Hh\), because weak curvature allows a larger displacement at the same loss.
+
+\begin{biobox}
+The matrices \(\G\) and \(\Hh\) answer different questions. \(\G\) asks, ``Where can the population vary and respond?'' \(\Hh\) asks, ``Where does a displacement matter most for fitness?'' The channel theory begins when those two answers are combined.
+\end{biobox}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/pedagogy_G_H_S.pdf}
+\caption{Three geometries used throughout the theory. The genetic covariance matrix \(\G\) defines a variance ellipsoid, the curvature matrix \(\Hh\) defines equal-fitness-loss contours, and whitening combines them into the symmetric operator \(\Sop\).}
+\label{fig:GHSgeometry}
+\end{figure}

@@ -1,0 +1,49 @@
+\chapter{Mean-divergence matrices and their relation to channels}
+
+\section{The \(\mathbf D\) matrix}
+
+Earlier \textit{Senecio} work summarized divergence in multivariate mean phenotype using a covariance-like matrix \(\mathbf D\). In a balanced nested design, a form such as
+\begin{equation}
+\mathbf D=\frac{\mathbf{MS}_{\mathrm{ecotype}}-\mathbf{MS}_{\mathrm{population(ecotype)}}}{n_f}
+\end{equation}
+separates between-ecotype mean divergence from population variation within ecotypes \cite{walter2018}.
+
+Its eigendecomposition
+\begin{equation}
+\mathbf D=\sum_jd_j\mathbf d_j\mathbf d_j^\top
+\end{equation}
+identifies directions of realized mean divergence.
+
+\section{Projection of mean divergence onto a channel}
+
+For a unit direction \(\mathbf u\), the amount of mean divergence associated with that direction is
+\begin{equation}
+V_D(\mathbf u)=\mathbf u^\top\mathbf D\mathbf u.
+\label{eq:Dprojection}
+\end{equation}
+If \(\mathbf u=\sum_jc_j\mathbf d_j\), then
+\begin{align}
+\mathbf u^\top\mathbf D\mathbf u
+&=\sum_jd_jc_j^2.
+\end{align}
+
+\inwords Projection asks how much of the realized mean divergence lies along a proposed trait combination. It is a directional-variance calculation analogous to \(\mathbf u^\top\G\mathbf u\).
+
+\section{What \(\mathbf D\) can and cannot tell us}
+
+\(\mathbf D\) can test whether mean divergence aligns with ancestral or derived channels. It does not estimate fitness curvature and cannot replace \(\Hh\). Realized mean divergence reflects optima, historical forcing, gene flow, and response geometry together.
+
+\begin{cautionbox}
+Phenotypic divergence \(\Delta\muv\), environmental Euclidean distance \(\Delta E\), and curvature difference \(\Delta\Hh\) are not interchangeable. Environmental variables describe habitats; \(\Hh\) describes how fitness changes with phenotype inside a habitat. A large environmental distance can produce little curvature difference in the measured traits, and a small environmental distance can rotate selection strongly.
+\end{cautionbox}
+
+\section{A sequence of increasingly strong tests}
+
+\begin{enumerate}[leftmargin=1.6em]
+\item Does \(\mathbf D\) align with \(\mathbf g_{\max}\)?
+\item Does \(\mathbf D\) align better with the leading channel of \(\Sop\)?
+\item Do between-population channel angles predict recombinant hybrid load?
+\item Does the exact curvature-weighted Gaussian model outperform raw channel angle?
+\end{enumerate}
+
+Each step retains the earlier result as a nested or limiting model.
